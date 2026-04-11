@@ -1,5 +1,7 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 using AkaKraft.Application.Interfaces;
 using AkaKraft.Domain.Enums;
 using AkaKraft.Infrastructure;
@@ -18,6 +20,9 @@ public static class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddInfrastructure(builder.Configuration);
+
+        builder.Services.ConfigureHttpJsonOptions(options =>
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         // -------------------------------------------------------------------------
         // Authentication: Cookies (für Google-Callback) + Google OAuth + JWT Bearer
@@ -49,6 +54,8 @@ public static class Program
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 var jwtConfig = builder.Configuration.GetSection("Authentication:Jwt");
+                // Sicherstellt dass sub → ClaimTypes.NameIdentifier gemappt wird
+                options.MapInboundClaims = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -153,7 +160,9 @@ public static class Program
         // Gibt den aktuell eingeloggten Nutzer zurück (JWT-geschützt)
         app.MapGet("/auth/me", async (HttpContext ctx, IUserService userService) =>
         {
-            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // MapInboundClaims=true mappt sub → NameIdentifier; Fallback für ältere Token
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
             if (!Guid.TryParse(userId, out var id))
                 return Results.Unauthorized();
 

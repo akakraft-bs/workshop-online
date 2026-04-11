@@ -14,6 +14,70 @@
   padding: 64px 16px;
 }
 
+// -------------------------------------------------------
+// Pending-Sektion
+// -------------------------------------------------------
+
+.pending-section {
+  border: 2px solid var(--mat-sys-error);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  background: color-mix(in srgb, var(--mat-sys-error-container) 60%, transparent);
+}
+
+.pending-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .pending-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: var(--mat-sys-error);
+    flex-shrink: 0;
+  }
+
+  strong {
+    display: block;
+    font-size: 15px;
+    color: var(--mat-sys-on-error-container);
+  }
+
+  span {
+    font-size: 13px;
+    color: var(--mat-sys-on-error-container);
+    opacity: 0.8;
+  }
+}
+
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pending-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--mat-sys-surface);
+  border-radius: 8px;
+  padding: 10px 12px;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+// -------------------------------------------------------
+// Tabelle
+// -------------------------------------------------------
+
 .table-container {
   border-radius: 12px;
   overflow: hidden;
@@ -24,16 +88,22 @@ table {
   width: 100%;
 }
 
+.mat-mdc-row.pending-row {
+  background: color-mix(in srgb, var(--mat-sys-error-container) 25%, transparent);
+}
+
 .user-cell {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 4px 0;
 
   .avatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
+    flex-shrink: 0;
   }
 
   .avatar-icon {
@@ -41,5 +111,32 @@ table {
     width: 32px;
     height: 32px;
     color: var(--mat-sys-on-surface-variant);
+    flex-shrink: 0;
   }
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+
+  small {
+    font-size: 12px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.pending-badge {
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--mat-sys-error);
+  color: var(--mat-sys-on-error);
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.no-role {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
 }

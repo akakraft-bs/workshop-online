@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>
+  <div class="dialog-title">
+    @if (data.user.pictureUrl) {
+      <img class="avatar" [src]="data.user.pictureUrl" [alt]="data.user.name">
+    } @else {
+      <mat-icon class="avatar-icon">account_circle</mat-icon>
+    }
+    <div>
+      <span>{{ data.user.name }}</span>
+      <small>{{ data.user.email }}</small>
+    </div>
+  </div>
+</h2>
+
+<mat-dialog-content>
+  @for (group of roleGroups; track group.label; let last = $last) {
+    <p class="group-label">{{ group.label }}</p>
+    <div class="role-list">
+      @for (role of group.roles; track role) {
+        <mat-checkbox
+          [checked]="isSelected(role)"
+          (change)="toggle(role)"
+          [disabled]="saving()">
+          {{ roleLabels[role] }}
+        </mat-checkbox>
+      }
+    </div>
+    @if (!last) {
+      <mat-divider />
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="saving()">Abbrechen</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="saving()">
+    @if (saving()) {
+      <mat-spinner diameter="18" />
+    } @else {
+      Speichern
+    }
+  </button>
+</mat-dialog-actions>

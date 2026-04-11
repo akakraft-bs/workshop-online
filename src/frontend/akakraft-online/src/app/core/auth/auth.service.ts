@@ -1,5 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { computed, inject, Injectable, signal } from '@angular/core';import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, EMPTY, firstValueFrom, tap } from 'rxjs';
 import { Role, User, VORSTAND_ROLES } from '../../models/user.model';
@@ -8,11 +7,11 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
+  private readonly USER_KEY = 'auth_user';
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
   readonly currentUser = signal<User | null>(null);
-  readonly isInitialized = signal(false);
   readonly isLoggedIn = computed(() => this.currentUser() !== null);
   readonly roles = computed(() => this.currentUser()?.roles ?? []);
 
@@ -40,9 +39,12 @@ export class AuthService {
     this.http
       .get<User>(`${environment.apiUrl}/auth/me`)
       .pipe(
-        tap(user => this.currentUser.set(user)),
+        tap(user => {
+          this.currentUser.set(user);
+          this.cacheUser(user);
+        }),
         catchError(() => {
-          this.logout();
+          this.clearSession();
           return EMPTY;
         })
       )
@@ -50,8 +52,7 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    this.currentUser.set(null);
+    this.clearSession();
     this.router.navigate(['/login']);
   }
 
@@ -70,20 +71,50 @@ export class AuthService {
   private async tryRestoreSession(): Promise<void> {
     const token = this.getToken();
     if (!token) {
-      this.isInitialized.set(true);
       return;
     }
 
+    // Sofort aus Cache wiederherstellen → kein Warten auf Backend nötig
+    const cached = this.loadCachedUser();
+    if (cached) {
+      this.currentUser.set(cached);
+    }
+
+    // Backend-Abfrage zur Aktualisierung (im Hintergrund)
     await firstValueFrom(
       this.http.get<User>(`${environment.apiUrl}/auth/me`).pipe(
-        tap(user => this.currentUser.set(user)),
-        catchError(() => {
-          localStorage.removeItem(this.TOKEN_KEY);
+        tap(user => {
+          this.currentUser.set(user);
+          this.cacheUser(user);
+        }),
+        catchError((err: HttpErrorResponse) => {
+          if (err.status === 401 || err.status === 403) {
+            // Token abgelaufen oder ungültig → komplett abmelden
+            this.clearSession();
+          }
+          // Bei Netzwerkfehlern: gecachten User behalten
           return EMPTY;
         })
       )
     ).catch(() => {});
+  }
 
-    this.isInitialized.set(true);
+  private cacheUser(user: User): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+  }
+
+  private loadCachedUser(): User | null {
+    try {
+      const raw = localStorage.getItem(this.USER_KEY);
+      return raw ? (JSON.parse(raw) as User) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private clearSession(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    this.currentUser.set(null);
   }
 }
