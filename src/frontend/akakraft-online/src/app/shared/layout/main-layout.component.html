@@ -1,0 +1,65 @@
+<mat-sidenav-container class="sidenav-container">
+
+  <mat-sidenav #sidenav
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="!isMobile()"
+    class="sidenav">
+
+    <div class="sidenav-header">
+      <mat-icon class="brand-icon">handyman</mat-icon>
+      <span class="brand-name">AkaKraft</span>
+    </div>
+
+    <mat-nav-list>
+      @for (item of navItems(); track item.route) {
+        <a mat-list-item
+          [routerLink]="item.route"
+          routerLinkActive="active-link"
+          (click)="isMobile() && sidenavRef().close()">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+
+    <mat-toolbar color="primary" class="toolbar">
+      @if (isMobile()) {
+        <button mat-icon-button (click)="sidenavRef().toggle()" aria-label="Menü öffnen">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <span class="toolbar-spacer"></span>
+
+      @if (currentUser(); as user) {
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="Nutzerkonto">
+          @if (user.pictureUrl) {
+            <img class="avatar" [src]="user.pictureUrl" [alt]="user.name">
+          } @else {
+            <mat-icon>account_circle</mat-icon>
+          }
+        </button>
+        <mat-menu #userMenu>
+          <div class="user-menu-header" mat-menu-item disabled>
+            <strong>{{ user.name }}</strong>
+            <small>{{ user.email }}</small>
+          </div>
+          <mat-divider />
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            Abmelden
+          </button>
+        </mat-menu>
+      }
+    </mat-toolbar>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

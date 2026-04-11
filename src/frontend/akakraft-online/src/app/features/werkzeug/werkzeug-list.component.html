@@ -1,0 +1,72 @@
+<div class="page-header">
+  <h2>Werkzeug</h2>
+
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Suche</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput [value]="searchQuery()" (input)="onSearch($event)" placeholder="Name, Kategorie...">
+    @if (searchQuery()) {
+      <button matSuffix mat-icon-button (click)="clearSearch()" aria-label="Suche löschen">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="48" />
+  </div>
+} @else {
+  <div class="card-grid">
+    @for (item of filteredItems(); track item.id) {
+      <mat-card class="werkzeug-card" appearance="outlined">
+        <div class="card-image">
+          @if (item.imageUrl) {
+            <img [src]="item.imageUrl" [alt]="item.name">
+          } @else {
+            <mat-icon>build</mat-icon>
+          }
+        </div>
+
+        <mat-card-header>
+          <mat-card-title>{{ item.name }}</mat-card-title>
+          <mat-card-subtitle>{{ item.category }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <p class="description">{{ item.description }}</p>
+
+          @if (item.dimensions) {
+            <p class="dimensions">
+              <mat-icon>straighten</mat-icon>
+              {{ item.dimensions }}
+            </p>
+          }
+
+          <mat-chip-set>
+            <mat-chip [highlighted]="true" [color]="item.isAvailable ? 'primary' : 'warn'">
+              {{ item.isAvailable ? 'Verfügbar' : 'Ausgeliehen' }}
+            </mat-chip>
+          </mat-chip-set>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-button color="primary"
+            [disabled]="!item.isAvailable"
+            (click)="borrow(item)">
+            <mat-icon>shopping_cart</mat-icon>
+            Ausleihen
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+
+    @empty {
+      <div class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <p>Keine Werkzeuge gefunden</p>
+      </div>
+    }
+  </div>
+}

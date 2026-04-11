@@ -1,0 +1,22 @@
+<div class="dashboard">
+  <h1 class="greeting">
+    Hallo, {{ (auth.currentUser()?.name ?? 'Mitglied').split(' ')[0] }}!
+  </h1>
+
+  <div class="quick-links">
+    @for (link of quickLinks; track link.route) {
+      <mat-card class="quick-link-card" appearance="outlined" [routerLink]="link.route">
+        <mat-card-content>
+          <div class="card-icon">
+            <mat-icon>{{ link.icon }}</mat-icon>
+          </div>
+          <div class="card-text">
+            <strong>{{ link.label }}</strong>
+            <span>{{ link.description }}</span>
+          </div>
+          <mat-icon class="arrow-icon">chevron_right</mat-icon>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</div>

@@ -1,0 +1,53 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{FE360695-3F2B-1049-3887-35FBB5135923}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkaKraft.WebApi", "src\backend\AkaKraft.WebApi\AkaKraft.WebApi.csproj", "{3A25C124-41CA-48A7-8699-3691E3A86F84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkaKraft.Domain", "src\backend\AkaKraft.Domain\AkaKraft.Domain.csproj", "{6D94D0AF-2C87-4DE0-8315-2DC2F7D8CE46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkaKraft.Application", "src\backend\AkaKraft.Application\AkaKraft.Application.csproj", "{761D6C3C-D4D0-4A4F-B605-29D6FB3C5B28}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AkaKraft.Infrastructure", "src\backend\AkaKraft.Infrastructure\AkaKraft.Infrastructure.csproj", "{336D869C-5A7A-4E17-8D8F-469A024A94A1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3A25C124-41CA-48A7-8699-3691E3A86F84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A25C124-41CA-48A7-8699-3691E3A86F84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A25C124-41CA-48A7-8699-3691E3A86F84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A25C124-41CA-48A7-8699-3691E3A86F84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D94D0AF-2C87-4DE0-8315-2DC2F7D8CE46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D94D0AF-2C87-4DE0-8315-2DC2F7D8CE46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D94D0AF-2C87-4DE0-8315-2DC2F7D8CE46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D94D0AF-2C87-4DE0-8315-2DC2F7D8CE46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{761D6C3C-D4D0-4A4F-B605-29D6FB3C5B28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{761D6C3C-D4D0-4A4F-B605-29D6FB3C5B28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{761D6C3C-D4D0-4A4F-B605-29D6FB3C5B28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{761D6C3C-D4D0-4A4F-B605-29D6FB3C5B28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{336D869C-5A7A-4E17-8D8F-469A024A94A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{336D869C-5A7A-4E17-8D8F-469A024A94A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{336D869C-5A7A-4E17-8D8F-469A024A94A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{336D869C-5A7A-4E17-8D8F-469A024A94A1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FE360695-3F2B-1049-3887-35FBB5135923} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{3A25C124-41CA-48A7-8699-3691E3A86F84} = {FE360695-3F2B-1049-3887-35FBB5135923}
+		{6D94D0AF-2C87-4DE0-8315-2DC2F7D8CE46} = {FE360695-3F2B-1049-3887-35FBB5135923}
+		{761D6C3C-D4D0-4A4F-B605-29D6FB3C5B28} = {FE360695-3F2B-1049-3887-35FBB5135923}
+		{336D869C-5A7A-4E17-8D8F-469A024A94A1} = {FE360695-3F2B-1049-3887-35FBB5135923}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = preSolution
+		SolutionGuid = {DE38D441-68E5-43B9-8A8C-A819E13728F4}
+	EndGlobalSection
+EndGlobal

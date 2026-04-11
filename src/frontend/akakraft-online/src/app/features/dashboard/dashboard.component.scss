@@ -1,0 +1,65 @@
+.dashboard {
+  h1.greeting {
+    font-size: 26px;
+    font-weight: 500;
+    margin: 0 0 24px;
+  }
+}
+
+.quick-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+}
+
+.quick-link-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: var(--mat-sys-level3);
+  }
+
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px !important;
+  }
+
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--mat-sys-primary-container);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      color: var(--mat-sys-on-primary-container);
+    }
+  }
+
+  .card-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    strong {
+      font-size: 16px;
+    }
+
+    span {
+      font-size: 13px;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  .arrow-icon {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}

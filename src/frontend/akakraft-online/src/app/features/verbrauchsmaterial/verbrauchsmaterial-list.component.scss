@@ -1,0 +1,63 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .search-field {
+    width: 100%;
+    max-width: 360px;
+
+    @media (max-width: 480px) {
+      max-width: 100%;
+    }
+  }
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 16px;
+  gap: 16px;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.table-container {
+  border-radius: 12px;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+.mat-mdc-row.table-row:hover {
+  background: var(--mat-sys-surface-variant);
+}
+
+td.mat-mdc-cell {
+  .description {
+    display: block;
+    font-size: 12px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}

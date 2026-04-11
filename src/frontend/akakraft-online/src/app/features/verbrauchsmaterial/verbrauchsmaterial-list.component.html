@@ -1,0 +1,64 @@
+<div class="page-header">
+  <h2>Verbrauchsmaterial</h2>
+
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Suche</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput [value]="searchQuery()" (input)="onSearch($event)" placeholder="Name, Kategorie...">
+    @if (searchQuery()) {
+      <button matSuffix mat-icon-button (click)="clearSearch()" aria-label="Suche löschen">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="48" />
+  </div>
+} @else if (filteredItems().length === 0) {
+  <div class="empty-state">
+    <mat-icon>search_off</mat-icon>
+    <p>Keine Materialien gefunden</p>
+  </div>
+} @else {
+  <div class="table-container mat-elevation-z1">
+    <table mat-table [dataSource]="filteredItems()">
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Bezeichnung</th>
+        <td mat-cell *matCellDef="let item">
+          <strong>{{ item.name }}</strong>
+          <small class="description">{{ item.description }}</small>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Kategorie</th>
+        <td mat-cell *matCellDef="let item">{{ item.category }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="quantity">
+        <th mat-header-cell *matHeaderCellDef>Bestand</th>
+        <td mat-cell *matCellDef="let item">
+          {{ item.quantity }} {{ item.unit }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let item">
+          @if (isLowStock(item)) {
+            <mat-chip color="warn" highlighted>Niedrig</mat-chip>
+          } @else {
+            <mat-chip color="primary" highlighted>OK</mat-chip>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+    </table>
+  </div>
+}

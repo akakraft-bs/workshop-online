@@ -1,0 +1,126 @@
+# =============================================================================
+# .NET / ASP.NET Core
+# =============================================================================
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.userosscache
+*.sln.docstates
+.vs/
+*.swp
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# dotnet tool manifests
+.config/
+
+# User secrets (lokal, niemals ins Repo!)
+**/secrets.json
+**/appsettings.*.local.json
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!**/packages/repositories.config
+*.nupkg.metadata
+
+# Publish output
+**/publish/
+**/PublishProfiles/
+
+# Entity Framework migrations temp files
+*.efbundle
+
+# =============================================================================
+# Angular / Node
+# =============================================================================
+node_modules/
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+npm-debug.log*
+yarn-error.log
+yarn-debug.log*
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# Angular cache
+.angular/cache/
+.angular/
+
+# Coverage
+coverage/
+
+# =============================================================================
+# Umgebungsvariablen und Secrets
+# =============================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+
+# =============================================================================
+# IDEs und Editoren
+# =============================================================================
+
+# Visual Studio / Rider
+.vs/
+*.rsuser
+*.VC.db
+*.VC.VC.opendb
+*.sdf
+*.opensdf
+*.cachefile
+*.VC.db-*
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/
+*.sublime-workspace
+.idea/
+*.iml
+
+# =============================================================================
+# Betriebssystem
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =============================================================================
+# Docker
+# =============================================================================
+# Lokale Overrides nicht einchecken
+docker-compose.override.yml
