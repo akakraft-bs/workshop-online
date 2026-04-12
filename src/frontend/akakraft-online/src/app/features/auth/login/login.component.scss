@@ -1,61 +1,114 @@
-.login-container {
+.login-page {
   min-height: 100vh;
+  background-image: url('/assets/motorbike_sunset.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: stretch;
+}
+
+// --- Panel: rechts auf Desktop, vollflächig auf Mobil ---
+.login-panel {
+  width: 420px;
+  min-height: 100vh;
+  margin-left: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  background: var(--mat-sys-surface-variant);
+
+  // Milchglas-Effekt
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+
+  @media (max-width: 600px) {
+    width: 100%;
+    margin-left: 0;
+    border-left: none;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  }
 }
 
-.login-card {
+// --- Inhalt innerhalb des Panels ---
+.login-inner {
   width: 100%;
-  max-width: 400px;
+  max-width: 340px;
+  padding: 48px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 
-  mat-card-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding-bottom: 8px;
+  @media (max-width: 600px) {
+    max-width: 100%;
+    padding: 64px 24px 48px;
+  }
+}
+
+.logo {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+
+  mat-icon {
+    font-size: 38px;
+    width: 38px;
+    height: 38px;
+    color: #ffffff;
+  }
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 4px;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 32px;
+  text-align: center;
+  letter-spacing: 0.4px;
+}
+
+.hint {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  line-height: 1.6;
+  margin: 0 0 32px;
+}
+
+.login-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  border-radius: 8px !important;
+
+  // Leicht transparenter Button passend zum Panel
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #1a1a1a !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2) !important;
+
+  mat-icon {
+    margin-right: 4px;
   }
 
-  .logo {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: var(--mat-sys-primary-container);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-
-    mat-icon {
-      font-size: 36px;
-      width: 36px;
-      height: 36px;
-      color: var(--mat-sys-on-primary-container);
-    }
-  }
-
-  mat-card-title {
-    font-size: 24px !important;
-  }
-
-  mat-card-content p {
-    text-align: center;
-    color: var(--mat-sys-on-surface-variant);
-    margin: 16px 0;
-  }
-
-  .centered-actions {
-    padding: 16px;
-    display: flex;
-    justify-content: center;
-  }
-
-  .login-btn {
-    width: 100%;
-    height: 48px;
-    font-size: 16px;
-    gap: 8px;
+  &:hover {
+    background: #ffffff !important;
   }
 }

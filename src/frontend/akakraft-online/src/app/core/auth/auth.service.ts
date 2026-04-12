@@ -48,7 +48,10 @@ export class AuthService {
           return EMPTY;
         })
       )
-      .subscribe(() => this.router.navigate(['/dashboard']));
+      .subscribe(() => {
+        const target = this.hasAccess() ? '/dashboard' : '/pending';
+        this.router.navigate([target]);
+      });
   }
 
   logout(): void {

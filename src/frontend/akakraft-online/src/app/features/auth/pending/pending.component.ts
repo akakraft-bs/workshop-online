@@ -4,15 +4,17 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-pending',
   imports: [MatButtonModule, MatIconModule],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.scss',
+  templateUrl: './pending.component.html',
+  styleUrl: './pending.component.scss',
 })
-export class LoginComponent {
+export class PendingComponent {
   private readonly auth = inject(AuthService);
 
-  login(): void {
-    this.auth.login();
+  readonly currentUser = this.auth.currentUser;
+
+  logout(): void {
+    this.auth.logout();
   }
 }

@@ -15,6 +15,11 @@ export const routes: Routes = [
       import('./features/auth/callback/callback.component').then(m => m.CallbackComponent),
   },
   {
+    path: 'pending',
+    loadComponent: () =>
+      import('./features/auth/pending/pending.component').then(m => m.PendingComponent),
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./shared/layout/main-layout.component').then(m => m.MainLayoutComponent),

@@ -1,22 +1,19 @@
-<div class="login-container">
-  <mat-card class="login-card" appearance="outlined">
-    <mat-card-header>
+<div class="login-page">
+  <div class="login-panel">
+    <div class="login-inner">
       <div class="logo">
         <mat-icon>handyman</mat-icon>
       </div>
-      <mat-card-title>AkaKraft Online</mat-card-title>
-      <mat-card-subtitle>Vereinsverwaltung</mat-card-subtitle>
-    </mat-card-header>
 
-    <mat-card-content>
-      <p>Melde dich mit deinem Google-Konto an, um auf die Vereinsverwaltung zuzugreifen.</p>
-    </mat-card-content>
+      <h1>AkaKraft Online</h1>
+      <p class="subtitle">Vereinsverwaltung</p>
 
-    <mat-card-actions class="centered-actions">
+      <p class="hint">Melde dich mit deinem Google-Konto an, um auf die Vereinsverwaltung zuzugreifen.</p>
+
       <button mat-raised-button color="primary" (click)="login()" class="login-btn">
         <mat-icon>login</mat-icon>
         Mit Google anmelden
       </button>
-    </mat-card-actions>
-  </mat-card>
+    </div>
+  </div>
 </div>

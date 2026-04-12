@@ -1,0 +1,24 @@
+<div class="pending-page">
+  <div class="pending-card">
+    <div class="icon-wrap">
+      <mat-icon>hourglass_top</mat-icon>
+    </div>
+
+    <h1>Zugang ausstehend</h1>
+
+    @if (currentUser(); as user) {
+      <p class="greeting">Hallo, {{ user.name }}!</p>
+    }
+
+    <p class="message">
+      Dein Konto ist registriert, aber noch keiner Rolle zugewiesen.<br>
+      Bitte wende dich an einen Administrator – sobald dir eine Rolle zugeteilt wurde,
+      hast du vollen Zugang zur Anwendung.
+    </p>
+
+    <button mat-stroked-button (click)="logout()" class="logout-btn">
+      <mat-icon>logout</mat-icon>
+      Abmelden
+    </button>
+  </div>
+</div>
