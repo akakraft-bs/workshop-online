@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using AkaKraft.Application.DTOs;
 using AkaKraft.Application.Interfaces;
 using AkaKraft.Domain.Enums;
 using AkaKraft.Infrastructure;
@@ -110,6 +111,18 @@ public static class Program
                 policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                       .RequireAuthenticatedUser()
                       .RequireRole(Role.Admin.ToString()));
+
+            // Vorstand oder Admin (z. B. für Inventarverwaltung)
+            options.AddPolicy("VorstandOrAdmin", policy =>
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                      .RequireAuthenticatedUser()
+                      .RequireAssertion(ctx =>
+                          ctx.User.Claims
+                             .Where(c => c.Type == ClaimTypes.Role)
+                             .Any(c => RoleGroups.Vorstand
+                                 .Select(r => r.ToString())
+                                 .Contains(c.Value)
+                                 || c.Value == Role.Admin.ToString())));
         });
 
         builder.Services.AddCors(options =>
@@ -197,6 +210,54 @@ public static class Program
             var user = await userService.RemoveRoleAsync(userId, parsedRole);
             return Results.Ok(user);
         }).RequireAuthorization("AdminOnly");
+
+        // -------------------------------------------------------------------------
+        // Werkzeug Endpoints
+        // -------------------------------------------------------------------------
+
+        app.MapGet("/werkzeug", async (IWerkzeugService werkzeugService) =>
+            Results.Ok(await werkzeugService.GetAllAsync()))
+            .RequireAuthorization("AnyRole");
+
+        app.MapPost("/werkzeug", async (CreateWerkzeugDto dto, IWerkzeugService werkzeugService) =>
+        {
+            var created = await werkzeugService.CreateAsync(dto);
+            return Results.Created($"/werkzeug/{created.Id}", created);
+        }).RequireAuthorization("VorstandOrAdmin");
+
+        app.MapPut("/werkzeug/{id:guid}", async (Guid id, UpdateWerkzeugDto dto, IWerkzeugService werkzeugService) =>
+        {
+            var updated = await werkzeugService.UpdateAsync(id, dto);
+            return updated is null ? Results.NotFound() : Results.Ok(updated);
+        }).RequireAuthorization("VorstandOrAdmin");
+
+        app.MapDelete("/werkzeug/{id:guid}", async (Guid id, IWerkzeugService werkzeugService) =>
+        {
+            var deleted = await werkzeugService.DeleteAsync(id);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        }).RequireAuthorization("VorstandOrAdmin");
+
+        app.MapPost("/werkzeug/{id:guid}/ausleihen", async (
+            Guid id, HttpContext ctx, IWerkzeugService werkzeugService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return Results.Unauthorized();
+
+            var result = await werkzeugService.AusleihenAsync(id, parsedUserId);
+            return result is null
+                ? Results.BadRequest("Werkzeug nicht gefunden oder nicht verfügbar.")
+                : Results.Ok(result);
+        }).RequireAuthorization("AnyRole");
+
+        // -------------------------------------------------------------------------
+        // Verbrauchsmaterial Endpoints
+        // -------------------------------------------------------------------------
+
+        app.MapGet("/verbrauchsmaterial", async (IVerbrauchsmaterialService verbrauchsmaterialService) =>
+            Results.Ok(await verbrauchsmaterialService.GetAllAsync()))
+            .RequireAuthorization("AnyRole");
 
         app.Run();
     }

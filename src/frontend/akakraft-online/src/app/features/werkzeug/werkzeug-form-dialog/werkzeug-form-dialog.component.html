@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Werkzeug bearbeiten' : 'Neues Werkzeug anlegen' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" placeholder="z. B. Schlagbohrmaschine">
+      @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+        <mat-error>Name ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Beschreibung</mat-label>
+      <textarea matInput formControlName="description" rows="3"
+        placeholder="z. B. Bosch 800W, inkl. Bohrersatz"></textarea>
+      @if (form.controls.description.hasError('required') && form.controls.description.touched) {
+        <mat-error>Beschreibung ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Kategorie</mat-label>
+      <input matInput formControlName="category" placeholder="z. B. Elektrowerkzeug">
+      @if (form.controls.category.hasError('required') && form.controls.category.touched) {
+        <mat-error>Kategorie ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Bild-URL (optional)</mat-label>
+      <input matInput formControlName="imageUrl" placeholder="https://...">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Abmessungen (optional)</mat-label>
+      <input matInput formControlName="dimensions" placeholder="z. B. 30 × 10 × 8 cm">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="saving()">Abbrechen</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="saving()">
+    @if (saving()) {
+      <mat-spinner diameter="18" />
+    } @else {
+      {{ isEdit ? 'Speichern' : 'Anlegen' }}
+    }
+  </button>
+</mat-dialog-actions>

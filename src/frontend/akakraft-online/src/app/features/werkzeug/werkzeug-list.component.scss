@@ -105,4 +105,39 @@
       }
     }
   }
+
+  mat-card-actions {
+    &.has-manage {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-right: 4px;
+    }
+
+    .manage-actions {
+      display: flex;
+      gap: 2px;
+    }
+  }
+
+  .delete-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 16px 12px;
+    background: var(--mat-sys-error-container);
+    border-radius: 0 0 12px 12px;
+
+    span {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--mat-sys-on-error-container);
+    }
+
+    .delete-confirm-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+  }
 }

@@ -18,6 +18,7 @@ services:
   adminer:
     image: adminer
     restart: always
-    depends_on: ako-db
+    depends_on: 
+      - ako-db
     ports:
       - 8080:8080

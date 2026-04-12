@@ -11,6 +11,13 @@
       </button>
     }
   </mat-form-field>
+
+  @if (canManage()) {
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Neu anlegen
+    </button>
+  }
 </div>
 
 @if (loading()) {
@@ -51,14 +58,35 @@
           </mat-chip-set>
         </mat-card-content>
 
-        <mat-card-actions>
-          <button mat-button color="primary"
-            [disabled]="!item.isAvailable"
-            (click)="borrow(item)">
-            <mat-icon>shopping_cart</mat-icon>
-            Ausleihen
-          </button>
-        </mat-card-actions>
+        @if (pendingDeleteId() === item.id) {
+          <div class="delete-confirm">
+            <span>Wirklich löschen?</span>
+            <div class="delete-confirm-actions">
+              <button mat-button (click)="cancelDelete()">Abbrechen</button>
+              <button mat-raised-button color="warn" (click)="confirmDelete(item)">Löschen</button>
+            </div>
+          </div>
+        } @else {
+          <mat-card-actions [class.has-manage]="canManage()">
+            <button mat-button color="primary"
+              [disabled]="!item.isAvailable"
+              (click)="borrow(item)">
+              <mat-icon>shopping_cart</mat-icon>
+              Ausleihen
+            </button>
+
+            @if (canManage()) {
+              <div class="manage-actions">
+                <button mat-icon-button matTooltip="Bearbeiten" (click)="openEditDialog(item)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button matTooltip="Löschen" color="warn" (click)="requestDelete(item)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </mat-card-actions>
+        }
       </mat-card>
     }
 
