@@ -26,6 +26,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: src/frontend/akakraft-online/package-lock.json
     - run: npm ci
+      working-directory: src/frontend/akakraft-online
     - run: npm run build --if-present
+      working-directory: src/frontend/akakraft-online
     - run: npm test
+      working-directory: src/frontend/akakraft-online
