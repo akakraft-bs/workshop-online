@@ -8,5 +8,6 @@ public interface IWerkzeugService
     Task<WerkzeugDto> CreateAsync(CreateWerkzeugDto dto);
     Task<WerkzeugDto?> UpdateAsync(Guid id, UpdateWerkzeugDto dto);
     Task<bool> DeleteAsync(Guid id);
-    Task<WerkzeugDto?> AusleihenAsync(Guid id, Guid userId);
+    Task<WerkzeugDto?> AusleihenAsync(Guid id, Guid userId, DateTime expectedReturnAt);
+    Task<(WerkzeugDto? Dto, bool Forbidden)> ZurueckgebenAsync(Guid id, Guid userId, bool isPrivileged);
 }

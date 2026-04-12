@@ -15,3 +15,5 @@ public record UpdateWerkzeugDto(
     string? ImageUrl,
     string? Dimensions
 );
+
+public record AusleihenRequestDto(DateTime ExpectedReturnAt);

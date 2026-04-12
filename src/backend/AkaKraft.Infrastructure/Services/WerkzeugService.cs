@@ -22,7 +22,9 @@ public class WerkzeugService(ApplicationDbContext db) : IWerkzeugService
                 w.IsAvailable,
                 w.BorrowedByUserId,
                 w.BorrowedBy != null ? w.BorrowedBy.Name : null,
-                w.BorrowedAt))
+                w.BorrowedAt,
+                w.ExpectedReturnAt,
+                w.ReturnedAt))
             .ToListAsync();
     }
 
@@ -43,14 +45,9 @@ public class WerkzeugService(ApplicationDbContext db) : IWerkzeugService
         await db.SaveChangesAsync();
 
         return new WerkzeugDto(
-            werkzeug.Id,
-            werkzeug.Name,
-            werkzeug.Description,
-            werkzeug.Category,
-            werkzeug.ImageUrl,
-            werkzeug.Dimensions,
-            werkzeug.IsAvailable,
-            null, null, null);
+            werkzeug.Id, werkzeug.Name, werkzeug.Description,
+            werkzeug.Category, werkzeug.ImageUrl, werkzeug.Dimensions,
+            werkzeug.IsAvailable, null, null, null, null, null);
     }
 
     public async Task<WerkzeugDto?> UpdateAsync(Guid id, UpdateWerkzeugDto dto)
@@ -70,17 +67,7 @@ public class WerkzeugService(ApplicationDbContext db) : IWerkzeugService
 
         await db.SaveChangesAsync();
 
-        return new WerkzeugDto(
-            werkzeug.Id,
-            werkzeug.Name,
-            werkzeug.Description,
-            werkzeug.Category,
-            werkzeug.ImageUrl,
-            werkzeug.Dimensions,
-            werkzeug.IsAvailable,
-            werkzeug.BorrowedByUserId,
-            werkzeug.BorrowedBy?.Name,
-            werkzeug.BorrowedAt);
+        return ToDto(werkzeug);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
@@ -94,7 +81,7 @@ public class WerkzeugService(ApplicationDbContext db) : IWerkzeugService
         return true;
     }
 
-    public async Task<WerkzeugDto?> AusleihenAsync(Guid id, Guid userId)
+    public async Task<WerkzeugDto?> AusleihenAsync(Guid id, Guid userId, DateTime expectedReturnAt)
     {
         var werkzeug = await db.Werkzeuge
             .Include(w => w.BorrowedBy)
@@ -106,21 +93,42 @@ public class WerkzeugService(ApplicationDbContext db) : IWerkzeugService
         werkzeug.IsAvailable = false;
         werkzeug.BorrowedByUserId = userId;
         werkzeug.BorrowedAt = DateTime.UtcNow;
+        werkzeug.ExpectedReturnAt = expectedReturnAt.ToUniversalTime();
+        werkzeug.ReturnedAt = null;
+
+        await db.SaveChangesAsync();
+        await db.Entry(werkzeug).Reference(w => w.BorrowedBy).LoadAsync();
+
+        return ToDto(werkzeug);
+    }
+
+    public async Task<(WerkzeugDto? Dto, bool Forbidden)> ZurueckgebenAsync(
+        Guid id, Guid userId, bool isPrivileged)
+    {
+        var werkzeug = await db.Werkzeuge
+            .Include(w => w.BorrowedBy)
+            .FirstOrDefaultAsync(w => w.Id == id);
+
+        if (werkzeug is null || werkzeug.IsAvailable)
+            return (null, false);
+
+        if (!isPrivileged && werkzeug.BorrowedByUserId != userId)
+            return (null, true);
+
+        werkzeug.IsAvailable = true;
+        werkzeug.ReturnedAt = DateTime.UtcNow;
+        werkzeug.BorrowedByUserId = null;
+        werkzeug.BorrowedAt = null;
+        werkzeug.ExpectedReturnAt = null;
 
         await db.SaveChangesAsync();
 
-        await db.Entry(werkzeug).Reference(w => w.BorrowedBy).LoadAsync();
-
-        return new WerkzeugDto(
-            werkzeug.Id,
-            werkzeug.Name,
-            werkzeug.Description,
-            werkzeug.Category,
-            werkzeug.ImageUrl,
-            werkzeug.Dimensions,
-            werkzeug.IsAvailable,
-            werkzeug.BorrowedByUserId,
-            werkzeug.BorrowedBy?.Name,
-            werkzeug.BorrowedAt);
+        return (ToDto(werkzeug), false);
     }
+
+    private static WerkzeugDto ToDto(Werkzeug w) => new(
+        w.Id, w.Name, w.Description, w.Category,
+        w.ImageUrl, w.Dimensions, w.IsAvailable,
+        w.BorrowedByUserId, w.BorrowedBy?.Name,
+        w.BorrowedAt, w.ExpectedReturnAt, w.ReturnedAt);
 }

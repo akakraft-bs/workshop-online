@@ -10,5 +10,7 @@ public record WerkzeugDto(
     bool IsAvailable,
     Guid? BorrowedByUserId,
     string? BorrowedByName,
-    DateTime? BorrowedAt
+    DateTime? BorrowedAt,
+    DateTime? ExpectedReturnAt,
+    DateTime? ReturnedAt
 );

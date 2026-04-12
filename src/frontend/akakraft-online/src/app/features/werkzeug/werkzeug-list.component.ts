@@ -1,9 +1,11 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -17,13 +19,17 @@ import {
   WerkzeugFormDialogComponent,
   WerkzeugFormDialogData,
 } from './werkzeug-form-dialog/werkzeug-form-dialog.component';
+import {
+  AusleihenDialogComponent,
+  AusleihenDialogData,
+} from './ausleihen-dialog/ausleihen-dialog.component';
 
 @Component({
   selector: 'app-werkzeug-list',
   imports: [
-    FormsModule,
+    FormsModule, DatePipe,
     MatFormFieldModule, MatInputModule, MatIconModule,
-    MatButtonModule, MatCardModule, MatChipsModule,
+    MatButtonModule, MatButtonToggleModule, MatCardModule, MatChipsModule,
     MatProgressSpinnerModule, MatTooltipModule,
   ],
   templateUrl: './werkzeug-list.component.html',
@@ -38,20 +44,28 @@ export class WerkzeugListComponent implements OnInit {
   readonly items = signal<Werkzeug[]>([]);
   readonly loading = signal(true);
   readonly searchQuery = signal('');
+  readonly showOnlyBorrowed = signal(false);
   readonly pendingDeleteId = signal<string | null>(null);
 
   readonly canManage = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
 
   readonly filteredItems = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
-    if (!q) return this.items();
-    return this.items().filter(
-      w =>
+    const onlyBorrowed = this.showOnlyBorrowed();
+
+    return this.items().filter(w => {
+      if (onlyBorrowed && w.isAvailable) return false;
+      if (!q) return true;
+      return (
         w.name.toLowerCase().includes(q) ||
         w.description.toLowerCase().includes(q) ||
         w.category.toLowerCase().includes(q)
-    );
+      );
+    });
   });
+
+  readonly borrowedCount = computed(() => this.items().filter(w => !w.isAvailable).length);
 
   ngOnInit(): void {
     this.load();
@@ -79,16 +93,48 @@ export class WerkzeugListComponent implements OnInit {
     this.searchQuery.set('');
   }
 
-  borrow(item: Werkzeug): void {
-    this.api.post<Werkzeug>(`/werkzeug/${item.id}/ausleihen`, {}).subscribe({
+  toggleBorrowedFilter(): void {
+    this.showOnlyBorrowed.update(v => !v);
+  }
+
+  isMyBorrow(item: Werkzeug): boolean {
+    return !!this.currentUserId() && item.borrowedByUserId === this.currentUserId();
+  }
+
+  canReturn(item: Werkzeug): boolean {
+    return !item.isAvailable && (this.isMyBorrow(item) || this.canManage());
+  }
+
+  isOverdue(item: Werkzeug): boolean {
+    if (!item.expectedReturnAt) return false;
+    return new Date(item.expectedReturnAt) < new Date();
+  }
+
+  openBorrowDialog(item: Werkzeug): void {
+    const data: AusleihenDialogData = { werkzeug: item };
+    this.dialog
+      .open(AusleihenDialogComponent, { data, width: '400px' })
+      .afterClosed()
+      .subscribe((updated: Werkzeug | undefined) => {
+        if (updated) {
+          this.items.update(list =>
+            list.map(w => w.id === updated.id ? updated : w)
+          );
+          this.snackBar.open(`${item.name} wurde ausgeliehen.`, 'OK', { duration: 3000 });
+        }
+      });
+  }
+
+  returnItem(item: Werkzeug): void {
+    this.api.post<Werkzeug>(`/werkzeug/${item.id}/zurueckgeben`, {}).subscribe({
       next: updated => {
         this.items.update(list =>
-          list.map(w => w.id === item.id ? updated : w)
+          list.map(w => w.id === updated.id ? updated : w)
         );
-        this.snackBar.open(`${item.name} wurde ausgeliehen.`, 'OK', { duration: 3000 });
+        this.snackBar.open(`${item.name} wurde zurückgegeben.`, 'OK', { duration: 3000 });
       },
       error: () =>
-        this.snackBar.open('Ausleihe fehlgeschlagen.', 'OK', { duration: 3000 }),
+        this.snackBar.open('Rückgabe fehlgeschlagen.', 'OK', { duration: 3000 }),
     });
   }
 

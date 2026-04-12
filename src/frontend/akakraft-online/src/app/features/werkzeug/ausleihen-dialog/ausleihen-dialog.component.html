@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>{{ data.werkzeug.name }} ausleihen</h2>
+
+<mat-dialog-content>
+  <p class="subtitle">Bitte gib an, wann du das Werkzeug voraussichtlich zurückbringst.</p>
+
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline">
+      <mat-label>Voraussichtliche Rückgabe</mat-label>
+      <input matInput type="date" formControlName="expectedReturnAt" [min]="minDate">
+      @if (form.controls.expectedReturnAt.hasError('required') && form.controls.expectedReturnAt.touched) {
+        <mat-error>Bitte ein Rückgabedatum angeben</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="saving()">Abbrechen</button>
+  <button mat-raised-button color="primary" (click)="confirm()" [disabled]="saving()">
+    @if (saving()) {
+      <mat-spinner diameter="18" />
+    } @else {
+      Ausleihen
+    }
+  </button>
+</mat-dialog-actions>

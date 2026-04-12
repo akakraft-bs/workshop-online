@@ -9,4 +9,6 @@ export interface Werkzeug {
   borrowedByUserId?: string;
   borrowedByName?: string;
   borrowedAt?: string;
+  expectedReturnAt?: string;
+  returnedAt?: string;
 }

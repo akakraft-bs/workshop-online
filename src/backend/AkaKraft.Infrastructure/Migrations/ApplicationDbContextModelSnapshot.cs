@@ -148,6 +148,9 @@ namespace AkaKraft.Infrastructure.Migrations
                         .HasMaxLength(1024)
                         .HasColumnType("character varying(1024)");
 
+                    b.Property<DateTime?>("ExpectedReturnAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 
@@ -155,6 +158,9 @@ namespace AkaKraft.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("ReturnedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 

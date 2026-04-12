@@ -1,0 +1,16 @@
+mat-dialog-content {
+  padding-top: 8px !important;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 16px;
+}
+
+.form {
+  mat-form-field {
+    width: 100%;
+    min-width: 280px;
+  }
+}

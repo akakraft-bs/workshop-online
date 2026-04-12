@@ -238,6 +238,20 @@ public static class Program
         }).RequireAuthorization("VorstandOrAdmin");
 
         app.MapPost("/werkzeug/{id:guid}/ausleihen", async (
+            Guid id, AusleihenRequestDto dto, HttpContext ctx, IWerkzeugService werkzeugService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return Results.Unauthorized();
+
+            var result = await werkzeugService.AusleihenAsync(id, parsedUserId, dto.ExpectedReturnAt);
+            return result is null
+                ? Results.BadRequest("Werkzeug nicht gefunden oder nicht verfügbar.")
+                : Results.Ok(result);
+        }).RequireAuthorization("AnyRole");
+
+        app.MapPost("/werkzeug/{id:guid}/zurueckgeben", async (
             Guid id, HttpContext ctx, IWerkzeugService werkzeugService) =>
         {
             var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -245,10 +259,17 @@ public static class Program
             if (!Guid.TryParse(userId, out var parsedUserId))
                 return Results.Unauthorized();
 
-            var result = await werkzeugService.AusleihenAsync(id, parsedUserId);
-            return result is null
-                ? Results.BadRequest("Werkzeug nicht gefunden oder nicht verfügbar.")
-                : Results.Ok(result);
+            var isPrivileged = ctx.User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Any(c => RoleGroups.Vorstand.Select(r => r.ToString()).Contains(c.Value)
+                       || c.Value == Role.Admin.ToString());
+
+            var (dto, forbidden) = await werkzeugService.ZurueckgebenAsync(id, parsedUserId, isPrivileged);
+
+            if (forbidden) return Results.Forbid();
+            return dto is null
+                ? Results.BadRequest("Werkzeug nicht gefunden oder bereits verfügbar.")
+                : Results.Ok(dto);
         }).RequireAuthorization("AnyRole");
 
         // -------------------------------------------------------------------------

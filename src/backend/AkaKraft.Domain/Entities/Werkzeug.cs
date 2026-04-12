@@ -12,4 +12,6 @@ public class Werkzeug
     public Guid? BorrowedByUserId { get; set; }
     public User? BorrowedBy { get; set; }
     public DateTime? BorrowedAt { get; set; }
+    public DateTime? ExpectedReturnAt { get; set; }
+    public DateTime? ReturnedAt { get; set; }
 }

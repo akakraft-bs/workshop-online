@@ -21,6 +21,33 @@
       max-width: 100%;
     }
   }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .active-filter {
+      background: var(--mat-sys-secondary-container);
+      color: var(--mat-sys-on-secondary-container);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      background: var(--mat-sys-error);
+      color: var(--mat-sys-on-error);
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+  }
 }
 
 .loading-state,
@@ -53,6 +80,11 @@
 .werkzeug-card {
   display: flex;
   flex-direction: column;
+  transition: box-shadow 0.2s;
+
+  &.overdue {
+    border-color: var(--mat-sys-error) !important;
+  }
 
   .card-image {
     height: 160px;
@@ -90,33 +122,65 @@
       overflow: hidden;
     }
 
-    .dimensions {
+    .meta-row {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       font-size: 13px;
       color: var(--mat-sys-on-surface-variant);
-      margin: 4px 0 8px;
+      margin: 4px 0;
 
       mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+      }
+
+      &.overdue-text {
+        color: var(--mat-sys-error);
+        font-weight: 500;
+      }
+    }
+
+    .borrow-info {
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: var(--mat-sys-surface-variant);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .you-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 1px 6px;
+        border-radius: 8px;
+        background: var(--mat-sys-primary-container);
+        color: var(--mat-sys-on-primary-container);
       }
     }
   }
 
   mat-card-actions {
-    &.has-manage {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 4px;
+
+    &:not(.has-manage) {
+      justify-content: flex-start;
+    }
+
+    .primary-actions {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-right: 4px;
     }
 
     .manage-actions {
       display: flex;
       gap: 2px;
+      margin-left: auto;
     }
   }
 

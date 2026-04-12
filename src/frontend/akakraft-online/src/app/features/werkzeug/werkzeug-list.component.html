@@ -12,12 +12,25 @@
     }
   </mat-form-field>
 
-  @if (canManage()) {
-    <button mat-raised-button color="primary" (click)="openCreateDialog()">
-      <mat-icon>add</mat-icon>
-      Neu anlegen
+  <div class="header-actions">
+    <button mat-stroked-button
+      [class.active-filter]="showOnlyBorrowed()"
+      (click)="toggleBorrowedFilter()"
+      matTooltip="Nur ausgeliehene Werkzeuge anzeigen">
+      <mat-icon>history</mat-icon>
+      Ausgeliehen
+      @if (borrowedCount() > 0) {
+        <span class="badge">{{ borrowedCount() }}</span>
+      }
     </button>
-  }
+
+    @if (canManage()) {
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Neu anlegen
+      </button>
+    }
+  </div>
 </div>
 
 @if (loading()) {
@@ -27,7 +40,10 @@
 } @else {
   <div class="card-grid">
     @for (item of filteredItems(); track item.id) {
-      <mat-card class="werkzeug-card" appearance="outlined">
+      <mat-card class="werkzeug-card" appearance="outlined"
+        [class.borrowed]="!item.isAvailable"
+        [class.overdue]="isOverdue(item)">
+
         <div class="card-image">
           @if (item.imageUrl) {
             <img [src]="item.imageUrl" [alt]="item.name">
@@ -45,7 +61,7 @@
           <p class="description">{{ item.description }}</p>
 
           @if (item.dimensions) {
-            <p class="dimensions">
+            <p class="meta-row">
               <mat-icon>straighten</mat-icon>
               {{ item.dimensions }}
             </p>
@@ -55,7 +71,34 @@
             <mat-chip [highlighted]="true" [color]="item.isAvailable ? 'primary' : 'warn'">
               {{ item.isAvailable ? 'Verfügbar' : 'Ausgeliehen' }}
             </mat-chip>
+            @if (isOverdue(item)) {
+              <mat-chip [highlighted]="true" color="warn">Überfällig</mat-chip>
+            }
           </mat-chip-set>
+
+          @if (!item.isAvailable && item.borrowedByName) {
+            <div class="borrow-info">
+              <p class="meta-row">
+                <mat-icon>person</mat-icon>
+                <span>{{ item.borrowedByName }}</span>
+                @if (isMyBorrow(item)) {
+                  <span class="you-badge">Du</span>
+                }
+              </p>
+              @if (item.borrowedAt) {
+                <p class="meta-row">
+                  <mat-icon>calendar_today</mat-icon>
+                  Seit {{ item.borrowedAt | date:'dd.MM.yyyy' }}
+                </p>
+              }
+              @if (item.expectedReturnAt) {
+                <p class="meta-row" [class.overdue-text]="isOverdue(item)">
+                  <mat-icon>event</mat-icon>
+                  Rückgabe bis {{ item.expectedReturnAt | date:'dd.MM.yyyy' }}
+                </p>
+              }
+            </div>
+          }
         </mat-card-content>
 
         @if (pendingDeleteId() === item.id) {
@@ -68,12 +111,19 @@
           </div>
         } @else {
           <mat-card-actions [class.has-manage]="canManage()">
-            <button mat-button color="primary"
-              [disabled]="!item.isAvailable"
-              (click)="borrow(item)">
-              <mat-icon>shopping_cart</mat-icon>
-              Ausleihen
-            </button>
+            <div class="primary-actions">
+              @if (item.isAvailable) {
+                <button mat-button color="primary" (click)="openBorrowDialog(item)">
+                  <mat-icon>shopping_cart</mat-icon>
+                  Ausleihen
+                </button>
+              } @else if (canReturn(item)) {
+                <button mat-button color="accent" (click)="returnItem(item)">
+                  <mat-icon>assignment_return</mat-icon>
+                  Zurückgeben
+                </button>
+              }
+            </div>
 
             @if (canManage()) {
               <div class="manage-actions">
@@ -92,8 +142,8 @@
 
     @empty {
       <div class="empty-state">
-        <mat-icon>search_off</mat-icon>
-        <p>Keine Werkzeuge gefunden</p>
+        <mat-icon>{{ showOnlyBorrowed() ? 'check_circle' : 'search_off' }}</mat-icon>
+        <p>{{ showOnlyBorrowed() ? 'Kein Werkzeug gerade ausgeliehen' : 'Keine Werkzeuge gefunden' }}</p>
       </div>
     }
   </div>
