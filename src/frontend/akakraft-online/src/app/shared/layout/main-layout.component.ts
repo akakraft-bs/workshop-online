@@ -41,6 +41,7 @@ export class MainLayoutComponent implements OnInit {
 
   readonly sidenavRef = viewChild.required<MatSidenav>('sidenav');
   readonly isMobile = signal(false);
+  logoFailed = false;
   readonly currentUser = this.auth.currentUser;
 
   readonly navItems = computed(() =>

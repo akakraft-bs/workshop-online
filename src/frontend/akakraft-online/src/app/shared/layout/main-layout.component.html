@@ -6,8 +6,12 @@
     class="sidenav">
 
     <div class="sidenav-header">
-      <mat-icon class="brand-icon">handyman</mat-icon>
-      <span class="brand-name">AkaKraft</span>
+      @if (!logoFailed) {
+        <img src="/assets/logo.svg" alt="AkaKraft" class="brand-logo" (error)="logoFailed = true">
+      } @else {
+        <mat-icon class="brand-icon">handyman</mat-icon>
+      }
+      <span class="brand-name">AkaKraft Braunschweig</span>
     </div>
 
     <mat-nav-list>

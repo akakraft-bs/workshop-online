@@ -2,7 +2,11 @@
   <div class="login-panel">
     <div class="login-inner">
       <div class="logo">
-        <mat-icon>handyman</mat-icon>
+        @if (!logoFailed) {
+          <img src="/assets/logo.svg" alt="AkaKraft Logo" (error)="logoFailed = true">
+        } @else {
+          <mat-icon>handyman</mat-icon>
+        }
       </div>
 
       <h1>AkaKraft Online</h1>

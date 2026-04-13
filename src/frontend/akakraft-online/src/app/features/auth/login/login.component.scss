@@ -59,11 +59,11 @@
   justify-content: center;
   margin-bottom: 24px;
 
-  mat-icon {
-    font-size: 38px;
-    width: 38px;
-    height: 38px;
-    color: #ffffff;
+  img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    filter: brightness(0) invert(1); // weiß färben passend zum Panel
   }
 }
 

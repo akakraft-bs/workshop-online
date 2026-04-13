@@ -12,6 +12,8 @@ import { AuthService } from '../../../core/auth/auth.service';
 export class LoginComponent {
   private readonly auth = inject(AuthService);
 
+  logoFailed = false;
+
   login(): void {
     this.auth.login();
   }
