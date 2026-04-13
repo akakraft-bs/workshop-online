@@ -5,7 +5,12 @@ import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Observable, switchMap, of } from 'rxjs';
 import { ApiService } from '../../../core/api/api.service';
 import { Werkzeug } from '../../../models/werkzeug.model';
 
@@ -13,12 +18,15 @@ export interface WerkzeugFormDialogData {
   werkzeug: Werkzeug | null;
 }
 
+type ImageMode = 'url' | 'upload';
+
 @Component({
   selector: 'app-werkzeug-form-dialog',
   imports: [
     ReactiveFormsModule,
     MatDialogModule, MatButtonModule, MatFormFieldModule,
-    MatInputModule, MatProgressSpinnerModule,
+    MatInputModule, MatProgressSpinnerModule, MatIconModule,
+    MatButtonToggleModule, MatDividerModule, MatTooltipModule,
   ],
   templateUrl: './werkzeug-form-dialog.component.html',
   styleUrl: './werkzeug-form-dialog.component.scss',
@@ -33,6 +41,11 @@ export class WerkzeugFormDialogComponent {
   readonly saving = signal(false);
   readonly isEdit = this.data.werkzeug !== null;
 
+  // Bild-State
+  readonly imageMode = signal<ImageMode>('url');
+  readonly selectedFile = signal<File | null>(null);
+  readonly previewUrl = signal<string | null>(this.data.werkzeug?.imageUrl ?? null);
+
   readonly form = this.fb.nonNullable.group({
     name:        [this.data.werkzeug?.name ?? '',        Validators.required],
     description: [this.data.werkzeug?.description ?? '', Validators.required],
@@ -40,6 +53,47 @@ export class WerkzeugFormDialogComponent {
     imageUrl:    [this.data.werkzeug?.imageUrl ?? ''],
     dimensions:  [this.data.werkzeug?.dimensions ?? ''],
   });
+
+  setImageMode(mode: ImageMode): void {
+    this.imageMode.set(mode);
+    if (mode === 'url') {
+      // Dateiauswahl verwerfen, Vorschau auf URL-Wert zurücksetzen
+      this.selectedFile.set(null);
+      this.previewUrl.set(this.form.controls.imageUrl.value || null);
+    } else {
+      // URL-Feld-Änderungen ignorieren; Vorschau bleibt
+    }
+  }
+
+  onUrlInput(): void {
+    if (this.imageMode() === 'url') {
+      this.previewUrl.set(this.form.controls.imageUrl.value || null);
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      this.snackBar.open('Ungültiger Dateityp. Erlaubt: JPEG, PNG, WebP, GIF.', 'OK', { duration: 4000 });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.snackBar.open('Datei zu groß. Maximal 5 MB erlaubt.', 'OK', { duration: 4000 });
+      return;
+    }
+
+    this.selectedFile.set(file);
+    this.previewUrl.set(URL.createObjectURL(file));
+  }
+
+  clearImage(): void {
+    this.selectedFile.set(null);
+    this.previewUrl.set(null);
+    this.form.controls.imageUrl.setValue('');
+  }
 
   save(): void {
     if (this.form.invalid) {
@@ -49,20 +103,37 @@ export class WerkzeugFormDialogComponent {
 
     this.saving.set(true);
     const value = this.form.getRawValue();
-    const body = {
-      name:        value.name,
-      description: value.description,
-      category:    value.category,
-      imageUrl:    value.imageUrl || null,
-      dimensions:  value.dimensions || null,
-    };
 
-    const request$ = this.isEdit
-      ? this.api.put<Werkzeug>(`/werkzeug/${this.data.werkzeug!.id}`, body)
-      : this.api.post<Werkzeug>('/werkzeug', body);
+    // Erst ggf. Bild hochladen, dann Werkzeug speichern
+    const file = this.selectedFile();
+    const upload$: Observable<{ url: string } | null> =
+      this.imageMode() === 'upload' && file
+        ? (() => {
+            const formData = new FormData();
+            formData.append('file', file);
+            return this.api.postFormData<{ url: string }>('/uploads/werkzeug', formData);
+          })()
+        : of(null);
 
-    request$.subscribe({
-      next: result => this.dialogRef.close(result),
+    upload$.pipe(
+      switchMap((uploadResult: { url: string } | null) => {
+        const imageUrl: string | null = uploadResult?.url
+          ?? (this.imageMode() === 'url' ? (value.imageUrl || null) : null);
+
+        const body = {
+          name:        value.name,
+          description: value.description,
+          category:    value.category,
+          imageUrl,
+          dimensions:  value.dimensions || null,
+        };
+
+        return this.isEdit
+          ? this.api.put<Werkzeug>(`/werkzeug/${this.data.werkzeug!.id}`, body)
+          : this.api.post<Werkzeug>('/werkzeug', body);
+      })
+    ).subscribe({
+      next: (result: Werkzeug) => this.dialogRef.close(result),
       error: () => {
         this.snackBar.open('Fehler beim Speichern.', 'OK', { duration: 3000 });
         this.saving.set(false);

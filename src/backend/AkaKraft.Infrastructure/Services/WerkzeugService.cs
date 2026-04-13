@@ -3,10 +3,11 @@ using AkaKraft.Application.Interfaces;
 using AkaKraft.Domain.Entities;
 using AkaKraft.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace AkaKraft.Infrastructure.Services;
 
-public class WerkzeugService(ApplicationDbContext db) : IWerkzeugService
+public class WerkzeugService(ApplicationDbContext db, IUploadService uploadService) : IWerkzeugService
 {
     public async Task<IEnumerable<WerkzeugDto>> GetAllAsync()
     {
@@ -59,6 +60,10 @@ public class WerkzeugService(ApplicationDbContext db) : IWerkzeugService
         if (werkzeug is null)
             return null;
 
+        // Altes hochgeladenes Bild löschen wenn es ersetzt wird
+        if (werkzeug.ImageUrl != dto.ImageUrl)
+            uploadService.DeleteIfLocal(werkzeug.ImageUrl);
+
         werkzeug.Name = dto.Name;
         werkzeug.Description = dto.Description;
         werkzeug.Category = dto.Category;
@@ -76,6 +81,7 @@ public class WerkzeugService(ApplicationDbContext db) : IWerkzeugService
         if (werkzeug is null)
             return false;
 
+        uploadService.DeleteIfLocal(werkzeug.ImageUrl);
         db.Werkzeuge.Remove(werkzeug);
         await db.SaveChangesAsync();
         return true;

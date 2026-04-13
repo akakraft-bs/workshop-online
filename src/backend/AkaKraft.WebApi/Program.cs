@@ -136,7 +136,12 @@ public static class Program
 
         var app = builder.Build();
 
+        // wwwroot/uploads sicherstellen
+        var wwwroot = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+        Directory.CreateDirectory(Path.Combine(wwwroot, "uploads", "werkzeug"));
+
         app.UseCors("Frontend");
+        app.UseStaticFiles();
         app.UseCookiePolicy();
         app.UseAuthentication();
         app.UseAuthorization();
@@ -210,6 +215,25 @@ public static class Program
             var user = await userService.RemoveRoleAsync(userId, parsedRole);
             return Results.Ok(user);
         }).RequireAuthorization("AdminOnly");
+
+        // -------------------------------------------------------------------------
+        // Upload Endpoints
+        // -------------------------------------------------------------------------
+
+        app.MapPost("/uploads/werkzeug", async (IFormFile file, IUploadService uploadService) =>
+        {
+            try
+            {
+                var model = new FileUploadModel(file.OpenReadStream(), file.FileName, file.ContentType, file.Length);
+                var url = await uploadService.SaveAsync(model);
+                return Results.Ok(new { url });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        }).RequireAuthorization("VorstandOrAdmin")
+          .DisableAntiforgery();
 
         // -------------------------------------------------------------------------
         // Werkzeug Endpoints

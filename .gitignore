@@ -124,3 +124,13 @@ Desktop.ini
 # =============================================================================
 # Lokale Overrides nicht einchecken
 docker-compose.override.yml
+
+# =============================================================================
+# Upload-Verzeichnis und persönliche Dateien
+# =============================================================================
+src/backend/AkaKraft.WebApi/wwwroot/uploads
+src/frontend/akakraft-online/public/android-chrome-192x192.png
+src/frontend/akakraft-online/public/android-chrome-512x512.png
+src/frontend/akakraft-online/public/apple-touch-icon.png
+src/frontend/akakraft-online/public/favicon-16x16.png
+src/frontend/akakraft-online/public/favicon-32x32.png

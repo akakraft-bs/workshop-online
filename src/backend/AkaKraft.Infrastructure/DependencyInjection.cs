@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IWerkzeugService, WerkzeugService>();
         services.AddScoped<IVerbrauchsmaterialService, VerbrauchsmaterialService>();
+        services.AddScoped<IUploadService, UploadService>();
 
         return services;
     }

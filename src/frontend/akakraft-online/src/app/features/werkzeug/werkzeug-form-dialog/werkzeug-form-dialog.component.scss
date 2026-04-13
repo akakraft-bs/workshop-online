@@ -6,7 +6,7 @@ mat-dialog-content {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 340px;
+  min-width: 380px;
 
   @media (max-width: 480px) {
     min-width: unset;
@@ -15,5 +15,152 @@ mat-dialog-content {
 
   mat-form-field {
     width: 100%;
+  }
+
+  mat-divider {
+    margin: 8px 0 12px;
+  }
+}
+
+// --- Bildbereich ---
+.image-section {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 4px;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+}
+
+.image-preview {
+  flex-shrink: 0;
+  width: 120px;
+  height: 100px;
+  border-radius: 8px;
+  background: var(--mat-sys-surface-variant);
+  border: 1.5px solid var(--mat-sys-outline-variant);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .placeholder-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.5;
+  }
+
+  .placeholder-text {
+    font-size: 11px;
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.6;
+    margin-top: 4px;
+  }
+
+  .clear-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 28px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    height: 120px;
+  }
+}
+
+.image-controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mode-toggle {
+  align-self: flex-start;
+
+  mat-button-toggle {
+    font-size: 13px;
+    height: 36px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      margin-right: 4px;
+    }
+  }
+}
+
+.url-field {
+  margin-bottom: -16px; // mat-form-field bottom padding ausgleichen
+}
+
+.upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--mat-sys-on-surface);
+  background: var(--mat-sys-secondary-container);
+  border-radius: 16px;
+  padding: 4px 12px 4px 8px;
+  width: fit-content;
+  max-width: 100%;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--mat-sys-on-secondary-container);
+    flex-shrink: 0;
+  }
+}
+
+.upload-btn {
+  button {
+    width: 100%;
+    justify-content: flex-start;
   }
 }
