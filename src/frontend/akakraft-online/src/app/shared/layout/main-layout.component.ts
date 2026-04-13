@@ -8,8 +8,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
 import { Role } from '../../models/user.model';
+import { FeedbackDialogComponent } from '../../features/feedback/feedback-dialog/feedback-dialog.component';
 
 interface NavItem {
   label: string;
@@ -23,6 +26,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
   { label: 'Werkzeug', icon: 'build', route: '/werkzeug' },
   { label: 'Verbrauchsmaterial', icon: 'inventory_2', route: '/verbrauchsmaterial' },
   { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
+  { label: 'Feedback', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },
 ];
 
 @Component({
@@ -30,7 +34,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
   imports: [
     RouterOutlet, RouterLink, RouterLinkActive,
     MatSidenavModule, MatToolbarModule, MatIconModule,
-    MatButtonModule, MatListModule, MatMenuModule, MatDividerModule,
+    MatButtonModule, MatListModule, MatMenuModule, MatDividerModule, MatTooltipModule,
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
@@ -38,6 +42,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
 export class MainLayoutComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly dialog = inject(MatDialog);
 
   readonly sidenavRef = viewChild.required<MatSidenav>('sidenav');
   readonly isMobile = signal(false);
@@ -58,5 +63,12 @@ export class MainLayoutComponent implements OnInit {
 
   logout(): void {
     this.auth.logout();
+  }
+
+  openFeedbackDialog(): void {
+    this.dialog.open(FeedbackDialogComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+    });
   }
 }

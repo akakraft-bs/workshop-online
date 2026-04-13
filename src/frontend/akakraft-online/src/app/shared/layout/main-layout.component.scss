@@ -69,6 +69,13 @@
   }
 }
 
+.feedback-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 200;
+}
+
 .toolbar {
   position: sticky;
   top: 0;

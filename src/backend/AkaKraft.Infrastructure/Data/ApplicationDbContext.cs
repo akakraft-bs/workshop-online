@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<Werkzeug> Werkzeuge => Set<Werkzeug>();
     public DbSet<Verbrauchsmaterial> Verbrauchsmaterialien => Set<Verbrauchsmaterial>();
+    public DbSet<Feedback> Feedbacks => Set<Feedback>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,5 +18,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
         modelBuilder.ApplyConfiguration(new WerkzeugConfiguration());
         modelBuilder.ApplyConfiguration(new VerbrauchsmaterialConfiguration());
+        modelBuilder.ApplyConfiguration(new FeedbackConfiguration());
     }
 }

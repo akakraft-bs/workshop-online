@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
 
+
 namespace AkaKraft.Infrastructure;
 
 public static class DependencyInjection
@@ -35,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<IWerkzeugService, WerkzeugService>();
         services.AddScoped<IVerbrauchsmaterialService, VerbrauchsmaterialService>();
         services.AddScoped<IUploadService, UploadService>();
+        services.AddScoped<IFeedbackService, FeedbackService>();
 
         return services;
     }

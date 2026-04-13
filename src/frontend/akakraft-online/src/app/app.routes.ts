@@ -50,6 +50,13 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: [Role.Admin] },
       },
+      {
+        path: 'admin/feedback',
+        loadComponent: () =>
+          import('./features/admin/feedback/feedback-list.component').then(m => m.AdminFeedbackListComponent),
+        canActivate: [roleGuard],
+        data: { roles: [Role.Admin] },
+      },
     ],
   },
   { path: '**', redirectTo: '' },

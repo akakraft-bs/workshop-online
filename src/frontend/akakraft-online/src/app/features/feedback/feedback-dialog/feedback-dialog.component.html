@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>Feedback senden</h2>
+
+<mat-dialog-content>
+  <p class="hint">
+    Teile uns mit, was dir aufgefallen ist oder was du dir wünschst.
+    Wir sehen automatisch, auf welcher Seite du dich befindest.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Dein Feedback</mat-label>
+      <textarea
+        matInput
+        formControlName="text"
+        rows="5"
+        placeholder="Was ist dir aufgefallen?"
+        cdkTextareaAutosize
+        cdkAutosizeMinRows="4"
+        cdkAutosizeMaxRows="8">
+      </textarea>
+      <mat-hint align="end">{{ remaining }} / 256</mat-hint>
+      @if (form.get('text')?.hasError('required')) {
+        <mat-error>Bitte gib eine Nachricht ein.</mat-error>
+      }
+      @if (form.get('text')?.hasError('maxlength')) {
+        <mat-error>Maximal 256 Zeichen erlaubt.</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+  <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="submit()">
+    <mat-icon>send</mat-icon>
+    Senden
+  </button>
+</mat-dialog-actions>

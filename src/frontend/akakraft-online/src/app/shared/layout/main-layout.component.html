@@ -70,6 +70,16 @@
       <router-outlet />
     </main>
 
+    <button
+      mat-fab
+      class="feedback-fab"
+      matTooltip="Feedback senden"
+      matTooltipPosition="left"
+      aria-label="Feedback senden"
+      (click)="openFeedbackDialog()">
+      <mat-icon>feedback</mat-icon>
+    </button>
+
   </mat-sidenav-content>
 
 </mat-sidenav-container>

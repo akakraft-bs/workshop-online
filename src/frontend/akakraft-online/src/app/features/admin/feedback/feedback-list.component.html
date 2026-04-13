@@ -1,0 +1,111 @@
+<div class="page-header">
+  <h1>Feedback</h1>
+</div>
+
+@if (loading()) {
+  <div class="spinner-wrap">
+    <mat-spinner diameter="48" />
+  </div>
+} @else {
+  <!-- Filter-Leiste -->
+  <mat-button-toggle-group
+    [value]="filterStatus()"
+    (change)="filterStatus.set($event.value)"
+    class="filter-group">
+    <mat-button-toggle value="all">Alle ({{ counts().all }})</mat-button-toggle>
+    <mat-button-toggle value="New">
+      <mat-icon class="status-icon new">fiber_new</mat-icon>
+      Neu ({{ counts().New }})
+    </mat-button-toggle>
+    <mat-button-toggle value="Read">
+      <mat-icon class="status-icon read">visibility</mat-icon>
+      Gelesen ({{ counts().Read }})
+    </mat-button-toggle>
+    <mat-button-toggle value="Done">
+      <mat-icon class="status-icon done">check_circle</mat-icon>
+      Umgesetzt ({{ counts().Done }})
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+
+  @if (filtered().length === 0) {
+    <div class="empty-state">
+      <mat-icon>feedback</mat-icon>
+      <p>Kein Feedback vorhanden.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table mat-table [dataSource]="filtered()" class="feedback-table">
+
+        <!-- Datum -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Datum</th>
+          <td mat-cell *matCellDef="let fb">
+            {{ fb.createdAt | date:'dd.MM.yy, HH:mm' }}
+          </td>
+        </ng-container>
+
+        <!-- Nutzer -->
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>Nutzer</th>
+          <td mat-cell *matCellDef="let fb">{{ fb.userName }}</td>
+        </ng-container>
+
+        <!-- Seite -->
+        <ng-container matColumnDef="page">
+          <th mat-header-cell *matHeaderCellDef>Seite</th>
+          <td mat-cell *matCellDef="let fb">
+            <code class="page-url">{{ fb.pageUrl }}</code>
+          </td>
+        </ng-container>
+
+        <!-- Text -->
+        <ng-container matColumnDef="text">
+          <th mat-header-cell *matHeaderCellDef>Feedback</th>
+          <td mat-cell *matCellDef="let fb" class="text-cell">{{ fb.text }}</td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let fb">
+            <mat-chip class="status-chip status-{{ fb.status.toLowerCase() }}">
+              {{ statusLabel(fb.status) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Aktionen -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let fb" class="actions-cell">
+            @if (fb.status === 'New') {
+              <button mat-icon-button
+                matTooltip="Als gelesen markieren"
+                (click)="updateStatus(fb, 'Read')">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            }
+            @if (fb.status !== 'Done') {
+              <button mat-icon-button
+                matTooltip="Als umgesetzt markieren"
+                (click)="updateStatus(fb, 'Done')">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+            }
+            @if (fb.status === 'Done') {
+              <button mat-icon-button
+                matTooltip="Zurück auf 'Neu' setzen"
+                (click)="updateStatus(fb, 'New')">
+                <mat-icon>refresh</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+          class="feedback-row status-row-{{ row.status.toLowerCase() }}"></tr>
+      </table>
+    </div>
+  }
+}
