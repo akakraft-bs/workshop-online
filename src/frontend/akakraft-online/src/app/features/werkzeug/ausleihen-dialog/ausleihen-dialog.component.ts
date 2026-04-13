@@ -40,7 +40,7 @@ export class AusleihenDialogComponent {
   })();
 
   readonly form = this.fb.nonNullable.group({
-    expectedReturnAt: ['', Validators.required],
+    expectedReturnAt: [this.minDate, Validators.required],
   });
 
   confirm(): void {
