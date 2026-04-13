@@ -1,9 +1,12 @@
 using AkaKraft.Application.Interfaces;
-using Microsoft.AspNetCore.Hosting;
+using AkaKraft.Infrastructure.Options;
+using Microsoft.Extensions.Options;
+using Minio;
+using Minio.DataModel.Args;
 
 namespace AkaKraft.Infrastructure.Services;
 
-public class UploadService(IWebHostEnvironment env) : IUploadService
+public class UploadService(IMinioClient minio, IOptions<MinioOptions> opts) : IUploadService
 {
     private static readonly HashSet<string> AllowedTypes =
         ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -21,26 +24,40 @@ public class UploadService(IWebHostEnvironment env) : IUploadService
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (string.IsNullOrEmpty(ext)) ext = ".jpg";
 
-        var fileName = $"{Guid.NewGuid()}{ext}";
-        var folder = Path.Combine(env.WebRootPath, "uploads", "werkzeug");
-        Directory.CreateDirectory(folder);
+        var objectName = $"werkzeug/{Guid.NewGuid()}{ext}";
+        var bucket = opts.Value.BucketName;
 
-        var filePath = Path.Combine(folder, fileName);
-        await using var stream = File.Create(filePath);
-        await file.Content.CopyToAsync(stream);
+        await minio.PutObjectAsync(new PutObjectArgs()
+            .WithBucket(bucket)
+            .WithObject(objectName)
+            .WithStreamData(file.Content)
+            .WithObjectSize(file.Length)
+            .WithContentType(file.ContentType));
 
-        return $"/uploads/werkzeug/{fileName}";
+        return $"{opts.Value.PublicBaseUrl}/{bucket}/{objectName}";
     }
 
-    public void DeleteIfLocal(string? url)
+    public async Task DeleteAsync(string? url)
     {
-        if (string.IsNullOrEmpty(url) || !url.StartsWith("/uploads/"))
-            return;
+        if (string.IsNullOrEmpty(url)) return;
 
-        var relativePath = url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-        var fullPath = Path.Combine(env.WebRootPath, relativePath);
+        var bucket = opts.Value.BucketName;
+        var prefix = $"{opts.Value.PublicBaseUrl}/{bucket}/";
 
-        if (File.Exists(fullPath))
-            File.Delete(fullPath);
+        // Nur MinIO-eigene URLs löschen
+        if (!url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return;
+
+        var objectName = url[prefix.Length..];
+
+        try
+        {
+            await minio.RemoveObjectAsync(new RemoveObjectArgs()
+                .WithBucket(bucket)
+                .WithObject(objectName));
+        }
+        catch
+        {
+            // Fehler beim Löschen ignorieren (Objekt evtl. schon weg)
+        }
     }
 }

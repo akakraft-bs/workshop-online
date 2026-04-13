@@ -16,7 +16,7 @@ namespace AkaKraft.WebApi;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -136,12 +136,10 @@ public static class Program
 
         var app = builder.Build();
 
-        // wwwroot/uploads sicherstellen
-        var wwwroot = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
-        Directory.CreateDirectory(Path.Combine(wwwroot, "uploads", "werkzeug"));
+        // MinIO-Bucket beim Start anlegen und auf öffentlichen Lesezugriff setzen
+        await EnsureMinioReadyAsync(app);
 
         app.UseCors("Frontend");
-        app.UseStaticFiles();
         app.UseCookiePolicy();
         app.UseAuthentication();
         app.UseAuthorization();
@@ -305,5 +303,41 @@ public static class Program
             .RequireAuthorization("AnyRole");
 
         app.Run();
+    }
+
+    private static async Task EnsureMinioReadyAsync(WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var minio = scope.ServiceProvider.GetRequiredService<Minio.IMinioClient>();
+        var opts  = scope.ServiceProvider
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<AkaKraft.Infrastructure.Options.MinioOptions>>()
+            .Value;
+
+        var bucket = opts.BucketName;
+
+        var exists = await minio.BucketExistsAsync(
+            new Minio.DataModel.Args.BucketExistsArgs().WithBucket(bucket));
+
+        if (!exists)
+            await minio.MakeBucketAsync(
+                new Minio.DataModel.Args.MakeBucketArgs().WithBucket(bucket));
+
+        // Anonymen Lesezugriff erlauben (GET auf alle Objekte)
+        var policy = $$"""
+            {
+              "Version": "2012-10-17",
+              "Statement": [{
+                "Effect": "Allow",
+                "Principal": {"AWS": ["*"]},
+                "Action": ["s3:GetObject"],
+                "Resource": ["arn:aws:s3:::{{bucket}}/*"]
+              }]
+            }
+            """;
+
+        await minio.SetPolicyAsync(
+            new Minio.DataModel.Args.SetPolicyArgs()
+                .WithBucket(bucket)
+                .WithPolicy(policy));
     }
 }
