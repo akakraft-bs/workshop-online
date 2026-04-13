@@ -10,3 +10,13 @@ public record VerbrauchsmaterialDto(
     int? MinQuantity,
     string? ImageUrl
 );
+
+public record CreateVerbrauchsmaterialDto(
+    string Name,
+    string Description,
+    string Category,
+    string Unit,
+    int Quantity,
+    int? MinQuantity,
+    string? ImageUrl
+);

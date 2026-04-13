@@ -303,6 +303,33 @@ public static class Program
             Results.Ok(await verbrauchsmaterialService.GetAllAsync()))
             .RequireAuthorization("AnyRole");
 
+        app.MapPost("/verbrauchsmaterial", async (CreateVerbrauchsmaterialDto dto, IVerbrauchsmaterialService verbrauchsmaterialService) =>
+        {
+            var created = await verbrauchsmaterialService.CreateAsync(dto);
+            return Results.Created($"/verbrauchsmaterial/{created.Id}", created);
+        }).RequireAuthorization("VorstandOrAdmin");
+
+        app.MapDelete("/verbrauchsmaterial/{id:guid}", async (Guid id, IVerbrauchsmaterialService verbrauchsmaterialService) =>
+        {
+            var deleted = await verbrauchsmaterialService.DeleteAsync(id);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        }).RequireAuthorization("VorstandOrAdmin");
+
+        app.MapPost("/uploads/verbrauchsmaterial", async (IFormFile file, IUploadService uploadService) =>
+        {
+            try
+            {
+                var model = new FileUploadModel(file.OpenReadStream(), file.FileName, file.ContentType, file.Length);
+                var url = await uploadService.SaveAsync(model);
+                return Results.Ok(new { url });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        }).RequireAuthorization("VorstandOrAdmin")
+          .DisableAntiforgery();
+
         // -------------------------------------------------------------------------
         // Feedback Endpoints
         // -------------------------------------------------------------------------
@@ -340,6 +367,8 @@ public static class Program
 
     private static async Task EnsureMinioReadyAsync(WebApplication app)
     {
+        var logger = app.Logger;
+
         using var scope = app.Services.CreateScope();
         var minio = scope.ServiceProvider.GetRequiredService<Minio.IMinioClient>();
         var opts  = scope.ServiceProvider
@@ -348,29 +377,58 @@ public static class Program
 
         var bucket = opts.BucketName;
 
-        var exists = await minio.BucketExistsAsync(
-            new Minio.DataModel.Args.BucketExistsArgs().WithBucket(bucket));
+        try
+        {
+            var exists = await minio.BucketExistsAsync(
+                new Minio.DataModel.Args.BucketExistsArgs().WithBucket(bucket));
 
-        if (!exists)
-            await minio.MakeBucketAsync(
-                new Minio.DataModel.Args.MakeBucketArgs().WithBucket(bucket));
-
-        // Anonymen Lesezugriff erlauben (GET auf alle Objekte)
-        var policy = $$"""
+            if (!exists)
             {
-              "Version": "2012-10-17",
-              "Statement": [{
-                "Effect": "Allow",
-                "Principal": {"AWS": ["*"]},
-                "Action": ["s3:GetObject"],
-                "Resource": ["arn:aws:s3:::{{bucket}}/*"]
-              }]
+                await minio.MakeBucketAsync(
+                    new Minio.DataModel.Args.MakeBucketArgs().WithBucket(bucket));
+                logger.LogInformation("MinIO-Bucket '{Bucket}' wurde erstellt.", bucket);
             }
-            """;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex,
+                "MinIO-Bucket '{Bucket}' konnte nicht geprüft/erstellt werden. " +
+                "Ist der MinIO-Server erreichbar und sind die Zugangsdaten korrekt?", bucket);
+            return;
+        }
 
-        await minio.SetPolicyAsync(
-            new Minio.DataModel.Args.SetPolicyArgs()
-                .WithBucket(bucket)
-                .WithPolicy(policy));
+        // Öffentliche Leseberechtigung setzen – schlägt auf manchen MinIO-Versionen
+        // fehl, wenn SetBucketPolicy durch Server-Policy gesperrt ist.
+        // Fallback: Bucket manuell in der MinIO-Console (http://localhost:9001) auf
+        // "Anonymous access: readonly" setzen.
+        try
+        {
+            var policy = $$"""
+                {
+                  "Version": "2012-10-17",
+                  "Statement": [{
+                    "Effect": "Allow",
+                    "Principal": {"AWS": ["*"]},
+                    "Action": ["s3:GetObject"],
+                    "Resource": ["arn:aws:s3:::{{bucket}}/*"]
+                  }]
+                }
+                """;
+
+            await minio.SetPolicyAsync(
+                new Minio.DataModel.Args.SetPolicyArgs()
+                    .WithBucket(bucket)
+                    .WithPolicy(policy));
+
+            logger.LogInformation("MinIO-Bucket '{Bucket}': öffentlicher Lesezugriff gesetzt.", bucket);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "MinIO-Bucket '{Bucket}': Bucket-Policy konnte nicht gesetzt werden " +
+                "(häufig bei neueren MinIO-Versionen). " +
+                "Bitte Bucket manuell über die MinIO-Console (http://localhost:9001) " +
+                "auf 'Anonymous access: readonly' stellen.", bucket);
+        }
     }
 }

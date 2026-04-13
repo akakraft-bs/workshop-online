@@ -11,6 +11,13 @@
       </button>
     }
   </mat-form-field>
+
+  @if (canManage()) {
+    <button mat-flat-button color="primary" (click)="openAddDialog()">
+      <mat-icon>add</mat-icon>
+      Hinzufügen
+    </button>
+  }
 </div>
 
 @if (loading()) {
@@ -26,6 +33,21 @@
   <div class="table-container mat-elevation-z1">
     <table mat-table [dataSource]="filteredItems()">
 
+      <!-- Bild -->
+      <ng-container matColumnDef="image">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let item" class="image-cell">
+          @if (item.imageUrl) {
+            <img [src]="item.imageUrl" [alt]="item.name" class="item-thumb">
+          } @else {
+            <div class="item-thumb-placeholder">
+              <mat-icon>inventory_2</mat-icon>
+            </div>
+          }
+        </td>
+      </ng-container>
+
+      <!-- Bezeichnung -->
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Bezeichnung</th>
         <td mat-cell *matCellDef="let item">
@@ -34,18 +56,24 @@
         </td>
       </ng-container>
 
+      <!-- Kategorie -->
       <ng-container matColumnDef="category">
         <th mat-header-cell *matHeaderCellDef>Kategorie</th>
         <td mat-cell *matCellDef="let item">{{ item.category }}</td>
       </ng-container>
 
+      <!-- Bestand -->
       <ng-container matColumnDef="quantity">
         <th mat-header-cell *matHeaderCellDef>Bestand</th>
         <td mat-cell *matCellDef="let item">
           {{ item.quantity }} {{ item.unit }}
+          @if (item.minQuantity != null) {
+            <small class="min-qty">(Min: {{ item.minQuantity }})</small>
+          }
         </td>
       </ng-container>
 
+      <!-- Status -->
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let item">
@@ -57,8 +85,20 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+      <!-- Aktionen (nur für Berechtigte) -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let item" class="actions-cell">
+          <button mat-icon-button color="warn"
+            matTooltip="Löschen"
+            (click)="delete(item); $event.stopPropagation()">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns();" class="table-row"></tr>
     </table>
   </div>
 }
