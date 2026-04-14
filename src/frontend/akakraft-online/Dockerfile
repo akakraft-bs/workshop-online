@@ -22,9 +22,10 @@ FROM nginx:alpine AS runtime
 # Angular-Build-Output in nginx-Webroot kopieren
 COPY --from=build /app/dist/akakraft-online/browser /usr/share/nginx/html
 
-# nginx-Template: ${BACKEND_URL} wird beim Start per envsubst ersetzt.
-# Das offizielle nginx-Image verarbeitet /etc/nginx/templates/ automatisch.
-COPY nginx.default.conf.template /etc/nginx/templates/default.conf.template
+# nginx-Template: nur ${BACKEND_URL} und ${MINIO_URL} werden ersetzt.
+# Wir rufen envsubst explizit auf, damit nginx-Regex-Muster wie {8,} nicht
+# fälschlicherweise als Variablen interpretiert werden.
+COPY nginx.default.conf.template /etc/nginx/nginx.default.conf.template
 
 EXPOSE 80
 
@@ -33,3 +34,6 @@ EXPOSE 80
 #   BACKEND_URL=http://akakraft-backend:8080
 ENV BACKEND_URL=http://backend:8080
 ENV MINIO_URL=http://minio:9000
+
+CMD ["/bin/sh", "-c", \
+  "envsubst '$BACKEND_URL $MINIO_URL' < /etc/nginx/nginx.default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
