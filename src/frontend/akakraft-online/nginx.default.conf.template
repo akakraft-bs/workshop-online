@@ -33,11 +33,12 @@ server {
 
     # -------------------------------------------------------------------------
     # API-Proxy → Backend
-    # Alle Anfragen an /api/ werden an den Backend-Service weitergeleitet.
-    # Der /api-Prefix wird beim Weiterleiten entfernt (trailing slash in proxy_pass).
+    # /api/-Prefix wird NICHT entfernt – das Backend nutzt UsePathBase("/api")
+    # und verarbeitet den Prefix selbst. So kann ASP.NET Core die korrekte
+    # redirect_uri (inkl. /api/) für Google OAuth aufbauen.
     # -------------------------------------------------------------------------
     location /api/ {
-        proxy_pass         ${BACKEND_URL}/;
+        proxy_pass         ${BACKEND_URL};
         proxy_http_version 1.1;
 
         proxy_set_header   Host              $host;

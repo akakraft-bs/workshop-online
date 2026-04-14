@@ -140,6 +140,11 @@ public static class Program
         // MinIO-Bucket beim Start anlegen und auf öffentlichen Lesezugriff setzen
         await EnsureMinioReadyAsync(app);
 
+        // Nginx leitet /api/... an das Backend weiter (ohne Prefix zu strippen).
+        // UsePathBase entfernt /api aus dem Pfad und fügt es bei URL-Konstruktionen
+        // (z. B. OAuth redirect_uri) automatisch wieder hinzu.
+        app.UsePathBase("/api");
+
         app.UseCors("Frontend");
         app.UseCookiePolicy();
         app.UseAuthentication();
