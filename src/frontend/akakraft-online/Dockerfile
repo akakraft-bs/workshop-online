@@ -20,7 +20,7 @@ RUN npm run build -- --configuration production
 FROM nginx:alpine AS runtime
 
 # Angular-Build-Output in nginx-Webroot kopieren
-COPY --from=build /app/dist/akakraft-online/browser /usr/share/nginx/html
+COPY --from=build /app/dist/akakraft-online/browser /usr/share/nginx/html/app
 
 # nginx-Template: nur ${BACKEND_URL} und ${MINIO_URL} werden ersetzt.
 # Wir rufen envsubst explizit auf, damit nginx-Regex-Muster wie {8,} nicht
