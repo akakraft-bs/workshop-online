@@ -1,0 +1,23 @@
+# .dockerignore für den Backend-Build
+# (Kontext: workshop-online/)
+
+# Build-Artefakte
+src/backend/**/bin/
+src/backend/**/obj/
+
+# Frontend – wird im Backend-Build nicht benötigt
+src/frontend/
+
+# Infrastruktur-Dateien
+infra/
+
+# Git & IDE
+.git/
+.github/
+.idea/
+.vs/
+*.user
+
+# Secrets (werden über K8s-Secrets / Env-Variablen injiziert)
+**/appsettings.Development.json
+**/secrets.json

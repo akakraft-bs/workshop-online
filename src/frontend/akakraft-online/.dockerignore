@@ -1,0 +1,17 @@
+# .dockerignore für den Frontend-Build
+# (Kontext: workshop-online/src/frontend/akakraft-online/)
+
+# Abhängigkeiten – werden im Container neu installiert
+node_modules/
+
+# Build-Artefakte
+dist/
+.angular/
+
+# Git & IDE
+.git/
+.idea/
+.vscode/
+
+# Entwicklungs-Proxy (nicht im Production-Build benötigt)
+proxy.conf.json

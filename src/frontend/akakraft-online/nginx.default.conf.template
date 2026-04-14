@@ -1,0 +1,75 @@
+# nginx-Konfiguration für AkaKraft Online (SPA + API-Proxy)
+#
+# Umgebungsvariable, die beim Container-Start ersetzt wird:
+#   BACKEND_URL  – interne URL des Backend-Service
+#                  z. B. http://akakraft-backend:8080  (K8s Service-Name)
+#                        http://backend:8080            (Docker Compose)
+
+server {
+    listen 80;
+    server_name _;
+
+    root  /usr/share/nginx/html;
+    index index.html;
+
+    # -------------------------------------------------------------------------
+    # Hashed Assets (JS/CSS mit Content-Hash im Dateinamen)
+    # → sehr langes Caching ist sicher, da der Hash sich bei Änderungen ändert
+    # -------------------------------------------------------------------------
+    location ~* \.[0-9a-f]{8,}\.(js|css)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # -------------------------------------------------------------------------
+    # Statische Dateien (Bilder, Fonts, Manifests …)
+    # -------------------------------------------------------------------------
+    location ~* \.(png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|eot|otf)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+        access_log off;
+    }
+
+    # -------------------------------------------------------------------------
+    # API-Proxy → Backend
+    # Alle Anfragen an /api/ werden an den Backend-Service weitergeleitet.
+    # Der /api-Prefix wird beim Weiterleiten entfernt (trailing slash in proxy_pass).
+    # -------------------------------------------------------------------------
+    location /api/ {
+        proxy_pass         ${BACKEND_URL}/;
+        proxy_http_version 1.1;
+
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+
+        # Timeouts für lange Requests (z. B. Dateiuploads)
+        proxy_connect_timeout 60s;
+        proxy_send_timeout    60s;
+        proxy_read_timeout    60s;
+
+        # Uploads bis 10 MB erlauben
+        client_max_body_size 10m;
+    }
+
+    # -------------------------------------------------------------------------
+    # Redirect: / → /app/
+    # -------------------------------------------------------------------------
+    location = / {
+        return 301 /app/;
+    }
+
+    # -------------------------------------------------------------------------
+    # Angular SPA unter /app/
+    # try_files versucht die Datei direkt, sonst Fallback auf /app/index.html
+    # (ermöglicht clientseitiges Angular-Routing unter /app/dashboard etc.)
+    # -------------------------------------------------------------------------
+    location /app/ {
+        try_files $uri $uri/ /app/index.html;
+
+        # index.html nie cachen
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+}
