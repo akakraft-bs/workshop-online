@@ -16,7 +16,7 @@ server {
     # Hashed Assets (JS/CSS mit Content-Hash im Dateinamen)
     # → sehr langes Caching ist sicher, da der Hash sich bei Änderungen ändert
     # -------------------------------------------------------------------------
-    location ~* \.[0-9a-f]{8,}\.(js|css)$ {
+    location ~* "\.[0-9a-f]{8,}\.(js|css)$" {
         expires 1y;
         add_header Cache-Control "public, immutable";
         access_log off;
