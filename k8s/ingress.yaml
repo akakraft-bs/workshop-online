@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: akakraft-ingress
+  namespace: akakraft
+  annotations:
+    # Traefik ist der Standard-Ingress-Controller in k3s.
+    # "web" = HTTP-Entrypoint (Port 80) – TLS wird vom NPM davor übernommen.
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+    - host: beta-app.akakraft-bs.de
+      http:
+        paths:
+          # Alles landet beim Frontend-nginx.
+          # nginx routet intern:
+          #   /app/*   → Angular SPA
+          #   /api/*   → Backend-Service
+          #   /minio/* → MinIO-Service
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: akakraft-frontend
+                port:
+                  number: 80

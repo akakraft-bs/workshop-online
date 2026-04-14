@@ -55,6 +55,21 @@ server {
     }
 
     # -------------------------------------------------------------------------
+    # MinIO-Proxy: Bilder werden über dieselbe Domain ausgeliefert
+    # /minio/akakraft/werkzeug/xxx.jpg → MinIO-Service intern
+    # -------------------------------------------------------------------------
+    location /minio/ {
+        proxy_pass         ${MINIO_URL}/;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+
+        # Bilder können lang gecacht werden (unveränderliche Objekte)
+        expires 30d;
+        add_header Cache-Control "public";
+        access_log off;
+    }
+
+    # -------------------------------------------------------------------------
     # Redirect: / → /app/
     # -------------------------------------------------------------------------
     location = / {

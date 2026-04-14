@@ -32,3 +32,4 @@ EXPOSE 80
 # In K8s via Deployment-Env überschreiben:
 #   BACKEND_URL=http://akakraft-backend:8080
 ENV BACKEND_URL=http://backend:8080
+ENV MINIO_URL=http://minio:9000

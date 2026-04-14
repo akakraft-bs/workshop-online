@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akakraft-backend
+  namespace: akakraft
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: akakraft-backend
+  template:
+    metadata:
+      labels:
+        app: akakraft-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/akakraft-bs/akakraft-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            # --- Datenbank ---
+            # K8s ersetzt $(VAR) innerhalb desselben env-Blocks
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: db-password
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=akakraft-postgres;Port=5432;Database=akakraft;Username=akakraft;Password=$(DB_PASSWORD)"
+
+            # --- MinIO ---
+            - name: Minio__Endpoint
+              value: "akakraft-minio:9000"
+            - name: Minio__AccessKey
+              value: "minioadmin"
+            - name: Minio__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: minio-secret-key
+            - name: Minio__BucketName
+              value: "akakraft"
+            - name: Minio__UseSSL
+              value: "false"
+            # Bilder werden über nginx unter /minio/ ausgeliefert
+            - name: Minio__PublicBaseUrl
+              value: "https://beta-app.akakraft-bs.de/minio"
+
+            # --- JWT ---
+            - name: Authentication__Jwt__Key
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: jwt-key
+            - name: Authentication__Jwt__Issuer
+              value: "AkaKraft"
+            - name: Authentication__Jwt__Audience
+              value: "AkaKraft"
+            - name: Authentication__Jwt__ExpiryMinutes
+              value: "480"
+
+            # --- Google OAuth ---
+            - name: Authentication__Google__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: google-client-id
+            - name: Authentication__Google__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: google-client-secret
+
+            # --- Frontend-URL (für OAuth-Callback-Redirect) ---
+            - name: Frontend__BaseUrl
+              value: "https://beta-app.akakraft-bs.de"
+
+            # --- ASP.NET Core ---
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            # Aktiviert ForwardedHeaders-Middleware für X-Forwarded-Proto/For
+            # (nötig da Traffic über NPM → Traefik → Pod läuft)
+            - name: ASPNETCORE_FORWARDEDHEADERS_ENABLED
+              value: "true"
+
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
