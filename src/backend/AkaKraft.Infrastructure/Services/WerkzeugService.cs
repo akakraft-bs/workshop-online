@@ -29,6 +29,13 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<string>> GetCategoriesAsync() =>
+        await db.Werkzeuge
+            .Select(w => w.Category)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToListAsync();
+
     public async Task<WerkzeugDto> CreateAsync(CreateWerkzeugDto dto)
     {
         var werkzeug = new Werkzeug

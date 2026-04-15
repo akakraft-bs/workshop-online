@@ -83,7 +83,13 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Kategorie</mat-label>
-      <input matInput formControlName="category" placeholder="z. B. Elektrowerkzeug">
+      <input matInput formControlName="category" placeholder="z. B. Elektrowerkzeug"
+        [matAutocomplete]="categoryAuto">
+      <mat-autocomplete #categoryAuto="matAutocomplete">
+        @for (cat of filteredCategories$ | async; track cat) {
+          <mat-option [value]="cat">{{ cat }}</mat-option>
+        }
+      </mat-autocomplete>
       @if (form.controls.category.hasError('required') && form.controls.category.touched) {
         <mat-error>Kategorie ist erforderlich</mat-error>
       }

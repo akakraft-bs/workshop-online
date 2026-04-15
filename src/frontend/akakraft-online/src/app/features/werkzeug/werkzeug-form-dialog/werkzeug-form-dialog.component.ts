@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -9,8 +9,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, switchMap, of } from 'rxjs';
+import { Observable, switchMap, of, map, startWith } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 import { ApiService } from '../../../core/api/api.service';
 import { Werkzeug } from '../../../models/werkzeug.model';
 
@@ -23,15 +25,16 @@ type ImageMode = 'url' | 'upload';
 @Component({
   selector: 'app-werkzeug-form-dialog',
   imports: [
-    ReactiveFormsModule,
+    ReactiveFormsModule, AsyncPipe,
     MatDialogModule, MatButtonModule, MatFormFieldModule,
     MatInputModule, MatProgressSpinnerModule, MatIconModule,
     MatButtonToggleModule, MatDividerModule, MatTooltipModule,
+    MatAutocompleteModule,
   ],
   templateUrl: './werkzeug-form-dialog.component.html',
   styleUrl: './werkzeug-form-dialog.component.scss',
 })
-export class WerkzeugFormDialogComponent {
+export class WerkzeugFormDialogComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
@@ -41,10 +44,12 @@ export class WerkzeugFormDialogComponent {
   readonly saving = signal(false);
   readonly isEdit = this.data.werkzeug !== null;
 
-  // Bild-State
   readonly imageMode = signal<ImageMode>('url');
   readonly selectedFile = signal<File | null>(null);
   readonly previewUrl = signal<string | null>(this.data.werkzeug?.imageUrl ?? null);
+
+  allCategories: string[] = [];
+  filteredCategories$!: Observable<string[]>;
 
   readonly form = this.fb.nonNullable.group({
     name:        [this.data.werkzeug?.name ?? '',        Validators.required],
@@ -54,14 +59,25 @@ export class WerkzeugFormDialogComponent {
     dimensions:  [this.data.werkzeug?.dimensions ?? ''],
   });
 
+  ngOnInit(): void {
+    this.api.get<string[]>('/werkzeug/categories').subscribe(cats => {
+      this.allCategories = cats;
+    });
+
+    this.filteredCategories$ = this.form.controls.category.valueChanges.pipe(
+      startWith(this.form.controls.category.value),
+      map(value => {
+        const filter = value.toLowerCase();
+        return this.allCategories.filter(c => c.toLowerCase().includes(filter));
+      }),
+    );
+  }
+
   setImageMode(mode: ImageMode): void {
     this.imageMode.set(mode);
     if (mode === 'url') {
-      // Dateiauswahl verwerfen, Vorschau auf URL-Wert zurücksetzen
       this.selectedFile.set(null);
       this.previewUrl.set(this.form.controls.imageUrl.value || null);
-    } else {
-      // URL-Feld-Änderungen ignorieren; Vorschau bleibt
     }
   }
 
@@ -104,7 +120,6 @@ export class WerkzeugFormDialogComponent {
     this.saving.set(true);
     const value = this.form.getRawValue();
 
-    // Erst ggf. Bild hochladen, dann Werkzeug speichern
     const file = this.selectedFile();
     const upload$: Observable<{ url: string } | null> =
       this.imageMode() === 'upload' && file

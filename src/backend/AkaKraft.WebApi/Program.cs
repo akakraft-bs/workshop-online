@@ -267,6 +267,10 @@ public static class Program
             Results.Ok(await werkzeugService.GetAllAsync()))
             .RequireAuthorization("AnyRole");
 
+        app.MapGet("/werkzeug/categories", async (IWerkzeugService werkzeugService) =>
+            Results.Ok(await werkzeugService.GetCategoriesAsync()))
+            .RequireAuthorization("AnyRole");
+
         app.MapPost("/werkzeug", async (CreateWerkzeugDto dto, IWerkzeugService werkzeugService) =>
         {
             var created = await werkzeugService.CreateAsync(dto);
