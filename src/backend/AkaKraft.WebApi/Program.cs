@@ -165,7 +165,7 @@ public static class Program
         // Schritt 1: Frontend leitet hierher weiter → Google-Login startet
         app.MapGet("/auth/login/google", (HttpContext ctx) =>
             Results.Challenge(
-                new AuthenticationProperties { RedirectUri = "/auth/callback" },
+                new AuthenticationProperties { RedirectUri = $"{ctx.Request.PathBase}/auth/callback" },
                 [GoogleDefaults.AuthenticationScheme]));
 
         // Schritt 2: Google-Callback → Nutzer anlegen/laden → JWT erzeugen → Frontend weiterleiten
