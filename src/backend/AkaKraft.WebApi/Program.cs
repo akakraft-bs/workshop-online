@@ -7,6 +7,7 @@ using AkaKraft.Application.Interfaces;
 using AkaKraft.Domain.Enums;
 using System.Text.Json;
 using AkaKraft.Infrastructure;
+using AkaKraft.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -144,6 +145,13 @@ public static class Program
         });
 
         var app = builder.Build();
+
+        // Ausstehende EF Core Migrationen beim Start automatisch anwenden
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await db.Database.MigrateAsync();
+        }
 
         // MinIO-Bucket beim Start anlegen und auf öffentlichen Lesezugriff setzen
         await EnsureMinioReadyAsync(app);
