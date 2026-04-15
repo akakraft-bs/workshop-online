@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AkaKraft.WebApi;
@@ -140,7 +141,7 @@ public static class Program
         // Nötig damit X-Forwarded-Proto: https vom nginx akzeptiert wird.
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
-            options.KnownNetworks.Clear();
+            options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
         });
 
