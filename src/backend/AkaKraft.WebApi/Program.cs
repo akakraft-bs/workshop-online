@@ -346,6 +346,12 @@ public static class Program
             return Results.Created($"/verbrauchsmaterial/{created.Id}", created);
         }).RequireAuthorization("VorstandOrAdmin");
 
+        app.MapPut("/verbrauchsmaterial/{id:guid}", async (Guid id, UpdateVerbrauchsmaterialDto dto, IVerbrauchsmaterialService verbrauchsmaterialService) =>
+        {
+            var updated = await verbrauchsmaterialService.UpdateAsync(id, dto);
+            return updated is null ? Results.NotFound() : Results.Ok(updated);
+        }).RequireAuthorization("VorstandOrAdmin");
+
         app.MapDelete("/verbrauchsmaterial/{id:guid}", async (Guid id, IVerbrauchsmaterialService verbrauchsmaterialService) =>
         {
             var deleted = await verbrauchsmaterialService.DeleteAsync(id);

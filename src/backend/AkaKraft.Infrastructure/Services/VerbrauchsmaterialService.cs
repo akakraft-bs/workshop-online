@@ -61,6 +61,26 @@ public class VerbrauchsmaterialService(ApplicationDbContext db) : IVerbrauchsmat
             item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl);
     }
 
+    public async Task<VerbrauchsmaterialDto?> UpdateAsync(Guid id, UpdateVerbrauchsmaterialDto dto)
+    {
+        var item = await db.Verbrauchsmaterialien.FindAsync(id);
+        if (item is null) return null;
+
+        item.Name        = dto.Name;
+        item.Description = dto.Description;
+        item.Category    = dto.Category;
+        item.Unit        = dto.Unit;
+        item.Quantity    = dto.Quantity;
+        item.MinQuantity = dto.MinQuantity;
+        item.ImageUrl    = dto.ImageUrl;
+
+        await db.SaveChangesAsync();
+
+        return new VerbrauchsmaterialDto(
+            item.Id, item.Name, item.Description, item.Category,
+            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl);
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         var item = await db.Verbrauchsmaterialien.FindAsync(id);

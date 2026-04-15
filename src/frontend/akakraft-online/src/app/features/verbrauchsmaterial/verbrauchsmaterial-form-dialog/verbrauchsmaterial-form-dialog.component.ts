@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -15,6 +15,10 @@ import { ApiService } from '../../../core/api/api.service';
 import { Verbrauchsmaterial } from '../../../models/verbrauchsmaterial.model';
 
 type ImageMode = 'url' | 'upload';
+
+export interface VerbrauchsmaterialFormDialogData {
+  item: Verbrauchsmaterial | null;
+}
 
 @Component({
   selector: 'app-verbrauchsmaterial-form-dialog',
@@ -32,11 +36,13 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialogRef = inject(MatDialogRef<VerbrauchsmaterialFormDialogComponent>);
+  readonly data: VerbrauchsmaterialFormDialogData = inject(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);
+  readonly isEdit = this.data?.item !== null && this.data?.item !== undefined;
   readonly imageMode = signal<ImageMode>('url');
   readonly selectedFile = signal<File | null>(null);
-  readonly previewUrl = signal<string | null>(null);
+  readonly previewUrl = signal<string | null>(this.data?.item?.imageUrl ?? null);
 
   allCategories: string[] = [];
   allUnits: string[] = [];
@@ -44,13 +50,13 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
   filteredUnits$!: Observable<string[]>;
 
   readonly form = this.fb.nonNullable.group({
-    name:        ['', Validators.required],
-    description: ['', Validators.required],
-    category:    ['', Validators.required],
-    unit:        ['', Validators.required],
-    quantity:    [0, [Validators.required, Validators.min(0)]],
-    minQuantity: [null as number | null],
-    imageUrl:    [''],
+    name:        [this.data?.item?.name        ?? '', Validators.required],
+    description: [this.data?.item?.description ?? '', Validators.required],
+    category:    [this.data?.item?.category    ?? '', Validators.required],
+    unit:        [this.data?.item?.unit        ?? '', Validators.required],
+    quantity:    [this.data?.item?.quantity    ?? 0,  [Validators.required, Validators.min(0)]],
+    minQuantity: [this.data?.item?.minQuantity ?? null as number | null],
+    imageUrl:    [this.data?.item?.imageUrl    ?? ''],
   });
 
   ngOnInit(): void {
@@ -62,7 +68,7 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
     });
 
     this.filteredCategories$ = this.form.controls.category.valueChanges.pipe(
-      startWith(''),
+      startWith(this.form.controls.category.value),
       map(value => {
         const filter = value.toLowerCase();
         return this.allCategories.filter(c => c.toLowerCase().includes(filter));
@@ -70,7 +76,7 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
     );
 
     this.filteredUnits$ = this.form.controls.unit.valueChanges.pipe(
-      startWith(''),
+      startWith(this.form.controls.unit.value),
       map(value => {
         const filter = value.toLowerCase();
         return this.allUnits.filter(u => u.toLowerCase().includes(filter));
@@ -140,7 +146,7 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
         const imageUrl = uploadResult?.url
           ?? (this.imageMode() === 'url' ? (value.imageUrl || null) : null);
 
-        return this.api.post<Verbrauchsmaterial>('/verbrauchsmaterial', {
+        const body = {
           name:        value.name,
           description: value.description,
           category:    value.category,
@@ -148,7 +154,11 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
           quantity:    value.quantity,
           minQuantity: value.minQuantity ?? null,
           imageUrl,
-        });
+        };
+
+        return this.isEdit
+          ? this.api.put<Verbrauchsmaterial>(`/verbrauchsmaterial/${this.data.item!.id}`, body)
+          : this.api.post<Verbrauchsmaterial>('/verbrauchsmaterial', body);
       })
     ).subscribe({
       next: (result: Verbrauchsmaterial) => this.dialogRef.close(result),

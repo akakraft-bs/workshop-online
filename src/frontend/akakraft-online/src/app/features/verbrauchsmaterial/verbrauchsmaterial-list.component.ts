@@ -13,7 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ApiService } from '../../core/api/api.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
-import { VerbrauchsmaterialFormDialogComponent } from './verbrauchsmaterial-form-dialog/verbrauchsmaterial-form-dialog.component';
+import { VerbrauchsmaterialFormDialogComponent, VerbrauchsmaterialFormDialogData } from './verbrauchsmaterial-form-dialog/verbrauchsmaterial-form-dialog.component';
 
 @Component({
   selector: 'app-verbrauchsmaterial-list',
@@ -72,17 +72,29 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   }
 
   openAddDialog(): void {
-    const ref = this.dialog.open<VerbrauchsmaterialFormDialogComponent, void, Verbrauchsmaterial>(
+    this.openDialog(null);
+  }
+
+  openEditDialog(item: Verbrauchsmaterial): void {
+    this.openDialog(item);
+  }
+
+  private openDialog(item: Verbrauchsmaterial | null): void {
+    const ref = this.dialog.open<VerbrauchsmaterialFormDialogComponent, VerbrauchsmaterialFormDialogData, Verbrauchsmaterial>(
       VerbrauchsmaterialFormDialogComponent,
-      { width: '560px', maxWidth: '95vw' }
+      { width: '560px', maxWidth: '95vw', data: { item } }
     );
 
-    ref.afterClosed().subscribe(created => {
-      if (created) {
-        this.items.update(list => [...list, created].sort((a, b) =>
+    ref.afterClosed().subscribe(result => {
+      if (!result) return;
+      if (item) {
+        this.items.update(list => list.map(v => v.id === result.id ? result : v));
+        this.snackBar.open(`„${result.name}" gespeichert.`, undefined, { duration: 3000 });
+      } else {
+        this.items.update(list => [...list, result].sort((a, b) =>
           a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
         ));
-        this.snackBar.open(`„${created.name}" hinzugefügt.`, undefined, { duration: 3000 });
+        this.snackBar.open(`„${result.name}" hinzugefügt.`, undefined, { duration: 3000 });
       }
     });
   }

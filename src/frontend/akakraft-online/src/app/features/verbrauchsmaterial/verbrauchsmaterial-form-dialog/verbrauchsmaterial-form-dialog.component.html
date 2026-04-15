@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Verbrauchsmaterial hinzufügen</h2>
+<h2 mat-dialog-title>{{ isEdit ? 'Verbrauchsmaterial bearbeiten' : 'Verbrauchsmaterial hinzufügen' }}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="form-grid">
@@ -114,8 +114,8 @@
     @if (saving()) {
       <mat-spinner diameter="20" />
     } @else {
-      <mat-icon>add</mat-icon>
-      Hinzufügen
+      <mat-icon>{{ isEdit ? 'save' : 'add' }}</mat-icon>
+      {{ isEdit ? 'Speichern' : 'Hinzufügen' }}
     }
   </button>
 </mat-dialog-actions>
