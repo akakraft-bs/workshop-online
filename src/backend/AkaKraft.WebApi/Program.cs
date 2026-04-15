@@ -332,6 +332,14 @@ public static class Program
             Results.Ok(await verbrauchsmaterialService.GetAllAsync()))
             .RequireAuthorization("AnyRole");
 
+        app.MapGet("/verbrauchsmaterial/categories", async (IVerbrauchsmaterialService verbrauchsmaterialService) =>
+            Results.Ok(await verbrauchsmaterialService.GetCategoriesAsync()))
+            .RequireAuthorization("AnyRole");
+
+        app.MapGet("/verbrauchsmaterial/units", async (IVerbrauchsmaterialService verbrauchsmaterialService) =>
+            Results.Ok(await verbrauchsmaterialService.GetUnitsAsync()))
+            .RequireAuthorization("AnyRole");
+
         app.MapPost("/verbrauchsmaterial", async (CreateVerbrauchsmaterialDto dto, IVerbrauchsmaterialService verbrauchsmaterialService) =>
         {
             var created = await verbrauchsmaterialService.CreateAsync(dto);

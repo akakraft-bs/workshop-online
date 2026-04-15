@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -7,8 +7,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, switchMap, of } from 'rxjs';
+import { Observable, switchMap, of, map, startWith } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 import { ApiService } from '../../../core/api/api.service';
 import { Verbrauchsmaterial } from '../../../models/verbrauchsmaterial.model';
 
@@ -17,15 +19,15 @@ type ImageMode = 'url' | 'upload';
 @Component({
   selector: 'app-verbrauchsmaterial-form-dialog',
   imports: [
-    ReactiveFormsModule,
+    ReactiveFormsModule, AsyncPipe,
     MatDialogModule, MatButtonModule, MatFormFieldModule,
     MatInputModule, MatProgressSpinnerModule, MatIconModule,
-    MatButtonToggleModule,
+    MatButtonToggleModule, MatAutocompleteModule,
   ],
   templateUrl: './verbrauchsmaterial-form-dialog.component.html',
   styleUrl: './verbrauchsmaterial-form-dialog.component.scss',
 })
-export class VerbrauchsmaterialFormDialogComponent {
+export class VerbrauchsmaterialFormDialogComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
@@ -36,6 +38,11 @@ export class VerbrauchsmaterialFormDialogComponent {
   readonly selectedFile = signal<File | null>(null);
   readonly previewUrl = signal<string | null>(null);
 
+  allCategories: string[] = [];
+  allUnits: string[] = [];
+  filteredCategories$!: Observable<string[]>;
+  filteredUnits$!: Observable<string[]>;
+
   readonly form = this.fb.nonNullable.group({
     name:        ['', Validators.required],
     description: ['', Validators.required],
@@ -45,6 +52,31 @@ export class VerbrauchsmaterialFormDialogComponent {
     minQuantity: [null as number | null],
     imageUrl:    [''],
   });
+
+  ngOnInit(): void {
+    this.api.get<string[]>('/verbrauchsmaterial/categories').subscribe(cats => {
+      this.allCategories = cats;
+    });
+    this.api.get<string[]>('/verbrauchsmaterial/units').subscribe(units => {
+      this.allUnits = units;
+    });
+
+    this.filteredCategories$ = this.form.controls.category.valueChanges.pipe(
+      startWith(''),
+      map(value => {
+        const filter = value.toLowerCase();
+        return this.allCategories.filter(c => c.toLowerCase().includes(filter));
+      }),
+    );
+
+    this.filteredUnits$ = this.form.controls.unit.valueChanges.pipe(
+      startWith(''),
+      map(value => {
+        const filter = value.toLowerCase();
+        return this.allUnits.filter(u => u.toLowerCase().includes(filter));
+      }),
+    );
+  }
 
   setImageMode(mode: ImageMode): void {
     this.imageMode.set(mode);

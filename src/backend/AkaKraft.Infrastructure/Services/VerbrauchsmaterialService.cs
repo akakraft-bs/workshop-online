@@ -25,6 +25,20 @@ public class VerbrauchsmaterialService(ApplicationDbContext db) : IVerbrauchsmat
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<string>> GetCategoriesAsync() =>
+        await db.Verbrauchsmaterialien
+            .Select(v => v.Category)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToListAsync();
+
+    public async Task<IEnumerable<string>> GetUnitsAsync() =>
+        await db.Verbrauchsmaterialien
+            .Select(v => v.Unit)
+            .Distinct()
+            .OrderBy(u => u)
+            .ToListAsync();
+
     public async Task<VerbrauchsmaterialDto> CreateAsync(CreateVerbrauchsmaterialDto dto)
     {
         var item = new Verbrauchsmaterial

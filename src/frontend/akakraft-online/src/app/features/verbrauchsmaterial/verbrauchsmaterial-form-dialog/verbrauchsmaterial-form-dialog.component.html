@@ -22,7 +22,13 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Kategorie</mat-label>
-      <input matInput formControlName="category" placeholder="z. B. Befestigungsmittel">
+      <input matInput formControlName="category" placeholder="z. B. Befestigungsmittel"
+        [matAutocomplete]="categoryAuto">
+      <mat-autocomplete #categoryAuto="matAutocomplete">
+        @for (cat of filteredCategories$ | async; track cat) {
+          <mat-option [value]="cat">{{ cat }}</mat-option>
+        }
+      </mat-autocomplete>
       @if (form.controls.category.hasError('required')) {
         <mat-error>Pflichtfeld</mat-error>
       }
@@ -30,7 +36,13 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Einheit</mat-label>
-      <input matInput formControlName="unit" placeholder="z. B. Stück, kg, m">
+      <input matInput formControlName="unit" placeholder="z. B. Stück, kg, m"
+        [matAutocomplete]="unitAuto">
+      <mat-autocomplete #unitAuto="matAutocomplete">
+        @for (unit of filteredUnits$ | async; track unit) {
+          <mat-option [value]="unit">{{ unit }}</mat-option>
+        }
+      </mat-autocomplete>
       @if (form.controls.unit.hasError('required')) {
         <mat-error>Pflichtfeld</mat-error>
       }
