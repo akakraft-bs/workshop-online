@@ -157,6 +157,9 @@ public static class Program
         // MinIO-Bucket beim Start anlegen und auf öffentlichen Lesezugriff setzen
         await EnsureMinioReadyAsync(app);
 
+        // Sicherstellen dass der konfigurierte Admin die Admin-Rolle hat
+        await EnsureAdminRoleAsync(app);
+
         // Nginx leitet /api/... an das Backend weiter (ohne Prefix zu strippen).
         // UsePathBase entfernt /api aus dem Pfad und fügt es bei URL-Konstruktionen
         // (z. B. OAuth redirect_uri) automatisch wieder hinzu.
@@ -451,6 +454,32 @@ public static class Program
                 "(häufig bei neueren MinIO-Versionen). " +
                 "Bitte Bucket manuell über die MinIO-Console (http://localhost:9001) " +
                 "auf 'Anonymous access: readonly' stellen.", bucket);
+        }
+    }
+
+    private static async Task EnsureAdminRoleAsync(WebApplication app)
+    {
+        var adminEmail = app.Configuration["Admin:Email"];
+        if (string.IsNullOrWhiteSpace(adminEmail))
+            return;
+
+        await using var scope = app.Services.CreateAsyncScope();
+        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AdminSetup");
+
+        var user = await userService.GetByEmailAsync(adminEmail);
+        if (user is null)
+        {
+            logger.LogInformation(
+                "Admin-E-Mail '{Email}' noch nicht registriert – Rolle wird beim ersten Login vergeben.",
+                adminEmail);
+            return;
+        }
+
+        if (!user.Roles.Contains(AkaKraft.Domain.Enums.Role.Admin))
+        {
+            await userService.AssignRoleAsync(user.Id, AkaKraft.Domain.Enums.Role.Admin);
+            logger.LogInformation("Admin-Rolle für '{Email}' vergeben.", adminEmail);
         }
     }
 }

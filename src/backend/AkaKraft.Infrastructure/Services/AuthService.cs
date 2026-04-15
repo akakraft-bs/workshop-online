@@ -21,6 +21,15 @@ public class AuthService(IUserService userService, IConfiguration configuration)
             user = await userService.CreateAsync(googleId, email, name, pictureUrl);
         }
 
+        // Admin-E-Mail-Adresse aus der Konfiguration: falls sie übereinstimmt,
+        // wird die Admin-Rolle automatisch vergeben (idempotent).
+        var adminEmail = configuration["Admin:Email"];
+        if (!string.IsNullOrWhiteSpace(adminEmail) &&
+            string.Equals(email, adminEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            await userService.AssignRoleAsync(user.Id, Domain.Enums.Role.Admin);
+        }
+
         var fullUser = await userService.GetByIdAsync(user.Id)
             ?? throw new InvalidOperationException("User not found after creation.");
 

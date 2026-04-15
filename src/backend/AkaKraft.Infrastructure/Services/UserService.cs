@@ -27,6 +27,15 @@ public class UserService(ApplicationDbContext db) : IUserService
         return user is null ? null : MapToDto(user);
     }
 
+    public async Task<UserDto?> GetByEmailAsync(string email)
+    {
+        var user = await db.Users
+            .Include(u => u.UserRoles)
+            .FirstOrDefaultAsync(u => u.Email == email);
+
+        return user is null ? null : MapToDto(user);
+    }
+
     public async Task<IReadOnlyList<UserDto>> GetAllAsync()
     {
         var users = await db.Users
