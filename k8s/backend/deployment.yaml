@@ -75,9 +75,16 @@ spec:
                   name: akakraft-secrets
                   key: google-client-secret
 
+            # --- Admin ---
+            - name: Admin__Email
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: admin-email
+
             # --- Frontend-URL (für OAuth-Callback-Redirect) ---
             - name: Frontend__BaseUrl
-              value: "https://beta-app.akakraft-bs.de"
+              value: "https://beta-app.akakraft-bs.de/app"
 
             # --- ASP.NET Core ---
             - name: ASPNETCORE_ENVIRONMENT
