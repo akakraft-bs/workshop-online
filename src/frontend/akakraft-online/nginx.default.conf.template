@@ -37,7 +37,7 @@ server {
     # und verarbeitet den Prefix selbst. So kann ASP.NET Core die korrekte
     # redirect_uri (inkl. /api/) für Google OAuth aufbauen.
     # -------------------------------------------------------------------------
-    location /api/ {
+    location ^~ /api/ {
         proxy_pass         ${BACKEND_URL};
         proxy_http_version 1.1;
 
@@ -59,7 +59,7 @@ server {
     # MinIO-Proxy: Bilder werden über dieselbe Domain ausgeliefert
     # /minio/akakraft/werkzeug/xxx.jpg → MinIO-Service intern
     # -------------------------------------------------------------------------
-    location /minio/ {
+    location ^~ /minio/ {
         proxy_pass         ${MINIO_URL}/;
         proxy_http_version 1.1;
         proxy_set_header   Host $host;
