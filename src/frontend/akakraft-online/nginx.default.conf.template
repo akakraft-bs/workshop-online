@@ -74,7 +74,7 @@ server {
     # Assets-Alias: /assets/ → /app/assets/
     # Ermöglicht absolute Asset-URLs ohne /app/-Prefix (z. B. in CSS url())
     # -------------------------------------------------------------------------
-    location /assets/ {
+    location ^~ /assets/ {
         alias /usr/share/nginx/html/app/assets/;
         expires 30d;
         add_header Cache-Control "public";
