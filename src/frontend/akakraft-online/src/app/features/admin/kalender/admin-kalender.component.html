@@ -1,0 +1,106 @@
+<div class="admin-kalender">
+
+  <div class="page-header">
+    <h2>Kalender-Einstellungen</h2>
+    <button mat-stroked-button (click)="loadCalendars()" [disabled]="loading()">
+      <mat-icon>refresh</mat-icon>
+      Aktualisieren
+    </button>
+  </div>
+
+  <p class="hint">
+    Hier werden alle Google-Kalender angezeigt, auf die der Service Account Zugriff hat.
+    Du kannst Kalender ein- oder ausblenden, die Farbe und die Bearbeitungsrollen pro Kalender festlegen.
+  </p>
+
+  @if (loading()) {
+    <div class="loading-center">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (calendars().length === 0) {
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        <p>Keine Kalender gefunden. Stelle sicher, dass der Service Account Zugriff auf die gewünschten Kalender hat.</p>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-accordion>
+      @for (cal of calendars(); track cal.googleCalendarId) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span
+                class="color-dot"
+                [style.background]="forms[cal.googleCalendarId]?.get('color')?.value ?? '#1976D2'">
+              </span>
+              {{ forms[cal.googleCalendarId]?.get('name')?.value ?? cal.name }}
+            </mat-panel-title>
+            <mat-panel-description>
+              {{ cal.googleCalendarId }}
+              @if (cal.config) {
+                <mat-icon class="configured-icon" color="primary">check_circle</mat-icon>
+              }
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          @if (forms[cal.googleCalendarId]; as form) {
+            <form [formGroup]="form" class="cal-form">
+
+              <mat-form-field appearance="outline">
+                <mat-label>Anzeigename</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+
+              <div class="color-row">
+                <mat-form-field appearance="outline" class="color-field">
+                  <mat-label>Farbe (Hex)</mat-label>
+                  <input matInput formControlName="color" placeholder="#1976D2">
+                </mat-form-field>
+                <input
+                  type="color"
+                  class="color-picker"
+                  [value]="form.get('color')!.value"
+                  (input)="form.get('color')!.setValue($any($event.target).value)">
+              </div>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Sortierreihenfolge</mat-label>
+                <input matInput type="number" formControlName="sortOrder">
+              </mat-form-field>
+
+              <mat-checkbox formControlName="isVisible">Im Kalender anzeigen</mat-checkbox>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Schreibberechtigte Rollen</mat-label>
+                <mat-select formControlName="writeRoles" multiple>
+                  @for (role of assignableRoles; track role) {
+                    <mat-option [value]="role">{{ getRoleLabel(role) }}</mat-option>
+                  }
+                </mat-select>
+                <mat-hint>Vorstand und Admins dürfen immer schreiben</mat-hint>
+              </mat-form-field>
+
+              <div class="form-actions">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="save(cal.googleCalendarId)"
+                  [disabled]="saving() === cal.googleCalendarId">
+                  @if (saving() === cal.googleCalendarId) {
+                    <mat-spinner diameter="18"></mat-spinner>
+                  } @else {
+                    <mat-icon>save</mat-icon>
+                  }
+                  Speichern
+                </button>
+              </div>
+
+            </form>
+          }
+
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+
+</div>

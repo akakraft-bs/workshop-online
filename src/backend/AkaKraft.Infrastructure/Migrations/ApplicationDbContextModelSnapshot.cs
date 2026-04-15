@@ -22,6 +22,63 @@ namespace AkaKraft.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.CalendarConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("GoogleCalendarId")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GoogleCalendarId")
+                        .IsUnique();
+
+                    b.ToTable("CalendarConfigs");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.CalendarWriteRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CalendarConfigId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalendarConfigId", "Role")
+                        .IsUnique();
+
+                    b.ToTable("CalendarWriteRoles");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.Feedback", b =>
                 {
                     b.Property<Guid>("Id")
@@ -201,6 +258,22 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.HasIndex("BorrowedByUserId");
 
                     b.ToTable("Werkzeuge");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.CalendarWriteRole", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.CalendarConfig", "CalendarConfig")
+                        .WithMany("WriteRoles")
+                        .HasForeignKey("CalendarConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CalendarConfig");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.CalendarConfig", b =>
+                {
+                    b.Navigation("WriteRoles");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Feedback", b =>
