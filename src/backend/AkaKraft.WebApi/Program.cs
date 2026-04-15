@@ -135,6 +135,14 @@ public static class Program
                       .AllowCredentials());
         });
 
+        // Allen Proxies im Cluster vertrauen (NPM → Traefik → nginx → Backend).
+        // Nötig damit X-Forwarded-Proto: https vom nginx akzeptiert wird.
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
+
         var app = builder.Build();
 
         // MinIO-Bucket beim Start anlegen und auf öffentlichen Lesezugriff setzen
