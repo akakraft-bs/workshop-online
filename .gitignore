@@ -129,3 +129,4 @@ docker-compose.override.yml
 # Upload-Verzeichnis und persönliche Dateien
 # =============================================================================
 src/backend/AkaKraft.WebApi/wwwroot/uploads
+k8s/secrets/*

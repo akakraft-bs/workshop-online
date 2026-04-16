@@ -158,8 +158,8 @@ export class EventFormDialogComponent implements OnInit {
         description: ev.description ?? '',
         location: ev.location ?? '',
       });
-    } else if (this.data.defaultStart) {
-      const start = this.data.defaultStart;
+    } else {
+      const start = this.data.defaultStart ?? roundToNextHour(new Date());
       const end = new Date(start.getTime() + 60 * 60 * 1000);
       this.form.patchValue({
         start: toLocalDateTimeInput(start),
@@ -199,6 +199,13 @@ export class EventFormDialogComponent implements OnInit {
 
     this.dialogRef.close(result);
   }
+}
+
+function roundToNextHour(d: Date): Date {
+  const result = new Date(d);
+  result.setMinutes(0, 0, 0);
+  result.setHours(result.getHours() + 1);
+  return result;
 }
 
 function toLocalDateTimeInput(d: Date): string {

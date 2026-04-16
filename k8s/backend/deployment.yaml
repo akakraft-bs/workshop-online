@@ -75,6 +75,13 @@ spec:
                   name: akakraft-secrets
                   key: google-client-secret
 
+            # --- Google Calendar ---
+            - name: GoogleCalendar__ServiceAccountJson
+              valueFrom:
+                secretKeyRef:
+                  name: google-calendar-secret
+                  key: service-account-json
+
             # --- Admin ---
             - name: Admin__Email
               valueFrom:

@@ -1,5 +1,13 @@
 import { Role } from './user.model';
 
+export type CalendarType = 'Hallenbelegung' | 'Veranstaltungen' | 'Hallendienst';
+
+export const CALENDAR_TYPES: { value: CalendarType; label: string }[] = [
+  { value: 'Hallenbelegung', label: 'Hallenbelegung' },
+  { value: 'Veranstaltungen', label: 'Veranstaltungen' },
+  { value: 'Hallendienst', label: 'Hallendienst' },
+];
+
 export interface CalendarConfig {
   id: string;
   googleCalendarId: string;
@@ -7,6 +15,7 @@ export interface CalendarConfig {
   color: string;
   isVisible: boolean;
   sortOrder: number;
+  calendarType: CalendarType;
   writeRoles: string[];
 }
 
@@ -56,6 +65,7 @@ export interface UpdateCalendarConfigRequest {
   color: string;
   isVisible: boolean;
   sortOrder: number;
+  calendarType: CalendarType;
   writeRoles: string[];
 }
 

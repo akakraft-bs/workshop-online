@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -62,8 +62,11 @@ namespace AkaKraft.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "CalendarWriteRoles");
-            migrationBuilder.DropTable(name: "CalendarConfigs");
+            migrationBuilder.DropTable(
+                name: "CalendarWriteRoles");
+
+            migrationBuilder.DropTable(
+                name: "CalendarConfigs");
         }
     }
 }

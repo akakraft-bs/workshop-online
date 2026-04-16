@@ -23,6 +23,12 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Lokale Overrides (gitignored): appsettings.Development.local.json etc.
+        builder.Configuration.AddJsonFile(
+            $"appsettings.{builder.Environment.EnvironmentName}.local.json",
+            optional: true,
+            reloadOnChange: true);
+
         builder.Services.AddInfrastructure(builder.Configuration);
 
         builder.Services.ConfigureHttpJsonOptions(options =>
@@ -409,10 +415,14 @@ public static class Program
         // Calendar Config Endpoints (Admin)
         // -------------------------------------------------------------------------
 
-        // Alle konfigurierten Kalender abrufen (für Farbzuordnung im Frontend)
-        app.MapGet("/calendar/configs", async (ICalendarConfigService configService) =>
-            Results.Ok(await configService.GetAllAsync()))
-            .RequireAuthorization("AnyRole");
+        // Alle konfigurierten Kalender abrufen (optional nach Typ filtern)
+        app.MapGet("/calendar/configs", async (ICalendarConfigService configService, string? type) =>
+        {
+            var all = await configService.GetAllAsync();
+            if (!string.IsNullOrWhiteSpace(type))
+                all = all.Where(c => string.Equals(c.CalendarType, type, StringComparison.OrdinalIgnoreCase));
+            return Results.Ok(all);
+        }).RequireAuthorization("AnyRole");
 
         // Verfügbare Google-Kalender + aktueller DB-Config (Admin)
         app.MapGet("/admin/calendar/available", async (
@@ -421,16 +431,34 @@ public static class Program
         {
             var available = await calendarService.GetAvailableCalendarsAsync();
             var configs = (await configService.GetAllAsync()).ToDictionary(c => c.GoogleCalendarId);
+            var availableIds = available.Select(a => a.GoogleCalendarId).ToHashSet();
 
-            var merged = available.Select(a => new
-            {
+            var merged = available.Select(a => new AvailableCalendarDto(
                 a.GoogleCalendarId,
                 a.Name,
                 a.Description,
-                Config = configs.GetValueOrDefault(a.GoogleCalendarId)
-            });
+                configs.GetValueOrDefault(a.GoogleCalendarId)
+            )).ToList();
+
+            // Auch DB-konfigurierte Kalender einbeziehen, die nicht im Google-CalendarList sind
+            foreach (var (id, cfg) in configs)
+            {
+                if (!availableIds.Contains(id))
+                    merged.Add(new AvailableCalendarDto(id, cfg.Name, null, cfg));
+            }
 
             return Results.Ok(merged);
+        }).RequireAuthorization("AdminOnly");
+
+        // Service Account bei einem Kalender anmelden (damit er in CalendarList erscheint)
+        app.MapPost("/admin/calendar/subscribe", async (
+            SubscribeCalendarDto dto,
+            ICalendarService calendarService) =>
+        {
+            var result = await calendarService.SubscribeCalendarAsync(dto.CalendarId);
+            if (result is null)
+                return Results.Problem("Kalender konnte nicht abonniert werden. Prüfe, ob der Service Account Zugriff hat.");
+            return Results.Ok(result);
         }).RequireAuthorization("AdminOnly");
 
         // Kalender-Konfiguration anlegen / aktualisieren (Admin)
@@ -446,6 +474,44 @@ public static class Program
         // -------------------------------------------------------------------------
         // Calendar Event Endpoints
         // -------------------------------------------------------------------------
+
+        // Nächste Veranstaltungen für das Dashboard
+        app.MapGet("/calendar/upcoming-events", async (
+            ICalendarService calendarService,
+            ICalendarConfigService configService) =>
+        {
+            var now = DateTime.UtcNow;
+            var configs = (await configService.GetAllAsync())
+                .Where(c => string.Equals(c.CalendarType, "Veranstaltungen", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (configs.Count == 0)
+                return Results.Ok(Array.Empty<object>());
+
+            var configMap = configs.ToDictionary(c => c.GoogleCalendarId);
+            var calendarIds = configs.Select(c => c.GoogleCalendarId);
+
+            // Erst die nächsten 14 Tage laden
+            var events = (await calendarService.GetEventsAsync(calendarIds, now, now.AddDays(14)))
+                .OrderBy(e => e.Start ?? DateTime.MaxValue)
+                .ToList();
+
+            // Weniger als 2 Treffer → weiter in die Zukunft schauen und mindestens 2 nehmen
+            if (events.Count < 2)
+            {
+                events = (await calendarService.GetEventsAsync(calendarIds, now, now.AddDays(365)))
+                    .OrderBy(e => e.Start ?? DateTime.MaxValue)
+                    .Take(2)
+                    .ToList();
+            }
+
+            var enriched = events.Select(e =>
+                configMap.TryGetValue(e.CalendarId, out var cfg)
+                    ? e with { CalendarName = cfg.Name, CalendarColor = cfg.Color }
+                    : e);
+
+            return Results.Ok(enriched);
+        }).RequireAuthorization("AnyRole");
 
         // Ereignisse für einen Zeitraum abrufen
         app.MapGet("/calendar/events", async (

@@ -39,6 +39,8 @@ public class CalendarConfigService(ApplicationDbContext db) : ICalendarConfigSer
         config.Color = dto.Color;
         config.IsVisible = dto.IsVisible;
         config.SortOrder = dto.SortOrder;
+        config.CalendarType = Enum.TryParse<CalendarType>(dto.CalendarType, ignoreCase: true, out var ct)
+            ? ct : CalendarType.Hallenbelegung;
 
         // Replace write roles
         db.CalendarWriteRoles.RemoveRange(config.WriteRoles);
@@ -68,6 +70,7 @@ public class CalendarConfigService(ApplicationDbContext db) : ICalendarConfigSer
         c.Color,
         c.IsVisible,
         c.SortOrder,
+        c.CalendarType.ToString(),
         c.WriteRoles.Select(r => r.Role.ToString())
     );
 }

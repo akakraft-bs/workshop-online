@@ -14,7 +14,7 @@ import {
   EventFormDialogResult,
 } from './event-form-dialog/event-form-dialog.component';
 
-const PX_PER_HOUR = 64;
+const PX_PER_HOUR = 26;
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 interface DayColumn {
@@ -95,7 +95,7 @@ export class KalenderPageComponent implements OnInit {
   }
 
   private loadConfigs(): void {
-    this.calendarService.getConfigs().subscribe({
+    this.calendarService.getConfigs('Hallenbelegung').subscribe({
       next: configs => {
         this.configs.set(configs);
         this.loadEvents();
@@ -240,9 +240,6 @@ export class KalenderPageComponent implements OnInit {
 function getWeekStart(d: Date): Date {
   const day = new Date(d);
   day.setHours(0, 0, 0, 0);
-  const dow = day.getDay(); // 0=Sun
-  const diff = dow === 0 ? -6 : 1 - dow; // adjust to Monday
-  day.setDate(day.getDate() + diff);
   return day;
 }
 

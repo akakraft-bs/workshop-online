@@ -5,6 +5,7 @@ import {
   AvailableCalendar,
   CalendarConfig,
   CalendarEvent,
+  CalendarType,
   CreateCalendarEventRequest,
   UpdateCalendarConfigRequest,
   UpdateCalendarEventRequest,
@@ -14,8 +15,9 @@ import {
 export class CalendarService {
   private readonly api = inject(ApiService);
 
-  getConfigs(): Observable<CalendarConfig[]> {
-    return this.api.get<CalendarConfig[]>('/calendar/configs');
+  getConfigs(type?: CalendarType): Observable<CalendarConfig[]> {
+    const url = type ? `/calendar/configs?type=${encodeURIComponent(type)}` : '/calendar/configs';
+    return this.api.get<CalendarConfig[]>(url);
   }
 
   getEvents(from: Date, to: Date): Observable<CalendarEvent[]> {
@@ -43,5 +45,13 @@ export class CalendarService {
 
   upsertConfig(googleCalendarId: string, dto: UpdateCalendarConfigRequest): Observable<CalendarConfig> {
     return this.api.put<CalendarConfig>(`/admin/calendar/configs/${encodeURIComponent(googleCalendarId)}`, dto);
+  }
+
+  subscribeCalendar(calendarId: string): Observable<AvailableCalendar> {
+    return this.api.post<AvailableCalendar>('/admin/calendar/subscribe', { calendarId });
+  }
+
+  getUpcomingEvents(): Observable<CalendarEvent[]> {
+    return this.api.get<CalendarEvent[]>('/calendar/upcoming-events');
   }
 }

@@ -89,3 +89,32 @@ mat-panel-title {
   justify-content: flex-end;
   margin-top: 8px;
 }
+
+.subscribe-card {
+  margin-bottom: 20px;
+}
+
+.subscribe-hint {
+  color: var(--mat-sys-on-surface-variant, #666);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.subscribe-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .subscribe-field {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.calendar-id-hint {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant, #999);
+  margin: -4px 0 4px;
+  word-break: break-all;
+}

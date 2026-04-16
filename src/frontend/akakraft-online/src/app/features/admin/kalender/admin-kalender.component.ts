@@ -13,7 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CalendarService } from '../../../core/calendar/calendar.service';
-import { AvailableCalendar } from '../../../models/calendar.model';
+import { AvailableCalendar, CALENDAR_TYPES } from '../../../models/calendar.model';
 import { ROLE_LABELS, Role } from '../../../models/user.model';
 
 const ASSIGNABLE_ROLES: Role[] = [
@@ -54,9 +54,13 @@ export class AdminKalenderComponent implements OnInit {
 
   readonly loading = signal(false);
   readonly saving = signal<string | null>(null);
+  readonly subscribing = signal(false);
   readonly calendars = signal<AvailableCalendar[]>([]);
   readonly assignableRoles = ASSIGNABLE_ROLES;
   readonly roleLabels = ROLE_LABELS;
+  readonly calendarTypes = CALENDAR_TYPES;
+
+  readonly newCalendarIdControl = this.fb.control('');
 
   // Per-calendar form groups (keyed by googleCalendarId)
   readonly forms: Record<string, ReturnType<typeof this.buildForm>> = {};
@@ -87,10 +91,11 @@ export class AdminKalenderComponent implements OnInit {
     this.saving.set(googleCalendarId);
 
     this.calendarService.upsertConfig(googleCalendarId, {
-      name: v.name,
-      color: v.color,
+      name: v.name ?? '',
+      color: v.color ?? '',
       isVisible: !!v.isVisible,
       sortOrder: v.sortOrder ?? 0,
+      calendarType: v.calendarType ?? 'Hallenbelegung',
       writeRoles: (v.writeRoles as string[]) ?? [],
     }).subscribe({
       next: () => {
@@ -101,6 +106,25 @@ export class AdminKalenderComponent implements OnInit {
       error: () => {
         this.saving.set(null);
         this.snackBar.open('Fehler beim Speichern.', 'OK', { duration: 4000 });
+      },
+    });
+  }
+
+  subscribe(): void {
+    const calendarId = this.newCalendarIdControl.value?.trim();
+    if (!calendarId) return;
+
+    this.subscribing.set(true);
+    this.calendarService.subscribeCalendar(calendarId).subscribe({
+      next: () => {
+        this.subscribing.set(false);
+        this.newCalendarIdControl.setValue('');
+        this.snackBar.open('Kalender erfolgreich abonniert.', 'OK', { duration: 3000 });
+        this.loadCalendars();
+      },
+      error: () => {
+        this.subscribing.set(false);
+        this.snackBar.open('Fehler beim Abonnieren. Prüfe die Kalender-ID und den Service Account Zugriff.', 'OK', { duration: 5000 });
       },
     });
   }
@@ -116,6 +140,7 @@ export class AdminKalenderComponent implements OnInit {
       color: [cfg?.color ?? '#1976D2'],
       isVisible: [cfg?.isVisible ?? true],
       sortOrder: [cfg?.sortOrder ?? 0],
+      calendarType: [cfg?.calendarType ?? 'Hallenbelegung'],
       writeRoles: [cfg?.writeRoles ?? []],
     });
   }

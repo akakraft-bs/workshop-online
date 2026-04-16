@@ -14,6 +14,7 @@ public record CalendarConfigDto(
     string Color,
     bool IsVisible,
     int SortOrder,
+    string CalendarType,
     IEnumerable<string> WriteRoles
 );
 
@@ -22,8 +23,11 @@ public record UpdateCalendarConfigDto(
     string Color,
     bool IsVisible,
     int SortOrder,
+    string CalendarType,
     IEnumerable<string> WriteRoles
 );
+
+public record SubscribeCalendarDto(string CalendarId);
 
 public record CalendarEventDto(
     string Id,

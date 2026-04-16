@@ -54,6 +54,7 @@ public class GoogleCalendarService : ICalendarService
         {
             var request = _calendarService.CalendarList.List();
             var result = await request.ExecuteAsync();
+            _logger.LogInformation( System.Text.Json.JsonSerializer.Serialize(result, new System.Text.Json.JsonSerializerOptions{ WriteIndented = true}));
             return result.Items?.Select(c => new AvailableCalendarDto(c.Id, c.Summary, c.Description, null)) ?? [];
         }
         catch (Exception ex)
@@ -120,6 +121,26 @@ public class GoogleCalendarService : ICalendarService
 
         await _calendarService.Events.Delete(calendarId, eventId).ExecuteAsync();
         return true;
+    }
+
+    public async Task<AvailableCalendarDto?> SubscribeCalendarAsync(string calendarId)
+    {
+        if (_calendarService is null)
+            throw new InvalidOperationException("Google Calendar Service ist nicht konfiguriert.");
+
+        try
+        {
+            // Insert subscribes the service account to the calendar so it appears in CalendarList.List()
+            var entry = await _calendarService.CalendarList
+                .Insert(new CalendarListEntry { Id = calendarId })
+                .ExecuteAsync();
+            return new AvailableCalendarDto(entry.Id, entry.Summary, entry.Description, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Fehler beim Abonnieren des Kalenders {CalendarId}.", calendarId);
+            return null;
+        }
     }
 
     // -------------------------------------------------------------------------

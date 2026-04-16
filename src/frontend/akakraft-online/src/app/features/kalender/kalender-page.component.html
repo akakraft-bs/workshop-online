@@ -16,48 +16,63 @@
 
     <div class="actions">
       @if (canWrite()) {
-        <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
           <mat-icon>add</mat-icon>
           Termin
+        </button>
+        <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+          <mat-icon>add</mat-icon>
         </button>
       }
     </div>
   </div>
 
+  <!-- Legende -->
+  @if (configs().length > 0) {
+    <div class="kalender-legend">
+      @for (cfg of configs(); track cfg.googleCalendarId) {
+        <span class="legend-item">
+          <span class="legend-dot" [style.background]="cfg.color"></span>
+          {{ cfg.name }}
+        </span>
+      }
+    </div>
+  }
+
   <!-- Kalender-Grid -->
   <div class="kalender-container">
 
-    <!-- Ganztages-Events-Zeile -->
-    <div class="allday-row">
-      <div class="time-gutter"></div>
-      @for (day of days(); track day.label) {
-        <div class="allday-cell">
-          @for (ev of day.allDayEvents; track ev.id) {
-            <div
-              class="allday-event"
-              [style.background-color]="ev.calendarColor"
-              [matTooltip]="ev.title + (ev.creatorName ? ' · ' + ev.creatorName : '')"
-              (click)="canEditEvent(ev) && openEditDialog(ev)">
-              <span class="event-title">{{ ev.title }}</span>
-              @if (canEditEvent(ev)) {
-                <button
-                  class="delete-btn"
-                  (click)="deleteEvent(ev, $event)"
-                  matTooltip="Löschen">
-                  ×
-                </button>
-              }
-            </div>
-          }
-        </div>
-      }
-    </div>
-
-    <!-- Trennlinie -->
-    <div class="allday-divider"></div>
-
     <!-- Scroll-Bereich mit Zeitraster -->
     <div class="scroll-area">
+
+      <!-- Ganztages-Events-Zeile (scrollt horizontal mit) -->
+      <div class="allday-row">
+        <div class="time-gutter"></div>
+        @for (day of days(); track day.label) {
+          <div class="allday-cell">
+            @for (ev of day.allDayEvents; track ev.id) {
+              <div
+                class="allday-event"
+                [style.background-color]="ev.calendarColor"
+                [matTooltip]="ev.title + (ev.creatorName ? ' · ' + ev.creatorName : '')"
+                (click)="canEditEvent(ev) && openEditDialog(ev)">
+                <span class="event-title">{{ ev.title }}</span>
+                @if (canEditEvent(ev)) {
+                  <button
+                    class="delete-btn"
+                    (click)="deleteEvent(ev, $event)"
+                    matTooltip="Löschen">
+                    ×
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Trennlinie -->
+      <div class="allday-divider"></div>
 
       <!-- Spalten-Kopfzeile mit Tagesnamen -->
       <div class="day-header-row">
