@@ -50,6 +50,7 @@ export class DashboardComponent implements OnInit {
   readonly loadingEvents = signal(true);
 
   readonly favoriteRoutes = signal<string[]>(DEFAULT_FAVORITES);
+  readonly displayName = signal<string | null>(null);
   readonly editMode = signal(false);
   readonly savingPrefs = signal(false);
 
@@ -76,6 +77,7 @@ export class DashboardComponent implements OnInit {
         if (prefs.favoriteRoutes.length > 0) {
           this.favoriteRoutes.set(prefs.favoriteRoutes);
         }
+        this.displayName.set(prefs.displayName);
       },
       error: () => { /* keep defaults */ },
     });
@@ -96,7 +98,7 @@ export class DashboardComponent implements OnInit {
 
   private savePreferences(routes: string[]): void {
     this.savingPrefs.set(true);
-    this.prefsService.updatePreferences(routes).subscribe({
+    this.prefsService.updatePreferences(routes, this.displayName()).subscribe({
       next: prefs => { this.favoriteRoutes.set(prefs.favoriteRoutes); this.savingPrefs.set(false); },
       error: () => this.savingPrefs.set(false),
     });

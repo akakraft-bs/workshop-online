@@ -59,6 +59,10 @@
             <small>{{ user.email }}</small>
           </div>
           <mat-divider />
+          <button mat-menu-item (click)="openProfileDialog()">
+            <mat-icon>manage_accounts</mat-icon>
+            Profil
+          </button>
           <button mat-menu-item (click)="logout()">
             <mat-icon>logout</mat-icon>
             Abmelden

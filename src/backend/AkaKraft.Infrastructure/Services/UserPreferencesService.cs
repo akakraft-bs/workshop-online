@@ -3,7 +3,6 @@ using AkaKraft.Application.DTOs;
 using AkaKraft.Application.Interfaces;
 using AkaKraft.Domain.Entities;
 using AkaKraft.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace AkaKraft.Infrastructure.Services;
 
@@ -20,15 +19,22 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
         var prefs = await db.UserPreferences.FindAsync(userId);
 
         var json = JsonSerializer.Serialize(dto.FavoriteRoutes ?? []);
+        var displayName = string.IsNullOrWhiteSpace(dto.DisplayName) ? null : dto.DisplayName.Trim();
 
         if (prefs is null)
         {
-            prefs = new UserPreferences { UserId = userId, FavoriteRoutesJson = json };
+            prefs = new UserPreferences
+            {
+                UserId = userId,
+                FavoriteRoutesJson = json,
+                DisplayName = displayName,
+            };
             db.UserPreferences.Add(prefs);
         }
         else
         {
             prefs.FavoriteRoutesJson = json;
+            prefs.DisplayName = displayName;
         }
 
         await db.SaveChangesAsync();
@@ -38,16 +44,16 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
     private static UserPreferencesDto ToDto(UserPreferences? prefs)
     {
         if (prefs is null)
-            return new UserPreferencesDto([]);
+            return new UserPreferencesDto([], null);
 
         try
         {
             var routes = JsonSerializer.Deserialize<List<string>>(prefs.FavoriteRoutesJson) ?? [];
-            return new UserPreferencesDto(routes);
+            return new UserPreferencesDto(routes, prefs.DisplayName);
         }
         catch
         {
-            return new UserPreferencesDto([]);
+            return new UserPreferencesDto([], null);
         }
     }
 }

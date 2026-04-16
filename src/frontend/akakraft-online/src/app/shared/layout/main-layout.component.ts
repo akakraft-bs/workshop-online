@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
 import { Role } from '../../models/user.model';
 import { FeedbackDialogComponent } from '../../features/feedback/feedback-dialog/feedback-dialog.component';
+import { ProfileDialogComponent } from '../../features/profile/profile-dialog.component';
 
 interface NavItem {
   label: string;
@@ -71,6 +72,13 @@ export class MainLayoutComponent implements OnInit {
   openFeedbackDialog(): void {
     this.dialog.open(FeedbackDialogComponent, {
       width: '480px',
+      maxWidth: '95vw',
+    });
+  }
+
+  openProfileDialog(): void {
+    this.dialog.open(ProfileDialogComponent, {
+      width: '440px',
       maxWidth: '95vw',
     });
   }

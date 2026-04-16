@@ -8,4 +8,9 @@ public class UserPreferences
     /// JSON-serialized list of favorite route strings, e.g. ["/werkzeug", "/kalender"]
     /// </summary>
     public string FavoriteRoutesJson { get; set; } = "[]";
+
+    /// <summary>
+    /// Optionaler Anzeigename, der z. B. als Termin-Präfix verwendet wird.
+    /// </summary>
+    public string? DisplayName { get; set; }
 }

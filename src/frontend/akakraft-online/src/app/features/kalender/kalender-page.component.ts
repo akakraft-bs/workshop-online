@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
 import { CalendarService } from '../../core/calendar/calendar.service';
+import { UserPreferencesService } from '../../core/user/user-preferences.service';
 import { CalendarConfig, CalendarEvent, PositionedEvent } from '../../models/calendar.model';
 import { Role } from '../../models/user.model';
 import {
@@ -40,7 +41,10 @@ interface DayColumn {
 export class KalenderPageComponent implements OnInit {
   private readonly calendarService = inject(CalendarService);
   private readonly auth = inject(AuthService);
+  private readonly prefsService = inject(UserPreferencesService);
   private readonly dialog = inject(MatDialog);
+
+  private displayName: string | null = null;
 
   readonly PX_PER_HOUR = PX_PER_HOUR;
   readonly HOURS = HOURS;
@@ -92,6 +96,9 @@ export class KalenderPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadConfigs();
+    this.prefsService.getPreferences().subscribe({
+      next: prefs => { this.displayName = prefs.displayName; },
+    });
   }
 
   private loadConfigs(): void {
@@ -136,10 +143,13 @@ export class KalenderPageComponent implements OnInit {
     const writableIds = this.writableCalendarIds();
     if (writableIds.length === 0) return;
 
+    const name = this.displayName || this.auth.currentUser()?.name?.split(' ')[0] || '';
+    const titlePrefix = name ? `${name} - ` : undefined;
+
     const ref = this.dialog.open(EventFormDialogComponent, {
       width: '480px',
       maxWidth: '95vw',
-      data: { configs, writableCalendarIds: writableIds, defaultStart },
+      data: { configs, writableCalendarIds: writableIds, defaultStart, titlePrefix },
     });
 
     ref.afterClosed().subscribe((result?: EventFormDialogResult) => {

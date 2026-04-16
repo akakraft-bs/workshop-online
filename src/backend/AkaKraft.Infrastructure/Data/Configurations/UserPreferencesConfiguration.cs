@@ -13,5 +13,8 @@ public class UserPreferencesConfiguration : IEntityTypeConfiguration<UserPrefere
         builder.Property(p => p.FavoriteRoutesJson)
             .IsRequired()
             .HasDefaultValue("[]");
+
+        builder.Property(p => p.DisplayName)
+            .HasMaxLength(64);
     }
 }
