@@ -186,6 +186,21 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.UserPreferences", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FavoriteRoutesJson")
+                        .IsRequired()
+                        .HasDefaultValue("[]")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("UserPreferences");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.UserRole", b =>
                 {
                     b.Property<Guid>("UserId")

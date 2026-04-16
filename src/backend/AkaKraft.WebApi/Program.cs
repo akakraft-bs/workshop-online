@@ -293,6 +293,33 @@ public static class Program
         }).RequireAuthorization("AdminOnly");
 
         // -------------------------------------------------------------------------
+        // User Preferences Endpoints
+        // -------------------------------------------------------------------------
+
+        app.MapGet("/users/me/preferences", async (HttpContext ctx, IUserPreferencesService prefsService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var id))
+                return Results.Unauthorized();
+
+            return Results.Ok(await prefsService.GetAsync(id));
+        }).RequireAuthorization("JwtApi");
+
+        app.MapPut("/users/me/preferences", async (
+            HttpContext ctx,
+            UpdateUserPreferencesDto dto,
+            IUserPreferencesService prefsService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var id))
+                return Results.Unauthorized();
+
+            return Results.Ok(await prefsService.UpdateAsync(id, dto));
+        }).RequireAuthorization("JwtApi");
+
+        // -------------------------------------------------------------------------
         // Upload Endpoints
         // -------------------------------------------------------------------------
 

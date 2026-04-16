@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IFeedbackService, FeedbackService>();
         services.AddScoped<ICalendarConfigService, CalendarConfigService>();
         services.AddSingleton<ICalendarService, GoogleCalendarService>();
+        services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 
         return services;
     }

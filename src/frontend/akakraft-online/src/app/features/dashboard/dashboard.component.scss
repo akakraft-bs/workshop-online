@@ -12,6 +12,28 @@
   margin-bottom: 32px;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  .section-title {
+    margin: 0;
+  }
+
+  .edit-btn {
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.6;
+    transition: opacity 0.15s;
+
+    &:hover, &.active {
+      opacity: 1;
+      color: var(--mat-sys-primary);
+    }
+  }
+}
+
 .section-title {
   font-size: 16px;
   font-weight: 600;
@@ -32,6 +54,10 @@
   font-size: 14px;
   color: var(--mat-sys-on-surface-variant);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .events-list {
@@ -134,5 +160,52 @@
 
   .arrow-icon {
     color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+// ---- Edit Mode -------------------------------------------------------------
+
+.edit-hint {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 12px;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.choice-chip {
+  border-radius: 20px !important;
+  height: 36px;
+  padding: 0 14px !important;
+  font-size: 14px;
+  border: 1.5px solid var(--mat-sys-outline-variant) !important;
+  background: var(--mat-sys-surface) !important;
+  color: var(--mat-sys-on-surface-variant) !important;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+  }
+
+  .check-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+    margin-right: 0;
+    color: var(--mat-sys-primary);
+  }
+
+  &.chosen {
+    background: var(--mat-sys-primary-container) !important;
+    color: var(--mat-sys-on-primary-container) !important;
+    border-color: var(--mat-sys-primary) !important;
   }
 }

@@ -14,6 +14,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<CalendarConfig> CalendarConfigs => Set<CalendarConfig>();
     public DbSet<CalendarWriteRole> CalendarWriteRoles => Set<CalendarWriteRole>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,5 +26,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new CalendarConfigConfiguration());
         modelBuilder.ApplyConfiguration(new CalendarWriteRoleConfiguration());
         modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+        modelBuilder.ApplyConfiguration(new UserPreferencesConfiguration());
     }
 }

@@ -1,46 +1,103 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
 import { CalendarService } from '../../core/calendar/calendar.service';
+import { UserPreferencesService } from '../../core/user/user-preferences.service';
 import { CalendarEvent } from '../../models/calendar.model';
+import { Role } from '../../models/user.model';
 
-interface QuickLink {
+export interface NavItem {
   label: string;
   description: string;
   icon: string;
   route: string;
+  requiredRoles?: Role[];
 }
 
-const QUICK_LINKS: QuickLink[] = [
+const ALL_QUICK_ITEMS: NavItem[] = [
+  { label: 'Hallenbelegung', description: 'Belegungskalender anzeigen', icon: 'calendar_month', route: '/kalender' },
   { label: 'Werkzeug', description: 'Werkzeug einsehen und ausleihen', icon: 'build', route: '/werkzeug' },
   { label: 'Verbrauchsmaterial', description: 'Aktuellen Bestand einsehen', icon: 'inventory_2', route: '/verbrauchsmaterial' },
+  { label: 'Nutzerverwaltung', description: 'Nutzer und Rollen verwalten', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
+  { label: 'Kalender-Einstellungen', description: 'Kalender konfigurieren', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
+  { label: 'Feedback', description: 'Eingegangenes Feedback verwalten', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },
 ];
+
+const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial'];
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [
+    RouterLink, MatCardModule, MatButtonModule, MatIconModule,
+    MatProgressSpinnerModule, MatChipsModule, MatTooltipModule,
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
   readonly auth = inject(AuthService);
   private readonly calendarService = inject(CalendarService);
+  private readonly prefsService = inject(UserPreferencesService);
 
-  readonly quickLinks = QUICK_LINKS;
   readonly upcomingEvents = signal<CalendarEvent[]>([]);
   readonly loadingEvents = signal(true);
 
+  readonly favoriteRoutes = signal<string[]>(DEFAULT_FAVORITES);
+  readonly editMode = signal(false);
+  readonly savingPrefs = signal(false);
+
+  /** All nav items the current user may access (role-filtered) */
+  readonly availableItems = computed(() =>
+    ALL_QUICK_ITEMS.filter(item =>
+      !item.requiredRoles || this.auth.hasAnyRole(item.requiredRoles)
+    )
+  );
+
+  /** Items shown in the quick-access section */
+  readonly quickLinks = computed(() =>
+    this.availableItems().filter(item => this.favoriteRoutes().includes(item.route))
+  );
+
   ngOnInit(): void {
     this.calendarService.getUpcomingEvents().subscribe({
-      next: events => {
-        this.upcomingEvents.set(events);
-        this.loadingEvents.set(false);
-      },
+      next: events => { this.upcomingEvents.set(events); this.loadingEvents.set(false); },
       error: () => this.loadingEvents.set(false),
+    });
+
+    this.prefsService.getPreferences().subscribe({
+      next: prefs => {
+        if (prefs.favoriteRoutes.length > 0) {
+          this.favoriteRoutes.set(prefs.favoriteRoutes);
+        }
+      },
+      error: () => { /* keep defaults */ },
+    });
+  }
+
+  isFavorite(route: string): boolean {
+    return this.favoriteRoutes().includes(route);
+  }
+
+  toggleFavorite(route: string): void {
+    const current = this.favoriteRoutes();
+    const next = current.includes(route)
+      ? current.filter(r => r !== route)
+      : [...current, route];
+    this.favoriteRoutes.set(next);
+    this.savePreferences(next);
+  }
+
+  private savePreferences(routes: string[]): void {
+    this.savingPrefs.set(true);
+    this.prefsService.updatePreferences(routes).subscribe({
+      next: prefs => { this.favoriteRoutes.set(prefs.favoriteRoutes); this.savingPrefs.set(false); },
+      error: () => this.savingPrefs.set(false),
     });
   }
 
