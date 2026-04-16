@@ -1,0 +1,98 @@
+<div class="veranstaltungen-page">
+  <div class="page-header">
+    <h1 class="page-title">Veranstaltungen</h1>
+    @if (canWrite()) {
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Neue Veranstaltung
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+  } @else if (configs().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">event_busy</mat-icon>
+      <p>Es sind noch keine Veranstaltungskalender konfiguriert.</p>
+    </div>
+  } @else {
+
+    <!-- Show-past toggle -->
+    @if (pastCount() > 0 && !showPast()) {
+      <button mat-button class="show-past-btn" (click)="showPast.set(true)">
+        <mat-icon>expand_less</mat-icon>
+        {{ pastCount() }} vergangene {{ pastCount() === 1 ? 'Monat' : 'Monate' }} anzeigen
+      </button>
+    }
+    @if (showPast()) {
+      <button mat-button class="show-past-btn" (click)="showPast.set(false)">
+        <mat-icon>expand_more</mat-icon>
+        Vergangene ausblenden
+      </button>
+    }
+
+    @if (visibleGroups().length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">event_available</mat-icon>
+        <p>Keine bevorstehenden Veranstaltungen geplant.</p>
+        @if (canWrite()) {
+          <button mat-flat-button color="primary" (click)="openCreateDialog()">
+            Erste Veranstaltung anlegen
+          </button>
+        }
+      </div>
+    }
+
+    @for (group of visibleGroups(); track group.key) {
+      <section class="month-section" [class.is-past]="group.isPast">
+        <h2 class="month-header">{{ group.label }}</h2>
+        <div class="event-list">
+          @for (event of group.events; track event.id) {
+            <div class="event-row" [class.can-edit]="canEditEvent(event)" (click)="canEditEvent(event) && openEditDialog(event)">
+              <span class="event-color-dot" [style.background]="event.calendarColor"></span>
+
+              <div class="event-main">
+                <div class="event-title-row">
+                  <span class="event-title">{{ event.title }}</span>
+                  @if (event.calendarName) {
+                    <span class="event-cal-name">{{ event.calendarName }}</span>
+                  }
+                </div>
+                <div class="event-meta">
+                  <span class="event-date">{{ formatEventDate(event) }}</span>
+                  @if (event.location) {
+                    <span class="event-location">
+                      <mat-icon inline>place</mat-icon>{{ event.location }}
+                    </span>
+                  }
+                </div>
+                @if (event.description) {
+                  <p class="event-description">{{ event.description }}</p>
+                }
+              </div>
+
+              @if (canEditEvent(event)) {
+                <div class="event-actions">
+                  <button mat-icon-button
+                          matTooltip="Bearbeiten"
+                          (click)="openEditDialog(event); $event.stopPropagation()">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button
+                          matTooltip="Löschen"
+                          class="delete-btn"
+                          (click)="deleteEvent(event, $event)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

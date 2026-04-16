@@ -20,10 +20,12 @@ export class CalendarService {
     return this.api.get<CalendarConfig[]>(url);
   }
 
-  getEvents(from: Date, to: Date): Observable<CalendarEvent[]> {
+  getEvents(from: Date, to: Date, type?: CalendarType): Observable<CalendarEvent[]> {
     const fromStr = from.toISOString();
     const toStr = to.toISOString();
-    return this.api.get<CalendarEvent[]>(`/calendar/events?from=${encodeURIComponent(fromStr)}&to=${encodeURIComponent(toStr)}`);
+    let url = `/calendar/events?from=${encodeURIComponent(fromStr)}&to=${encodeURIComponent(toStr)}`;
+    if (type) url += `&type=${encodeURIComponent(type)}`;
+    return this.api.get<CalendarEvent[]>(url);
   }
 
   createEvent(dto: CreateCalendarEventRequest): Observable<CalendarEvent> {

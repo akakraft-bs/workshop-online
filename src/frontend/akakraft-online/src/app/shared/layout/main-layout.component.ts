@@ -24,6 +24,7 @@ interface NavItem {
 const ALL_NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
   { label: 'Hallenbelegung', icon: 'calendar_month', route: '/kalender' },
+  { label: 'Veranstaltungen', icon: 'celebration', route: '/veranstaltungen' },
   { label: 'Werkzeug', icon: 'build', route: '/werkzeug' },
   { label: 'Verbrauchsmaterial', icon: 'inventory_2', route: '/verbrauchsmaterial' },
   { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },

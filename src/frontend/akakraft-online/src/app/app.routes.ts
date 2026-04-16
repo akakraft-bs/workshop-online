@@ -63,6 +63,11 @@ export const routes: Routes = [
           import('./features/kalender/kalender-page.component').then(m => m.KalenderPageComponent),
       },
       {
+        path: 'veranstaltungen',
+        loadComponent: () =>
+          import('./features/veranstaltungen/veranstaltungen-page.component').then(m => m.VeranstaltungenPageComponent),
+      },
+      {
         path: 'admin/kalender',
         loadComponent: () =>
           import('./features/admin/kalender/admin-kalender.component').then(m => m.AdminKalenderComponent),

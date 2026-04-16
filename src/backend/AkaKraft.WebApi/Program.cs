@@ -590,11 +590,16 @@ public static class Program
         app.MapGet("/calendar/events", async (
             DateTime from,
             DateTime to,
+            string? type,
             ICalendarService calendarService,
             ICalendarConfigService configService) =>
         {
-            var configs = (await configService.GetAllAsync())
-                .Where(c => c.IsVisible)
+            var all = await configService.GetAllAsync();
+            // Wenn ein Typ angegeben: nach Typ filtern (unabhängig von IsVisible)
+            // Ohne Typ: nur sichtbare Kalender (bestehende Hallenbelegung-Logik)
+            var configs = (!string.IsNullOrWhiteSpace(type)
+                ? all.Where(c => string.Equals(c.CalendarType, type, StringComparison.OrdinalIgnoreCase))
+                : all.Where(c => c.IsVisible))
                 .ToList();
 
             if (configs.Count == 0)
