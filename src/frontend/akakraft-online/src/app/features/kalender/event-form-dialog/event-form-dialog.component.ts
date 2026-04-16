@@ -6,6 +6,8 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { CalendarConfig, CalendarEvent } from '../../../models/calendar.model';
 
 export interface EventFormDialogData {
@@ -35,6 +37,8 @@ export interface EventFormDialogResult {
     MatButtonModule,
     MatSelectModule,
     MatCheckboxModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   template: `
     <h2 mat-dialog-title>{{ data.event ? 'Termin bearbeiten' : 'Neuer Termin' }}</h2>
@@ -57,28 +61,47 @@ export interface EventFormDialogResult {
           <input matInput formControlName="title" placeholder="Titel eingeben">
         </mat-form-field>
 
-
         <mat-checkbox formControlName="isAllDay">Ganztägig</mat-checkbox>
 
         @if (!form.get('isAllDay')!.value) {
-          <mat-form-field appearance="outline">
-            <mat-label>Beginn</mat-label>
-            <input matInput type="datetime-local" formControlName="start">
-          </mat-form-field>
+          <div class="date-time-row">
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>Beginn</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+              <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="time-field">
+              <mat-label>Uhrzeit</mat-label>
+              <input matInput type="time" formControlName="startTime">
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Ende</mat-label>
-            <input matInput type="datetime-local" formControlName="end">
-          </mat-form-field>
+          <div class="date-time-row">
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>Ende</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+              <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="time-field">
+              <mat-label>Uhrzeit</mat-label>
+              <input matInput type="time" formControlName="endTime">
+            </mat-form-field>
+          </div>
         } @else {
           <mat-form-field appearance="outline">
             <mat-label>Datum (Beginn)</mat-label>
-            <input matInput type="date" formControlName="startDate">
+            <input matInput [matDatepicker]="allDayStartPicker" formControlName="startDate">
+            <mat-datepicker-toggle matIconSuffix [for]="allDayStartPicker"></mat-datepicker-toggle>
+            <mat-datepicker #allDayStartPicker></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Datum (Ende)</mat-label>
-            <input matInput type="date" formControlName="endDate">
+            <input matInput [matDatepicker]="allDayEndPicker" formControlName="endDate">
+            <mat-datepicker-toggle matIconSuffix [for]="allDayEndPicker"></mat-datepicker-toggle>
+            <mat-datepicker #allDayEndPicker></mat-datepicker>
           </mat-form-field>
         }
 
@@ -116,6 +139,12 @@ export interface EventFormDialogResult {
       border-radius: 50%;
       margin-right: 6px;
     }
+    .date-time-row {
+      display: flex;
+      gap: 8px;
+      .date-field { flex: 1 1 60%; }
+      .time-field { flex: 1 1 40%; }
+    }
   `],
 })
 export class EventFormDialogComponent implements OnInit {
@@ -131,10 +160,10 @@ export class EventFormDialogComponent implements OnInit {
     calendarId: [this.writableConfigs[0]?.googleCalendarId ?? '', Validators.required],
     title: ['', Validators.required],
     isAllDay: [false],
-    start: [''],
-    end: [''],
-    startDate: [''],
-    endDate: [''],
+    startDate: [null as Date | null, Validators.required],
+    startTime: [''],
+    endDate: [null as Date | null, Validators.required],
+    endTime: [''],
     description: [''],
     location: [''],
   });
@@ -152,10 +181,10 @@ export class EventFormDialogComponent implements OnInit {
       this.form.patchValue({
         title: ev.title,
         isAllDay: ev.isAllDay,
-        start: toLocalDateTimeInput(start),
-        end: toLocalDateTimeInput(end),
-        startDate: toLocalDateInput(start),
-        endDate: toLocalDateInput(end),
+        startDate: dateOnly(start),
+        startTime: toTimeString(start),
+        endDate: dateOnly(end),
+        endTime: toTimeString(end),
         description: ev.description ?? '',
         location: ev.location ?? '',
       });
@@ -163,13 +192,43 @@ export class EventFormDialogComponent implements OnInit {
       const start = this.data.defaultStart ?? roundToNextHour(new Date());
       const end = new Date(start.getTime() + 60 * 60 * 1000);
       this.form.patchValue({
-        start: toLocalDateTimeInput(start),
-        end: toLocalDateTimeInput(end),
-        startDate: toLocalDateInput(start),
-        endDate: toLocalDateInput(start),
+        startDate: dateOnly(start),
+        startTime: toTimeString(start),
+        endDate: dateOnly(end),
+        endTime: toTimeString(end),
       });
     }
 
+    // Auto-adjust end when start changes
+    this.form.get('startDate')!.valueChanges.subscribe(() => this.adjustEndIfNeeded());
+    this.form.get('startTime')!.valueChanges.subscribe(() => this.adjustEndIfNeeded());
+    this.form.get('isAllDay')!.valueChanges.subscribe(() => this.adjustEndIfNeeded());
+  }
+
+  private adjustEndIfNeeded(): void {
+    const isAllDay = !!this.form.get('isAllDay')!.value;
+    const startDate = this.form.get('startDate')!.value as Date | null;
+    if (!startDate) return;
+
+    if (isAllDay) {
+      const endDate = this.form.get('endDate')!.value as Date | null;
+      if (!endDate || endDate < startDate) {
+        this.form.get('endDate')!.setValue(new Date(startDate), { emitEvent: false });
+      }
+    } else {
+      const startTime = this.form.get('startTime')!.value || '00:00';
+      const endDate = this.form.get('endDate')!.value as Date | null;
+      const endTime = this.form.get('endTime')!.value || '00:00';
+      const start = combineDateTime(startDate, startTime);
+      const end = endDate ? combineDateTime(endDate, endTime) : null;
+      if (!end || end <= start) {
+        const newEnd = new Date(start.getTime() + 60 * 60 * 1000);
+        this.form.patchValue({
+          endDate: dateOnly(newEnd),
+          endTime: toTimeString(newEnd),
+        }, { emitEvent: false });
+      }
+    }
   }
 
   submit(): void {
@@ -182,11 +241,13 @@ export class EventFormDialogComponent implements OnInit {
     let end: Date;
 
     if (isAllDay) {
-      start = new Date(v.startDate + 'T00:00:00');
-      end = new Date(v.endDate + 'T00:00:00');
+      start = new Date(v.startDate!);
+      start.setHours(0, 0, 0, 0);
+      end = new Date(v.endDate!);
+      end.setHours(0, 0, 0, 0);
     } else {
-      start = new Date(v.start!);
-      end = new Date(v.end!);
+      start = combineDateTime(v.startDate!, v.startTime || '00:00');
+      end = combineDateTime(v.endDate!, v.endTime || '00:00');
     }
 
     const result: EventFormDialogResult = {
@@ -210,12 +271,18 @@ function roundToNextHour(d: Date): Date {
   return result;
 }
 
-function toLocalDateTimeInput(d: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+function dateOnly(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-function toLocalDateInput(d: Date): string {
+function toTimeString(d: Date): string {
   const pad = (n: number) => n.toString().padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function combineDateTime(date: Date, timeStr: string): Date {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const result = new Date(date);
+  result.setHours(hours, minutes, 0, 0);
+  return result;
 }
