@@ -112,6 +112,7 @@
             @for (pev of day.events; track trackByEventId($index, pev)) {
               <div
                 class="event-block"
+                [class.compact]="pev.heightPx < PX_PER_HOUR * 1.5"
                 [ngStyle]="eventStyle(pev)"
                 [matTooltip]="pev.event.title + (pev.event.creatorName ? ' · ' + pev.event.creatorName : '')"
                 (click)="canEditEvent(pev.event) && openEditDialog(pev.event); $event.stopPropagation()">
