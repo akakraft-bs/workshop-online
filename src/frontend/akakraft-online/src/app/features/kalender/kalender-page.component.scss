@@ -291,22 +291,6 @@ $border-color: var(--mat-sys-outline-variant, #e0e0e0);
   &:hover { color: #fff; }
 }
 
-// ---- Mobile ----------------------------------------------------------------
-
-.create-btn-mobile {
-  display: none;
-}
-
-@media (max-width: 599px) {
-  .create-btn-desktop {
-    display: none !important;
-  }
-
-  .create-btn-mobile {
-    display: inline-flex;
-  }
-}
-
 // ---- Loading Overlay -------------------------------------------------------
 
 .loading-overlay {

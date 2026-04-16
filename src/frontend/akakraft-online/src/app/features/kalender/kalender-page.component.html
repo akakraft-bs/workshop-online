@@ -1,5 +1,7 @@
 <div class="kalender-page">
 
+  <h1 class="page-title">Hallenbelegung</h1>
+
   <!-- Toolbar -->
   <div class="kalender-toolbar">
     <div class="nav-group">
@@ -18,7 +20,7 @@
       @if (canWrite()) {
         <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
           <mat-icon>add</mat-icon>
-          Termin
+          Neue Reservierung
         </button>
         <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
           <mat-icon>add</mat-icon>

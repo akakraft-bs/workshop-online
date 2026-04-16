@@ -1,19 +1,12 @@
 .admin-kalender {
   max-width: 800px;
-  padding: 24px;
 }
 
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-bottom: 8px;
-
-  h2 {
-    margin: 0;
-    font-size: 1.4rem;
-    font-weight: 500;
-  }
 }
 
 .hint {

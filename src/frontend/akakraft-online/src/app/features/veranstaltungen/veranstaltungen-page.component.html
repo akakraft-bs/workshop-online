@@ -1,13 +1,16 @@
 <div class="veranstaltungen-page">
-  <div class="page-header">
-    <h1 class="page-title">Veranstaltungen</h1>
-    @if (canWrite()) {
-      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+  <h1 class="page-title">Veranstaltungen</h1>
+  @if (canWrite()) {
+    <div class="page-header">
+      <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
         <mat-icon>add</mat-icon>
         Neue Veranstaltung
       </button>
-    }
-  </div>
+      <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+  }
 
   @if (loading()) {
     <div class="loading-wrap">

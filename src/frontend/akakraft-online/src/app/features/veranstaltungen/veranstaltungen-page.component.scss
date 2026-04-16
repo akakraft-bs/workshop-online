@@ -7,15 +7,9 @@
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 28px;
+  justify-content: flex-end;
+  margin-bottom: 16px;
   gap: 16px;
-
-  .page-title {
-    font-size: 26px;
-    font-weight: 500;
-    margin: 0;
-  }
 }
 
 // ---- Loading / empty --------------------------------------------------------

@@ -1,6 +1,5 @@
+<h1 class="page-title">Werkzeug</h1>
 <div class="page-header">
-  <h2>Werkzeug</h2>
-
   <mat-form-field appearance="outline" class="search-field">
     <mat-label>Suche</mat-label>
     <mat-icon matPrefix>search</mat-icon>
@@ -25,10 +24,13 @@
     </button>
 
     @if (canManage()) {
-      <button mat-raised-button color="primary" (click)="openCreateDialog()">
-        <mat-icon>add</mat-icon>
-        Neu anlegen
-      </button>
+    <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
+      <mat-icon>add</mat-icon>
+      Neues Werkzeug
+    </button>
+    <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+      <mat-icon>add</mat-icon>
+    </button>
     }
   </div>
 </div>

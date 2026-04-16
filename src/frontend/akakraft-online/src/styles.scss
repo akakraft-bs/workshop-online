@@ -20,9 +20,33 @@ body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
+// Einheitliche Seitenüberschrift über der jeweiligen Toolbar
+.page-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: var(--mat-sys-on-surface);
+}
+
 // Mat-Dialog: erstes mat-form-field mit outline-appearance braucht oben
 // etwas Platz damit das floating label nicht abgeschnitten wird.
 mat-dialog-content {
   padding-top: 8px !important;
   overflow-x: hidden;
+}
+
+// Responsive Desktop/Mobile Button-Sichtbarkeit.
+// Verwendung: class="create-btn-desktop" bzw. class="create-btn-mobile"
+.create-btn-mobile {
+  display: none !important;
+}
+
+@media (max-width: 599px) {
+  .create-btn-desktop {
+    display: none !important;
+  }
+
+  .create-btn-mobile {
+    display: inline-flex !important;
+  }
 }

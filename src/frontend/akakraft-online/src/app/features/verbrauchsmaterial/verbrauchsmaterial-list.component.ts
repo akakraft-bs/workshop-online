@@ -71,7 +71,7 @@ export class VerbrauchsmaterialListComponent implements OnInit {
     });
   }
 
-  openAddDialog(): void {
+  openCreateDialog(): void {
     this.openDialog(null);
   }
 
