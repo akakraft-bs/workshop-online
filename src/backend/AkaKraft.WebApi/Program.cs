@@ -5,7 +5,6 @@ using System.Text.Json.Serialization;
 using AkaKraft.Application.DTOs;
 using AkaKraft.Application.Interfaces;
 using AkaKraft.Domain.Enums;
-using System.Text.Json;
 using AkaKraft.Infrastructure;
 using AkaKraft.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication;
@@ -186,7 +185,7 @@ public static class Program
                 new AuthenticationProperties { RedirectUri = $"{ctx.Request.PathBase}/auth/callback" },
                 [GoogleDefaults.AuthenticationScheme]));
 
-        // Schritt 2: Google-Callback → Nutzer anlegen/laden → JWT erzeugen → Frontend weiterleiten
+        // Schritt 2: Google-Callback → Nutzer anlegen/laden → JWT + Refresh-Token erzeugen → Frontend weiterleiten
         app.MapGet("/auth/callback", async (HttpContext ctx, IAuthService authService, IConfiguration config) =>
         {
             var result = await ctx.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -200,10 +199,57 @@ public static class Program
             var picture  = principal.FindFirstValue("picture");
 
             var authResult = await authService.HandleGoogleCallbackAsync(googleId, email, name, picture);
+            var refreshToken = await authService.CreateRefreshTokenAsync(authResult.User.Id);
+
+            ctx.Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                MaxAge = TimeSpan.FromDays(30),
+                Path = "/api/auth",
+            });
 
             var frontendUrl = config["Frontend:BaseUrl"];
             return Results.Redirect($"{frontendUrl}/auth/callback?token={authResult.Token}");
         });
+
+        // JWT per Refresh-Token erneuern (Cookie wird automatisch mitgesendet)
+        app.MapPost("/auth/refresh", async (HttpContext ctx, IAuthService authService) =>
+        {
+            var refreshToken = ctx.Request.Cookies["refresh_token"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return Results.Unauthorized();
+
+            var result = await authService.UseRefreshTokenAsync(refreshToken);
+            if (result is null)
+            {
+                ctx.Response.Cookies.Delete("refresh_token", new CookieOptions { Path = "/api/auth" });
+                return Results.Unauthorized();
+            }
+
+            ctx.Response.Cookies.Append("refresh_token", result.RefreshToken!, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                MaxAge = TimeSpan.FromDays(30),
+                Path = "/api/auth",
+            });
+
+            return Results.Ok(new { token = result.Token, expiresAt = result.ExpiresAt });
+        });
+
+        // Abmelden: Refresh-Token widerrufen und Cookie löschen
+        app.MapPost("/auth/logout", async (HttpContext ctx, IAuthService authService) =>
+        {
+            var refreshToken = ctx.Request.Cookies["refresh_token"];
+            if (!string.IsNullOrEmpty(refreshToken))
+                await authService.RevokeRefreshTokenAsync(refreshToken);
+
+            ctx.Response.Cookies.Delete("refresh_token", new CookieOptions { Path = "/api/auth" });
+            return Results.Ok();
+        }).RequireAuthorization("JwtApi");
 
         // Gibt den aktuell eingeloggten Nutzer zurück (JWT-geschützt)
         app.MapGet("/auth/me", async (HttpContext ctx, IUserService userService) =>

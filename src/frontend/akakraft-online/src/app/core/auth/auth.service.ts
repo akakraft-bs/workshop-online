@@ -1,6 +1,7 @@
-import { computed, inject, Injectable, signal } from '@angular/core';import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { catchError, EMPTY, firstValueFrom, tap } from 'rxjs';
+import { catchError, EMPTY, firstValueFrom, Observable, tap } from 'rxjs';
 import { Role, User, VORSTAND_ROLES } from '../../models/user.model';
 import { environment } from '../../../environments/environment';
 
@@ -14,16 +15,10 @@ export class AuthService {
   readonly currentUser = signal<User | null>(null);
   readonly isLoggedIn = computed(() => this.currentUser() !== null);
   readonly roles = computed(() => this.currentUser()?.roles ?? []);
-
   readonly isAdmin = computed(() => this.roles().includes(Role.Admin));
-  readonly isVorstand = computed(() =>
-    this.roles().some(r => VORSTAND_ROLES.includes(r))
-  );
-  readonly hasAccess = computed(() =>
-    this.roles().some(r => r !== Role.None)
-  );
+  readonly isVorstand = computed(() => this.roles().some(r => VORSTAND_ROLES.includes(r)));
+  readonly hasAccess = computed(() => this.roles().some(r => r !== Role.None));
 
-  // Wird vom authGuard abgewartet bevor die Route aktiviert wird
   readonly initialized$: Promise<void>;
 
   constructor() {
@@ -36,70 +31,90 @@ export class AuthService {
 
   handleCallback(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
-    this.http
-      .get<User>(`${environment.apiUrl}/auth/me`)
+    this.http.get<User>(`${environment.apiUrl}/auth/me`, { withCredentials: true })
       .pipe(
-        tap(user => {
-          this.currentUser.set(user);
-          this.cacheUser(user);
-        }),
-        catchError(() => {
-          this.clearSession();
-          return EMPTY;
-        })
+        tap(user => { this.currentUser.set(user); this.cacheUser(user); }),
+        catchError(() => { this.clearSession(); return EMPTY; })
       )
-      .subscribe(() => {
-        const target = this.hasAccess() ? '/dashboard' : '/pending';
-        this.router.navigate([target]);
-      });
+      .subscribe(() => this.router.navigate([this.hasAccess() ? '/dashboard' : '/pending']));
   }
 
   logout(): void {
-    this.clearSession();
-    this.router.navigate(['/login']);
+    this.http.post(`${environment.apiUrl}/auth/logout`, {}, { withCredentials: true })
+      .pipe(catchError(() => EMPTY))
+      .subscribe(() => { this.clearSession(); this.router.navigate(['/login']); });
+  }
+
+  /** Versucht per Refresh-Token (httpOnly-Cookie) ein neues JWT zu holen. */
+  refresh(): Observable<string> {
+    return new Observable(observer => {
+      this.http.post<{ token: string }>(
+        `${environment.apiUrl}/auth/refresh`, {}, { withCredentials: true }
+      ).pipe(
+        tap(res => localStorage.setItem(this.TOKEN_KEY, res.token)),
+        catchError((err: HttpErrorResponse) => {
+          this.clearSession();
+          this.router.navigate(['/login']);
+          observer.error(err);
+          return EMPTY;
+        })
+      ).subscribe({
+        next: res => { observer.next(res.token); observer.complete(); },
+      });
+    });
   }
 
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  hasRole(role: Role): boolean {
-    return this.roles().includes(role);
-  }
+  hasRole(role: Role): boolean { return this.roles().includes(role); }
+  hasAnyRole(roles: Role[]): boolean { return roles.some(r => this.roles().includes(r)); }
 
-  hasAnyRole(roles: Role[]): boolean {
-    return roles.some(r => this.roles().includes(r));
+  clearSession(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    this.currentUser.set(null);
   }
 
   private async tryRestoreSession(): Promise<void> {
-    const token = this.getToken();
-    if (!token) {
-      return;
-    }
-
-    // Sofort aus Cache wiederherstellen → kein Warten auf Backend nötig
     const cached = this.loadCachedUser();
-    if (cached) {
-      this.currentUser.set(cached);
-    }
+    if (cached) this.currentUser.set(cached);
 
-    // Backend-Abfrage zur Aktualisierung (im Hintergrund)
+    // Erst mit vorhandenem JWT versuchen, dann per Refresh-Cookie
+    const token = this.getToken();
+    const meUrl = `${environment.apiUrl}/auth/me`;
+
     await firstValueFrom(
-      this.http.get<User>(`${environment.apiUrl}/auth/me`).pipe(
-        tap(user => {
-          this.currentUser.set(user);
-          this.cacheUser(user);
-        }),
+      this.http.get<User>(meUrl, { withCredentials: true }).pipe(
+        tap(user => { this.currentUser.set(user); this.cacheUser(user); }),
         catchError((err: HttpErrorResponse) => {
-          if (err.status === 401 || err.status === 403) {
-            // Token abgelaufen oder ungültig → komplett abmelden
-            this.clearSession();
+          if (err.status === 401) {
+            // JWT abgelaufen → Refresh-Cookie versuchen
+            return this.http.post<{ token: string }>(
+              `${environment.apiUrl}/auth/refresh`, {}, { withCredentials: true }
+            ).pipe(
+              tap(res => localStorage.setItem(this.TOKEN_KEY, res.token)),
+              // Nach erfolgreichem Refresh Nutzerdaten laden
+              catchError(() => { this.clearSession(); return EMPTY; })
+            );
           }
-          // Bei Netzwerkfehlern: gecachten User behalten
+          if (!token) { /* noch nicht eingeloggt – kein Fehler */ }
           return EMPTY;
         })
       )
     ).catch(() => {});
+
+    // Falls Refresh ein neues Token gesetzt hat, Nutzerdaten laden
+    const newToken = this.getToken();
+    if (newToken && !this.currentUser()) {
+      await firstValueFrom(
+        this.http.get<User>(meUrl, { withCredentials: true }).pipe(
+          tap(user => { this.currentUser.set(user); this.cacheUser(user); }),
+          catchError(() => { this.clearSession(); return EMPTY; })
+        )
+      ).catch(() => {});
+    }
   }
 
   private cacheUser(user: User): void {
@@ -110,14 +125,6 @@ export class AuthService {
     try {
       const raw = localStorage.getItem(this.USER_KEY);
       return raw ? (JSON.parse(raw) as User) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  private clearSession(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    this.currentUser.set(null);
+    } catch { return null; }
   }
 }

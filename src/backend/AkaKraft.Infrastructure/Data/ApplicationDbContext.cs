@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
     public DbSet<CalendarConfig> CalendarConfigs => Set<CalendarConfig>();
     public DbSet<CalendarWriteRole> CalendarWriteRoles => Set<CalendarWriteRole>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,5 +24,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new FeedbackConfiguration());
         modelBuilder.ApplyConfiguration(new CalendarConfigConfiguration());
         modelBuilder.ApplyConfiguration(new CalendarWriteRoleConfiguration());
+        modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
     }
 }
