@@ -19,3 +19,10 @@ body {
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
+
+// Mat-Dialog: erstes mat-form-field mit outline-appearance braucht oben
+// etwas Platz damit das floating label nicht abgeschnitten wird.
+mat-dialog-content {
+  padding-top: 8px !important;
+  overflow-x: hidden;
+}
