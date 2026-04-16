@@ -1,0 +1,146 @@
+<div class="kalender-page">
+
+  <!-- Toolbar -->
+  <div class="kalender-toolbar">
+    <div class="nav-group">
+      <button mat-icon-button (click)="prevWeek()" matTooltip="Vorherige Woche">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button mat-stroked-button (click)="goToToday()">Heute</button>
+      <button mat-icon-button (click)="nextWeek()" matTooltip="Nächste Woche">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+    <span class="week-range">{{ weekRange() }}</span>
+
+    <div class="actions">
+      @if (canWrite()) {
+        <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
+          <mat-icon>add</mat-icon>
+          Termin
+        </button>
+        <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+          <mat-icon>add</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Legende -->
+  @if (configs().length > 0) {
+    <div class="kalender-legend">
+      @for (cfg of configs(); track cfg.googleCalendarId) {
+        <span class="legend-item">
+          <span class="legend-dot" [style.background]="cfg.color"></span>
+          {{ cfg.name }}
+        </span>
+      }
+    </div>
+  }
+
+  <!-- Kalender-Grid -->
+  <div class="kalender-container">
+
+    <!-- Scroll-Bereich mit Zeitraster -->
+    <div class="scroll-area">
+
+      <!-- Ganztages-Events-Zeile (scrollt horizontal mit) -->
+      <div class="allday-row">
+        <div class="time-gutter"></div>
+        @for (day of days(); track day.label) {
+          <div class="allday-cell">
+            @for (ev of day.allDayEvents; track ev.id) {
+              <div
+                class="allday-event"
+                [style.background-color]="ev.calendarColor"
+                [matTooltip]="ev.title + (ev.creatorName ? ' · ' + ev.creatorName : '')"
+                (click)="canEditEvent(ev) && openEditDialog(ev)">
+                <span class="event-title">{{ ev.title }}</span>
+                @if (canEditEvent(ev)) {
+                  <button
+                    class="delete-btn"
+                    (click)="deleteEvent(ev, $event)"
+                    matTooltip="Löschen">
+                    ×
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Trennlinie -->
+      <div class="allday-divider"></div>
+
+      <!-- Spalten-Kopfzeile mit Tagesnamen -->
+      <div class="day-header-row">
+        <div class="time-gutter"></div>
+        @for (day of days(); track day.label) {
+          <div class="day-header" [class.today]="day.isToday">
+            {{ day.label }}
+          </div>
+        }
+      </div>
+
+      <!-- Zeitraster -->
+      <div class="time-grid">
+
+        <!-- Stunden-Beschriftung -->
+        <div class="time-labels">
+          @for (h of HOURS; track trackByHour($index, h)) {
+            <div class="hour-label" [style.height.px]="PX_PER_HOUR">
+              {{ formatHour(h) }}
+            </div>
+          }
+        </div>
+
+        <!-- Tag-Spalten -->
+        @for (day of days(); track day.label; let i = $index) {
+          <div
+            class="day-column"
+            [class.today]="day.isToday"
+            (click)="onGridClick(day, $event)">
+
+            <!-- Stunden-Linien -->
+            @for (h of HOURS; track trackByHour($index, h)) {
+              <div class="hour-line" [style.top.px]="h * PX_PER_HOUR"></div>
+            }
+
+            <!-- Termine -->
+            @for (pev of day.events; track trackByEventId($index, pev)) {
+              <div
+                class="event-block"
+                [ngStyle]="eventStyle(pev)"
+                [matTooltip]="pev.event.title + (pev.event.creatorName ? ' · ' + pev.event.creatorName : '')"
+                (click)="canEditEvent(pev.event) && openEditDialog(pev.event); $event.stopPropagation()">
+                <span class="event-title">{{ pev.event.title }}</span>
+                @if (pev.event.creatorName) {
+                  <span class="event-creator">{{ pev.event.creatorName }}</span>
+                }
+                @if (canEditEvent(pev.event)) {
+                  <button
+                    class="delete-btn"
+                    (click)="deleteEvent(pev.event, $event)"
+                    matTooltip="Löschen">
+                    ×
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    </div>
+
+  </div>
+
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+</div>

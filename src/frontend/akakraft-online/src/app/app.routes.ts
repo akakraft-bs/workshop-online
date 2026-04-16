@@ -57,6 +57,18 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: [Role.Admin] },
       },
+      {
+        path: 'kalender',
+        loadComponent: () =>
+          import('./features/kalender/kalender-page.component').then(m => m.KalenderPageComponent),
+      },
+      {
+        path: 'admin/kalender',
+        loadComponent: () =>
+          import('./features/admin/kalender/admin-kalender.component').then(m => m.AdminKalenderComponent),
+        canActivate: [roleGuard],
+        data: { roles: [Role.Admin] },
+      },
     ],
   },
   { path: '**', redirectTo: '' },

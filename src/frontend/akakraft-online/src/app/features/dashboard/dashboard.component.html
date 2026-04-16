@@ -3,20 +3,49 @@
     Hallo, {{ (auth.currentUser()?.name ?? 'Mitglied').split(' ')[0] }}!
   </h1>
 
-  <div class="quick-links">
-    @for (link of quickLinks; track link.route) {
-      <mat-card class="quick-link-card" appearance="outlined" [routerLink]="link.route">
-        <mat-card-content>
-          <div class="card-icon">
-            <mat-icon>{{ link.icon }}</mat-icon>
+  <!-- Nächste Veranstaltungen -->
+  <section class="section">
+    <h2 class="section-title">Nächste Veranstaltungen</h2>
+
+    @if (loadingEvents()) {
+      <div class="events-loading">
+        <mat-spinner diameter="28"></mat-spinner>
+      </div>
+    } @else if (upcomingEvents().length === 0) {
+      <p class="events-empty">Keine bevorstehenden Veranstaltungen gefunden.</p>
+    } @else {
+      <div class="events-list">
+        @for (event of upcomingEvents(); track event.id) {
+          <div class="event-item">
+            <span class="event-dot" [style.background]="event.calendarColor"></span>
+            <div class="event-info">
+              <span class="event-title">{{ event.title }}</span>
+              <span class="event-date">{{ formatEventDate(event) }}</span>
+            </div>
           </div>
-          <div class="card-text">
-            <strong>{{ link.label }}</strong>
-            <span>{{ link.description }}</span>
-          </div>
-          <mat-icon class="arrow-icon">chevron_right</mat-icon>
-        </mat-card-content>
-      </mat-card>
+        }
+      </div>
     }
-  </div>
+  </section>
+
+  <!-- Schnellzugriff -->
+  <section class="section">
+    <h2 class="section-title">Schnellzugriff</h2>
+    <div class="quick-links">
+      @for (link of quickLinks; track link.route) {
+        <mat-card class="quick-link-card" appearance="outlined" [routerLink]="link.route">
+          <mat-card-content>
+            <div class="card-icon">
+              <mat-icon>{{ link.icon }}</mat-icon>
+            </div>
+            <div class="card-text">
+              <strong>{{ link.label }}</strong>
+              <span>{{ link.description }}</span>
+            </div>
+            <mat-icon class="arrow-icon">chevron_right</mat-icon>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
 </div>

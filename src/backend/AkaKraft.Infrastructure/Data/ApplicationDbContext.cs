@@ -11,6 +11,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Werkzeug> Werkzeuge => Set<Werkzeug>();
     public DbSet<Verbrauchsmaterial> Verbrauchsmaterialien => Set<Verbrauchsmaterial>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
+    public DbSet<CalendarConfig> CalendarConfigs => Set<CalendarConfig>();
+    public DbSet<CalendarWriteRole> CalendarWriteRoles => Set<CalendarWriteRole>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,5 +21,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new WerkzeugConfiguration());
         modelBuilder.ApplyConfiguration(new VerbrauchsmaterialConfiguration());
         modelBuilder.ApplyConfiguration(new FeedbackConfiguration());
+        modelBuilder.ApplyConfiguration(new CalendarConfigConfiguration());
+        modelBuilder.ApplyConfiguration(new CalendarWriteRoleConfiguration());
     }
 }
