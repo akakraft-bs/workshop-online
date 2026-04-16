@@ -628,7 +628,8 @@ public static class Program
             HttpContext ctx,
             ICalendarService calendarService,
             ICalendarConfigService configService,
-            IUserService userService) =>
+            IUserService userService,
+            IUserPreferencesService prefsService) =>
         {
             var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
                       ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
@@ -648,8 +649,14 @@ public static class Program
             if (user is null)
                 return Results.Unauthorized();
 
+            // DisplayName aus den Nutzerpräferenzen verwenden, Fallback auf Google-Name
+            var prefs = await prefsService.GetAsync(parsedUserId);
+            var creatorName = !string.IsNullOrWhiteSpace(prefs.DisplayName)
+                ? prefs.DisplayName
+                : user.Name;
+
             var created = await calendarService.CreateEventAsync(
-                dto.CalendarId, config.Name, config.Color, dto, user.Name, user.Email);
+                dto.CalendarId, config.Name, config.Color, dto, creatorName, user.Email);
 
             return Results.Created($"/calendar/events/{dto.CalendarId}/{created.Id}", created);
         }).RequireAuthorization("AnyRole");

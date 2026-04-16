@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -11,8 +11,6 @@ import { CalendarConfig, CalendarEvent } from '../../../models/calendar.model';
 export interface EventFormDialogData {
   event?: CalendarEvent;
   defaultStart?: Date;
-  /** Wird beim Speichern automatisch vor den Titel gestellt, z. B. "Max - " */
-  titlePrefix?: string;
   configs: CalendarConfig[];
   writableCalendarIds: string[];
 }
@@ -59,12 +57,6 @@ export interface EventFormDialogResult {
           <input matInput formControlName="title" placeholder="Titel eingeben">
         </mat-form-field>
 
-        @if (data.titlePrefix && !data.event) {
-          <p class="title-preview">
-            <span class="preview-label">Gespeicherter Titel:</span>
-            <span class="preview-prefix">{{ data.titlePrefix }}</span><span class="preview-input">{{ titlePreview() || '…' }}</span>
-          </p>
-        }
 
         <mat-checkbox formControlName="isAllDay">Ganztägig</mat-checkbox>
 
@@ -124,25 +116,6 @@ export interface EventFormDialogResult {
       border-radius: 50%;
       margin-right: 6px;
     }
-    .title-preview {
-      font-size: 13px;
-      color: var(--mat-sys-on-surface-variant, #666);
-      margin: -2px 0 8px;
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .preview-label {
-      white-space: nowrap;
-    }
-    .preview-prefix {
-      color: var(--mat-sys-primary, #1976d2);
-      font-weight: 500;
-    }
-    .preview-input {
-      font-style: italic;
-    }
   `],
 })
 export class EventFormDialogComponent implements OnInit {
@@ -165,9 +138,6 @@ export class EventFormDialogComponent implements OnInit {
     description: [''],
     location: [''],
   });
-
-  /** Reaktive Vorschau des Titels im Eingabefeld (für das Preview-Label) */
-  titlePreview = signal('');
 
   ngOnInit(): void {
     const ev = this.data.event;
@@ -200,8 +170,6 @@ export class EventFormDialogComponent implements OnInit {
       });
     }
 
-    // Preview live aktualisieren
-    this.form.get('title')!.valueChanges.subscribe(v => this.titlePreview.set(v ?? ''));
   }
 
   submit(): void {
@@ -221,13 +189,9 @@ export class EventFormDialogComponent implements OnInit {
       end = new Date(v.end!);
     }
 
-    // Prefix nur beim Erstellen anhängen (nicht beim Bearbeiten)
-    const prefix = !this.data.event && this.data.titlePrefix ? this.data.titlePrefix : '';
-    const title = prefix + v.title!;
-
     const result: EventFormDialogResult = {
       calendarId: v.calendarId!,
-      title,
+      title: v.title!,
       start,
       end,
       isAllDay,
