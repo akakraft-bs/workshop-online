@@ -1,0 +1,76 @@
+<h2 mat-dialog-title>Mangel melden</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Titel</mat-label>
+      <input matInput formControlName="title" placeholder="Kurze Beschreibung des Mangels">
+      @if (form.controls.title.hasError('required')) {
+        <mat-error>Titel ist erforderlich</mat-error>
+      }
+      @if (form.controls.title.hasError('maxlength')) {
+        <mat-error>Maximal 200 Zeichen</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Kategorie</mat-label>
+      <mat-select formControlName="kategorie">
+        @for (k of kategorien; track k) {
+          <mat-option [value]="k">{{ k }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.kategorie.hasError('required')) {
+        <mat-error>Kategorie ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Beschreibung</mat-label>
+      <textarea matInput
+                formControlName="description"
+                rows="4"
+                placeholder="Detaillierte Beschreibung des Mangels..."></textarea>
+      @if (form.controls.description.hasError('required')) {
+        <mat-error>Beschreibung ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Bild (optional) -->
+    <div class="image-section">
+      <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+
+      @if (!previewUrl()) {
+        <button type="button" mat-stroked-button (click)="fileInput.click()">
+          <mat-icon>photo_camera</mat-icon>
+          Foto anhängen (optional)
+        </button>
+      } @else {
+        <div class="image-preview">
+          <img [src]="previewUrl()!" alt="Vorschau">
+          <button type="button" mat-icon-button class="clear-btn" (click)="clearImage()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <button type="button" mat-stroked-button (click)="fileInput.click()">
+          <mat-icon>swap_horiz</mat-icon>
+          Foto ersetzen
+        </button>
+      }
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="saving()">Abbrechen</button>
+  <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid || saving()">
+    @if (saving()) {
+      <mat-spinner diameter="20" />
+    } @else {
+      <span class="btn-inner">
+        <mat-icon>send</mat-icon>
+        Melden
+      </span>
+    }
+  </button>
+</mat-dialog-actions>

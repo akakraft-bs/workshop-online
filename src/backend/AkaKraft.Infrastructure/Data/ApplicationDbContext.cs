@@ -16,6 +16,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
     public DbSet<FcmToken> FcmTokens => Set<FcmToken>();
+    public DbSet<Mangel> Maengel => Set<Mangel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,5 +30,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
         modelBuilder.ApplyConfiguration(new UserPreferencesConfiguration());
         modelBuilder.ApplyConfiguration(new FcmTokenConfiguration());
+        modelBuilder.ApplyConfiguration(new MangelConfiguration());
     }
 }

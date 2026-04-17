@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>Mangel bearbeiten</h2>
+
+<mat-dialog-content>
+  <p class="mangel-title">„{{ data.mangel.title }}"</p>
+
+  <form [formGroup]="form">
+    <p class="field-label">Status setzen</p>
+    <mat-button-toggle-group formControlName="status" class="status-toggle">
+      @for (opt of statusOptions; track opt.value) {
+        <mat-button-toggle [value]="opt.value">{{ opt.label }}</mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+
+    <mat-form-field appearance="outline" class="full-width note-field">
+      <mat-label>Anmerkung (optional)</mat-label>
+      <textarea matInput
+                formControlName="note"
+                rows="3"
+                placeholder="Kurze Erläuterung..."></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Abbrechen</button>
+  <button mat-flat-button color="primary" (click)="submit()">Speichern</button>
+</mat-dialog-actions>

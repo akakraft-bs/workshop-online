@@ -54,6 +54,29 @@
     </section>
   }
 
+  <!-- Offene Mängel -->
+  @if (openMaengel().length > 0) {
+    <section class="section">
+      <h2 class="section-title">
+        <mat-icon class="section-title-icon">report_problem</mat-icon>
+        Offene Mängel
+      </h2>
+      <div class="events-list">
+        @for (mangel of openMaengel(); track mangel.id) {
+          <a class="event-item stock-item" routerLink="/mangel">
+            <mat-icon class="stock-warn-icon mangel-icon-{{ mangel.status === 'Kenntnisgenommen' ? 'known' : 'open' }}">
+              {{ mangel.status === 'Kenntnisgenommen' ? 'visibility' : 'report_problem' }}
+            </mat-icon>
+            <div class="event-info">
+              <span class="event-title">{{ mangel.title }}</span>
+              <span class="event-date">{{ mangel.kategorie }} · {{ mangel.status === 'Kenntnisgenommen' ? 'Kenntnisgenommen' : 'Offen' }}</span>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
   <!-- Schnellzugriff -->
   <section class="section">
     <div class="section-header">

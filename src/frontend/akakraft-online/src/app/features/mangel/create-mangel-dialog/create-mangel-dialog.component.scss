@@ -1,0 +1,47 @@
+.full-width {
+  width: 100%;
+}
+
+.btn-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.image-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.image-preview {
+  position: relative;
+  width: fit-content;
+
+  img {
+    max-height: 160px;
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--mat-sys-outline-variant);
+    display: block;
+    object-fit: cover;
+  }
+
+  .clear-btn {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    background: var(--mat-sys-surface);
+    border: 1px solid var(--mat-sys-outline-variant);
+    width: 28px;
+    height: 28px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}

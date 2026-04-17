@@ -1,0 +1,114 @@
+<h1 class="page-title">Mängelmelder</h1>
+
+<div class="page-header">
+  <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
+    <mat-button-toggle value="aktiv">
+      Aktiv
+      @if (openCount() > 0) {
+        <span class="count-badge">{{ openCount() }}</span>
+      }
+    </mat-button-toggle>
+    <mat-button-toggle value="abgeschlossen">Abgeschlossen</mat-button-toggle>
+    <mat-button-toggle value="alle">Alle</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
+    <mat-icon>add</mat-icon>
+    Mangel melden
+  </button>
+  <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+
+<div class="kat-filter">
+  <mat-chip-set>
+    <mat-chip [highlighted]="kategorieFilter() === null" (click)="kategorieFilter.set(null)">Alle</mat-chip>
+    @for (k of kategorien; track k) {
+      <mat-chip [highlighted]="kategorieFilter() === k" (click)="kategorieFilter.set(k)">
+        <mat-icon matChipAvatar>{{ kategorieIcon(k) }}</mat-icon>
+        {{ k }}
+      </mat-chip>
+    }
+  </mat-chip-set>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="48" />
+  </div>
+} @else if (filteredItems().length === 0) {
+  <div class="empty-state">
+    <mat-icon>check_circle_outline</mat-icon>
+    <p>Keine Mängel in dieser Ansicht.</p>
+  </div>
+} @else {
+  <div class="mangel-list">
+    @for (mangel of filteredItems(); track mangel.id) {
+      <div class="mangel-card" [class.resolved]="mangel.status !== 'Offen' && mangel.status !== 'Kenntnisgenommen'">
+        <div class="mangel-header">
+          <div class="mangel-meta">
+            <span class="kategorie-chip">
+              <mat-icon class="kat-icon">{{ kategorieIcon(mangel.kategorie) }}</mat-icon>
+              {{ KATEGORIE_LABELS[mangel.kategorie] }}
+            </span>
+            <span class="status-chip status-{{ mangel.status.toLowerCase() }}">
+              <mat-icon class="status-icon">{{ statusIcon(mangel.status) }}</mat-icon>
+              {{ STATUS_LABELS[mangel.status] }}
+            </span>
+          </div>
+          <div class="mangel-actions">
+            @if (canZurueckziehen(mangel)) {
+              <button mat-icon-button
+                      matTooltip="Meldung zurückziehen"
+                      (click)="zurueckziehen(mangel)">
+                <mat-icon>undo</mat-icon>
+              </button>
+            }
+            @if (canResolve(mangel)) {
+              <button mat-icon-button
+                      matTooltip="Status bearbeiten"
+                      (click)="openResolveDialog(mangel)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+
+        <h3 class="mangel-title">{{ mangel.title }}</h3>
+        <p class="mangel-description">{{ mangel.description }}</p>
+
+        @if (mangel.imageUrl) {
+          <a [href]="mangel.imageUrl" target="_blank" rel="noopener" class="mangel-image-link">
+            <img [src]="mangel.imageUrl" alt="Mangel-Foto" class="mangel-thumb">
+          </a>
+        }
+
+        <div class="mangel-footer">
+          <span class="reporter">
+            <mat-icon class="footer-icon">person</mat-icon>
+            {{ mangel.createdByName }}
+          </span>
+          <span class="date">{{ mangel.createdAt | date:'dd.MM.yyyy' }}</span>
+        </div>
+
+        @if (mangel.note) {
+          <div class="mangel-note">
+            <mat-icon class="note-icon">comment</mat-icon>
+            <span>{{ mangel.note }}</span>
+          </div>
+        }
+
+        @if (mangel.resolvedByName) {
+          <div class="resolved-by">
+            <mat-icon class="footer-icon">manage_accounts</mat-icon>
+            {{ mangel.resolvedByName }}
+            @if (mangel.resolvedAt) {
+              · {{ mangel.resolvedAt | date:'dd.MM.yyyy' }}
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

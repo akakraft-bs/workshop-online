@@ -12,6 +12,7 @@ import { CalendarService } from '../../core/calendar/calendar.service';
 import { UserPreferencesService } from '../../core/user/user-preferences.service';
 import { CalendarEvent } from '../../models/calendar.model';
 import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
+import { Mangel } from '../../models/mangel.model';
 import { Role } from '../../models/user.model';
 
 export interface NavItem {
@@ -27,6 +28,7 @@ const ALL_QUICK_ITEMS: NavItem[] = [
   { label: 'Veranstaltungen', description: 'Veranstaltungen planen und verwalten', icon: 'celebration', route: '/veranstaltungen' },
   { label: 'Werkzeug', description: 'Werkzeug einsehen und ausleihen', icon: 'build', route: '/werkzeug' },
   { label: 'Verbrauchsmaterial', description: 'Aktuellen Bestand einsehen', icon: 'inventory_2', route: '/verbrauchsmaterial' },
+  { label: 'Mängelmelder', description: 'Mängel melden und einsehen', icon: 'report_problem', route: '/mangel' },
   { label: 'Nutzerverwaltung', description: 'Nutzer und Rollen verwalten', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
   { label: 'Kalender-Einstellungen', description: 'Kalender konfigurieren', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
   { label: 'Feedback', description: 'Eingegangenes Feedback verwalten', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },
@@ -53,6 +55,7 @@ export class DashboardComponent implements OnInit {
   readonly upcomingEvents = signal<CalendarEvent[]>([]);
   readonly loadingEvents = signal(true);
   readonly lowStockItems = signal<Verbrauchsmaterial[]>([]);
+  readonly openMaengel = signal<Mangel[]>([]);
 
   readonly favoriteRoutes = signal<string[]>(DEFAULT_FAVORITES);
   readonly editMode = signal(false);
@@ -85,6 +88,13 @@ export class DashboardComponent implements OnInit {
         items.filter(v => v.minQuantity != null && v.quantity <= v.minQuantity)
       ),
       error: () => { /* kein Fehler anzeigen, Dashboard bleibt funktionsfähig */ },
+    });
+
+    this.api.get<Mangel[]>('/mangel').subscribe({
+      next: items => this.openMaengel.set(
+        items.filter(m => m.status === 'Offen' || m.status === 'Kenntnisgenommen')
+      ),
+      error: () => { /* kein Fehler anzeigen */ },
     });
 
     this.prefsService.getPreferences().subscribe({
