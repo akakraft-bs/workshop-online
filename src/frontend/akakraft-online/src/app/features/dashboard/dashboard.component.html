@@ -1,6 +1,6 @@
 <div class="dashboard">
   <h1 class="greeting">
-    Hallo, {{ (auth.currentUser()?.name ?? 'Mitglied').split(' ')[0] }}!
+    Hallo, {{ auth.currentUser()?.displayName || (auth.currentUser()?.name ?? 'Mitglied').split(' ')[0] }}!
   </h1>
 
   <!-- Nächste Veranstaltungen -->

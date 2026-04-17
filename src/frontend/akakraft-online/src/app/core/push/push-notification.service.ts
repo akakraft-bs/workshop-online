@@ -11,6 +11,12 @@ export type PushPermissionState = 'default' | 'granted' | 'denied' | 'unsupporte
 const TOKEN_STORAGE_KEY = 'fcm_token';
 const PROMPT_SEEN_KEY = 'push_prompt_seen';
 const IOS_HINT_SEEN_KEY = 'ios_install_hint_seen';
+const ANDROID_INSTALL_SEEN_KEY = 'android_install_seen';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  readonly userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
 
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
@@ -18,6 +24,7 @@ export class PushNotificationService {
 
   private app: FirebaseApp | null = null;
   private messaging: Messaging | null = null;
+  private deferredInstallPrompt: BeforeInstallPromptEvent | null = null;
 
   /** Ob Push im Browser grundsätzlich erlaubt ist. */
   readonly permissionState = signal<PushPermissionState>(this.readCurrentPermission());
@@ -25,12 +32,29 @@ export class PushNotificationService {
   /** Ob ein Token aktiv im Backend registriert ist (= Push "eingeschaltet"). */
   readonly isSubscribed = signal(!!localStorage.getItem(TOKEN_STORAGE_KEY));
 
+  /** Ob der Browser einen PWA-Installationsprompt bereitstellt. */
+  readonly canInstall = signal(false);
+
   constructor() {
     if (this.isSupported()) {
       this.app = getApps().length
         ? getApps()[0]
         : initializeApp(environment.firebase);
       this.messaging = getMessaging(this.app);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        this.deferredInstallPrompt = e as BeforeInstallPromptEvent;
+        this.canInstall.set(true);
+      });
+
+      // Wenn die App installiert wird (z.B. über Browser-Menü), Signal zurücksetzen
+      window.addEventListener('appinstalled', () => {
+        this.deferredInstallPrompt = null;
+        this.canInstall.set(false);
+      });
     }
   }
 
@@ -172,6 +196,32 @@ export class PushNotificationService {
 
   markIosHintSeen(): void {
     localStorage.setItem(IOS_HINT_SEEN_KEY, '1');
+  }
+
+  /**
+   * Soll der Android-Installations-Banner gezeigt werden?
+   * Ja wenn: Browser hat beforeinstallprompt gefeuert, noch nicht installiert/abgelehnt.
+   */
+  shouldShowAndroidInstallPrompt(): boolean {
+    if (!this.canInstall()) return false;
+    if (this.isStandalone()) return false;
+    if (localStorage.getItem(ANDROID_INSTALL_SEEN_KEY)) return false;
+    return true;
+  }
+
+  /** Löst den nativen Browser-Installationsdialog aus. */
+  async triggerInstall(): Promise<'accepted' | 'dismissed' | null> {
+    if (!this.deferredInstallPrompt) return null;
+    await this.deferredInstallPrompt.prompt();
+    const { outcome } = await this.deferredInstallPrompt.userChoice;
+    this.deferredInstallPrompt = null;
+    this.canInstall.set(false);
+    localStorage.setItem(ANDROID_INSTALL_SEEN_KEY, '1');
+    return outcome;
+  }
+
+  markAndroidInstallSeen(): void {
+    localStorage.setItem(ANDROID_INSTALL_SEEN_KEY, '1');
   }
 
   private readCurrentPermission(): PushPermissionState {

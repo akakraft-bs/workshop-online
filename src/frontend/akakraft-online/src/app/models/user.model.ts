@@ -38,6 +38,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  displayName?: string | null;
   pictureUrl?: string;
   createdAt: string;
   roles: Role[];

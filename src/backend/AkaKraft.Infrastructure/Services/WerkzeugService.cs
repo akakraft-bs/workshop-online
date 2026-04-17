@@ -22,7 +22,12 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
                 w.Dimensions,
                 w.IsAvailable,
                 w.BorrowedByUserId,
-                w.BorrowedBy != null ? w.BorrowedBy.Name : null,
+                w.BorrowedBy != null
+                    ? db.UserPreferences
+                        .Where(p => p.UserId == w.BorrowedByUserId && p.DisplayName != null)
+                        .Select(p => p.DisplayName)
+                        .FirstOrDefault() ?? w.BorrowedBy.Name
+                    : null,
                 w.BorrowedAt,
                 w.ExpectedReturnAt,
                 w.ReturnedAt))
@@ -139,9 +144,19 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         return (ToDto(werkzeug), false);
     }
 
-    private static WerkzeugDto ToDto(Werkzeug w) => new(
+    private string? ResolveDisplayName(Werkzeug w)
+    {
+        if (w.BorrowedBy is null) return null;
+        var displayName = db.UserPreferences
+            .Where(p => p.UserId == w.BorrowedByUserId && p.DisplayName != null)
+            .Select(p => p.DisplayName)
+            .FirstOrDefault();
+        return displayName ?? w.BorrowedBy.Name;
+    }
+
+    private WerkzeugDto ToDto(Werkzeug w) => new(
         w.Id, w.Name, w.Description, w.Category,
         w.ImageUrl, w.Dimensions, w.IsAvailable,
-        w.BorrowedByUserId, w.BorrowedBy?.Name,
+        w.BorrowedByUserId, ResolveDisplayName(w),
         w.BorrowedAt, w.ExpectedReturnAt, w.ReturnedAt);
 }

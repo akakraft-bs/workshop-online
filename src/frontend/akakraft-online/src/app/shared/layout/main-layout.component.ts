@@ -17,6 +17,7 @@ import { ProfileDialogComponent } from '../../features/profile/profile-dialog.co
 import { PushNotificationService } from '../../core/push/push-notification.service';
 import { PushPromptDialogComponent } from '../../features/push/push-prompt-dialog.component';
 import { IosInstallBannerComponent } from '../../features/push/ios-install-banner.component';
+import { AndroidInstallBannerComponent } from '../../features/push/android-install-banner.component';
 
 interface NavItem {
   label: string;
@@ -44,6 +45,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     MatSidenavModule, MatToolbarModule, MatIconModule,
     MatButtonModule, MatListModule, MatMenuModule, MatDividerModule, MatTooltipModule,
     IosInstallBannerComponent,
+    AndroidInstallBannerComponent,
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
@@ -57,6 +59,7 @@ export class MainLayoutComponent implements OnInit {
   readonly sidenavRef = viewChild.required<MatSidenav>('sidenav');
   readonly isMobile = signal(false);
   readonly showIosBanner = signal(false);
+  readonly showAndroidBanner = signal(false);
   logoFailed = false;
   readonly currentUser = this.auth.currentUser;
 
@@ -80,6 +83,11 @@ export class MainLayoutComponent implements OnInit {
 
     if (this.push.shouldShowIosInstallHint()) {
       this.showIosBanner.set(true);
+      return;
+    }
+
+    if (this.push.shouldShowAndroidInstallPrompt()) {
+      this.showAndroidBanner.set(true);
       return;
     }
 

@@ -22,7 +22,7 @@
             <mat-select formControlName="userId">
               <mat-option [value]="null">Alle Nutzer (mit aktiviertem Push)</mat-option>
               @for (user of users(); track user.id) {
-                <mat-option [value]="user.id">{{ user.name }} – {{ user.email }}</mat-option>
+                <mat-option [value]="user.id">{{ user.displayName || user.name }} – {{ user.email }}</mat-option>
               }
             </mat-select>
           </mat-form-field>

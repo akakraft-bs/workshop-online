@@ -6,7 +6,7 @@
       <mat-icon class="avatar-icon">account_circle</mat-icon>
     }
     <div>
-      <span>{{ data.user.name }}</span>
+      <span>{{ data.user.displayName || data.user.name }}</span>
       <small>{{ data.user.email }}</small>
     </div>
   </div>

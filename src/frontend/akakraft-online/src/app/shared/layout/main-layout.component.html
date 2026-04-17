@@ -92,3 +92,7 @@
 @if (showIosBanner()) {
   <app-ios-install-banner (closed)="showIosBanner.set(false)" />
 }
+
+@if (showAndroidBanner()) {
+  <app-android-install-banner (closed)="showAndroidBanner.set(false)" />
+}

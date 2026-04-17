@@ -1,0 +1,119 @@
+<h2 mat-dialog-title>Profil</h2>
+<mat-dialog-content>
+    <div class="user-info">
+    @if (auth.currentUser()?.pictureUrl; as pic) {
+        <img class="avatar" [src]="pic" [alt]="auth.currentUser()?.name">
+    }
+    <div>
+        <div class="real-name">{{ auth.currentUser()?.name }}</div>
+        <div class="email">{{ auth.currentUser()?.email }}</div>
+    </div>
+    </div>
+
+    <form [formGroup]="form" class="profile-form">
+
+    <mat-form-field appearance="outline">
+        <mat-label>Anzeigename</mat-label>
+        <input matInput formControlName="displayName"
+                placeholder="z. B. dein Vorname oder Spitzname">
+    </mat-form-field>
+
+    <mat-divider class="section-divider" />
+
+    <div class="section-header">
+        <mat-icon class="section-icon">notifications</mat-icon>
+        <span class="section-title">Benachrichtigungen</span>
+    </div>
+
+    @if (push.isSupported()) {
+        <div class="push-row">
+        @if (push.permissionState() === 'denied') {
+            <div class="push-denied">
+            <mat-icon class="push-denied-icon">notifications_off</mat-icon>
+            <span>
+                Push-Benachrichtigungen wurden im Browser blockiert.
+                Bitte erlaube sie in den Browser-Einstellungen und lade die Seite neu.
+            </span>
+            </div>
+        } @else {
+            <button
+            mat-stroked-button
+            [color]="push.isSubscribed() ? 'warn' : 'primary'"
+            (click)="togglePush()"
+            [disabled]="togglingPush()">
+            @if (togglingPush()) {
+                <mat-spinner diameter="18" />
+            } @else if (push.isSubscribed()) {
+                <span class="btn-inner">
+                <mat-icon>notifications_off</mat-icon>
+                Push deaktivieren
+                </span>
+            } @else {
+                <span class="btn-inner">
+                <mat-icon>notifications_active</mat-icon>
+                Push aktivieren
+                </span>
+            }
+            </button>
+            @if (push.isSubscribed()) {
+            <span class="push-active-hint">
+                <mat-icon class="push-check-icon">check_circle</mat-icon>
+                Aktiv auf diesem Gerät
+            </span>
+            }
+        }
+        </div>
+    } @else {
+        <p class="push-unsupported">
+        Dein Browser unterstützt keine Push-Benachrichtigungen.
+        </p>
+    }
+
+    <div class="notification-list">
+        <div class="notification-item">
+        <mat-slide-toggle
+            [checked]="push.isSubscribed() && !!form.get('notifyLeihruckgabe')?.value"
+            [disabled]="!push.isSubscribed()"
+            (change)="form.get('notifyLeihruckgabe')!.setValue($event.checked); form.markAsDirty()">
+            Leihrückgabe
+        </mat-slide-toggle>
+        <p class="notification-hint">Erinnerungen bei überfälligen Werkzeug-Rückgaben</p>
+        </div>
+
+        <div class="notification-item">
+        <mat-slide-toggle
+            [checked]="push.isSubscribed() && !!form.get('notifyVeranstaltungen')?.value"
+            [disabled]="!push.isSubscribed()"
+            (change)="form.get('notifyVeranstaltungen')!.setValue($event.checked); form.markAsDirty()">
+            Veranstaltungen
+        </mat-slide-toggle>
+        <p class="notification-hint">Neue Termine und Erinnerungen</p>
+        </div>
+
+        @if (isHallenwart()) {
+        <div class="notification-item">
+            <mat-slide-toggle
+            [checked]="push.isSubscribed() && !!form.get('notifyMindestbestand')?.value"
+            [disabled]="!push.isSubscribed()"
+            (change)="form.get('notifyMindestbestand')!.setValue($event.checked); form.markAsDirty()">
+            Mindestbestand
+            </mat-slide-toggle>
+            <p class="notification-hint">Unterschreitung von Mindestbeständen</p>
+        </div>
+        }
+    </div>
+
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>{{ form.dirty ? 'Abbrechen' : 'Schließen' }}</button>
+    <button mat-flat-button color="primary"
+            (click)="save()"
+            [disabled]="saving() || form.pristine">
+    @if (saving()) {
+        <mat-spinner diameter="18" />
+    } @else {
+        Speichern
+    }
+    </button>
+</mat-dialog-actions>

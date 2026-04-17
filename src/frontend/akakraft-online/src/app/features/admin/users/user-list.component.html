@@ -27,7 +27,7 @@
                 <mat-icon class="avatar-icon">account_circle</mat-icon>
               }
               <div class="user-info">
-                <strong>{{ user.name }}</strong>
+                <strong>{{ user.displayName || user.name }}</strong>
                 <small>{{ user.email }}</small>
               </div>
             </div>
@@ -54,7 +54,7 @@
             } @else {
               <mat-icon class="avatar-icon">account_circle</mat-icon>
             }
-            <span>{{ user.name }}</span>
+            <span>{{ user.displayName || user.name }}</span>
             @if (isPending(user)) {
               <span class="pending-badge" matTooltip="Kein Zugriff – noch keine Rolle zugewiesen">Neu</span>
             }

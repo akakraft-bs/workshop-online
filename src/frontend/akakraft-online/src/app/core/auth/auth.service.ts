@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { catchError, EMPTY, firstValueFrom, Observable, tap } from 'rxjs';
 import { Role, User, VORSTAND_ROLES } from '../../models/user.model';
 import { environment } from '../../../environments/environment';
@@ -11,6 +12,7 @@ export class AuthService {
   private readonly USER_KEY = 'auth_user';
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
 
   readonly currentUser = signal<User | null>(null);
   readonly isLoggedIn = computed(() => this.currentUser() !== null);
@@ -36,7 +38,23 @@ export class AuthService {
         tap(user => { this.currentUser.set(user); this.cacheUser(user); }),
         catchError(() => { this.clearSession(); return EMPTY; })
       )
-      .subscribe(() => this.router.navigate([this.hasAccess() ? '/dashboard' : '/pending']));
+      .subscribe(() => {
+        // window.location.replace erzeugt eine echte HTTP-Navigation und ersetzt den
+        // History-Eintrag. Dadurch merkt sich Safari beim "Zum Home-Bildschirm hinzufügen"
+        // die korrekte URL (/dashboard) statt der Callback-URL.
+        window.location.replace(this.location.prepareExternalUrl(
+          this.hasAccess() ? '/dashboard' : '/pending'
+        ));
+      });
+  }
+
+  refreshCurrentUser(): void {
+    this.http.get<User>(`${environment.apiUrl}/auth/me`, { withCredentials: true })
+      .pipe(
+        tap(user => { this.currentUser.set(user); this.cacheUser(user); }),
+        catchError(() => EMPTY),
+      )
+      .subscribe();
   }
 
   logout(): void {

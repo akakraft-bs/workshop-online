@@ -6,6 +6,7 @@ public record UserDto(
     Guid Id,
     string Email,
     string Name,
+    string? DisplayName,
     string? PictureUrl,
     DateTime CreatedAt,
     IReadOnlyList<Role> Roles

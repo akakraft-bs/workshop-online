@@ -15,7 +15,12 @@ public class UserService(ApplicationDbContext db) : IUserService
             .Include(u => u.UserRoles)
             .FirstOrDefaultAsync(u => u.Id == id);
 
-        return user is null ? null : MapToDto(user);
+        if (user is null) return null;
+        var displayName = await db.UserPreferences
+            .Where(p => p.UserId == user.Id)
+            .Select(p => p.DisplayName)
+            .FirstOrDefaultAsync();
+        return MapToDto(user, displayName);
     }
 
     public async Task<UserDto?> GetByGoogleIdAsync(string googleId)
@@ -24,7 +29,12 @@ public class UserService(ApplicationDbContext db) : IUserService
             .Include(u => u.UserRoles)
             .FirstOrDefaultAsync(u => u.GoogleId == googleId);
 
-        return user is null ? null : MapToDto(user);
+        if (user is null) return null;
+        var displayName = await db.UserPreferences
+            .Where(p => p.UserId == user.Id)
+            .Select(p => p.DisplayName)
+            .FirstOrDefaultAsync();
+        return MapToDto(user, displayName);
     }
 
     public async Task<UserDto?> GetByEmailAsync(string email)
@@ -33,34 +43,31 @@ public class UserService(ApplicationDbContext db) : IUserService
             .Include(u => u.UserRoles)
             .FirstOrDefaultAsync(u => u.Email == email);
 
-        return user is null ? null : MapToDto(user);
+        if (user is null) return null;
+        var displayName = await db.UserPreferences
+            .Where(p => p.UserId == user.Id)
+            .Select(p => p.DisplayName)
+            .FirstOrDefaultAsync();
+        return MapToDto(user, displayName);
     }
 
     public async Task<IReadOnlyList<UserDto>> GetAllAsync()
     {
-        var users = await db.Users
+        return await db.Users
             .Include(u => u.UserRoles)
+            .Select(u => new UserDto(
+                u.Id,
+                u.Email,
+                u.Name,
+                db.UserPreferences
+                    .Where(p => p.UserId == u.Id)
+                    .Select(p => p.DisplayName)
+                    .FirstOrDefault(),
+                u.PictureUrl,
+                u.CreatedAt,
+                u.UserRoles.Select(ur => ur.Role).ToList()
+            ))
             .ToListAsync();
-
-        return users.Select(MapToDto).ToList();
-    }
-
-    public async Task<UserDto> CreateAsync(string googleId, string email, string name, string? pictureUrl)
-    {
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            GoogleId = googleId,
-            Email = email,
-            Name = name,
-            PictureUrl = pictureUrl,
-            CreatedAt = DateTime.UtcNow,
-        };
-
-        db.Users.Add(user);
-        await db.SaveChangesAsync();
-
-        return MapToDto(user);
     }
 
     public async Task<UserDto> AssignRoleAsync(Guid userId, Role role)
@@ -82,7 +89,11 @@ public class UserService(ApplicationDbContext db) : IUserService
             await db.SaveChangesAsync();
         }
 
-        return MapToDto(user);
+        var displayName = await db.UserPreferences
+            .Where(p => p.UserId == user.Id)
+            .Select(p => p.DisplayName)
+            .FirstOrDefaultAsync();
+        return MapToDto(user, displayName);
     }
 
     public async Task<UserDto> RemoveRoleAsync(Guid userId, Role role)
@@ -99,14 +110,37 @@ public class UserService(ApplicationDbContext db) : IUserService
             await db.SaveChangesAsync();
         }
 
-        return MapToDto(user);
+        var displayName = await db.UserPreferences
+            .Where(p => p.UserId == user.Id)
+            .Select(p => p.DisplayName)
+            .FirstOrDefaultAsync();
+        return MapToDto(user, displayName);
     }
 
-    private static UserDto MapToDto(User user) =>
+    public async Task<UserDto> CreateAsync(string googleId, string email, string name, string? pictureUrl)
+    {
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            GoogleId = googleId,
+            Email = email,
+            Name = name,
+            PictureUrl = pictureUrl,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+
+        return MapToDto(user, null);
+    }
+
+    private static UserDto MapToDto(User user, string? displayName) =>
         new(
             user.Id,
             user.Email,
             user.Name,
+            displayName,
             user.PictureUrl,
             user.CreatedAt,
             user.UserRoles.Select(ur => ur.Role).ToList()

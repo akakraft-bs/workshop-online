@@ -67,7 +67,7 @@ export class AdminPushComponent implements OnInit {
       next: () => {
         this.sending.set(false);
         const target = userId
-          ? this.users().find(u => u.id === userId)?.name ?? 'Nutzer'
+          ? (this.users().find(u => u.id === userId)?.displayName || this.users().find(u => u.id === userId)?.name) ?? 'Nutzer'
           : 'alle Nutzer';
         this.snackBar.open(`Benachrichtigung an ${target} gesendet.`, 'OK', { duration: 4000 });
       },
