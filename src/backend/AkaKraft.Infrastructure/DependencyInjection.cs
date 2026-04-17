@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
+using WebPush;
 
 
 namespace AkaKraft.Infrastructure;
@@ -40,6 +41,31 @@ public static class DependencyInjection
         services.AddScoped<ICalendarConfigService, CalendarConfigService>();
         services.AddSingleton<ICalendarService, GoogleCalendarService>();
         services.AddScoped<IUserPreferencesService, UserPreferencesService>();
+
+        // Push Notifications
+        var vapidOpts = configuration.GetSection(VapidOptions.SectionName).Get<VapidOptions>()
+            ?? new VapidOptions();
+
+        // VAPID-Keys automatisch generieren falls nicht konfiguriert
+        if (string.IsNullOrWhiteSpace(vapidOpts.PublicKey) || string.IsNullOrWhiteSpace(vapidOpts.PrivateKey))
+        {
+            var generated = VapidHelper.GenerateVapidKeys();
+            vapidOpts.PublicKey = generated.PublicKey;
+            vapidOpts.PrivateKey = generated.PrivateKey;
+            if (string.IsNullOrWhiteSpace(vapidOpts.Subject))
+                vapidOpts.Subject = "mailto:admin@akakraft.de";
+        }
+
+        services.Configure<VapidOptions>(opts =>
+        {
+            opts.Subject = vapidOpts.Subject;
+            opts.PublicKey = vapidOpts.PublicKey;
+            opts.PrivateKey = vapidOpts.PrivateKey;
+        });
+
+        services.AddScoped<IPushNotificationService, PushNotificationService>();
+        services.AddScoped<INotificationPreferencesService, NotificationPreferencesService>();
+        services.AddHostedService<WerkzeugRueckgabeReminderService>();
 
         return services;
     }

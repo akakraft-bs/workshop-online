@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using INotificationPreferencesService = AkaKraft.Application.Interfaces.INotificationPreferencesService;
 
 namespace AkaKraft.WebApi;
 
@@ -293,6 +294,74 @@ public static class Program
         }).RequireAuthorization("AdminOnly");
 
         // -------------------------------------------------------------------------
+        // Push Notification Endpoints
+        // -------------------------------------------------------------------------
+
+        // VAPID Public Key – Frontend braucht ihn für PushManager.subscribe()
+        app.MapGet("/push/vapid-public-key", (IPushNotificationService pushService) =>
+            Results.Ok(new { publicKey = pushService.GetVapidPublicKey() }))
+            .RequireAuthorization("JwtApi");
+
+        // Browser-Subscription speichern
+        app.MapPost("/push/subscribe", async (
+            HttpContext ctx,
+            AkaKraft.Application.DTOs.SavePushSubscriptionDto dto,
+            IPushNotificationService pushService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var id))
+                return Results.Unauthorized();
+
+            await pushService.SaveSubscriptionAsync(id, dto.Endpoint, dto.P256DH, dto.Auth);
+            return Results.Ok();
+        }).RequireAuthorization("JwtApi");
+
+        // Browser-Subscription entfernen (Opt-Out / Browser-Wechsel)
+        app.MapPost("/push/unsubscribe", async (
+            HttpContext ctx,
+            AkaKraft.Application.DTOs.SavePushSubscriptionDto dto,
+            IPushNotificationService pushService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var id))
+                return Results.Unauthorized();
+
+            await pushService.RemoveSubscriptionAsync(id, dto.Endpoint);
+            return Results.Ok();
+        }).RequireAuthorization("JwtApi");
+
+        // -------------------------------------------------------------------------
+        // Notification Preferences Endpoints
+        // -------------------------------------------------------------------------
+
+        app.MapGet("/users/me/notification-preferences", async (
+            HttpContext ctx,
+            INotificationPreferencesService notifPrefsService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var id))
+                return Results.Unauthorized();
+
+            return Results.Ok(await notifPrefsService.GetAsync(id));
+        }).RequireAuthorization("JwtApi");
+
+        app.MapPut("/users/me/notification-preferences", async (
+            HttpContext ctx,
+            AkaKraft.Application.DTOs.UpdateNotificationPreferencesDto dto,
+            INotificationPreferencesService notifPrefsService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var id))
+                return Results.Unauthorized();
+
+            return Results.Ok(await notifPrefsService.UpdateAsync(id, dto));
+        }).RequireAuthorization("JwtApi");
+
+        // -------------------------------------------------------------------------
         // User Preferences Endpoints
         // -------------------------------------------------------------------------
 
@@ -425,10 +494,42 @@ public static class Program
             return Results.Created($"/verbrauchsmaterial/{created.Id}", created);
         }).RequireAuthorization("VorstandOrAdmin");
 
-        app.MapPut("/verbrauchsmaterial/{id:guid}", async (Guid id, UpdateVerbrauchsmaterialDto dto, IVerbrauchsmaterialService verbrauchsmaterialService) =>
+        app.MapPut("/verbrauchsmaterial/{id:guid}", async (
+            Guid id,
+            UpdateVerbrauchsmaterialDto dto,
+            IVerbrauchsmaterialService verbrauchsmaterialService,
+            IPushNotificationService pushService,
+            IUserService userService) =>
         {
             var updated = await verbrauchsmaterialService.UpdateAsync(id, dto);
-            return updated is null ? Results.NotFound() : Results.Ok(updated);
+            if (updated is null)
+                return Results.NotFound();
+
+            // Mindestbestand-Unterschreitung → Hallenwart benachrichtigen
+            if (updated.MinQuantity.HasValue && updated.Quantity < updated.MinQuantity.Value)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var hallenwarte = (await userService.GetAllAsync())
+                            .Where(u => u.Roles.Contains(Role.Hallenwart))
+                            .Select(u => u.Id)
+                            .ToList();
+
+                        if (hallenwarte.Count > 0)
+                            await pushService.NotifyUsersWithPreferenceAsync(
+                                p => p.VerbrauchsmaterialMindestbestand,
+                                "Mindestbestand unterschritten",
+                                $"„{updated.Name}": noch {updated.Quantity} {updated.Unit} (Min. {updated.MinQuantity})",
+                                url: "/verbrauchsmaterial",
+                                restrictToUserIds: hallenwarte);
+                    }
+                    catch { }
+                });
+            }
+
+            return Results.Ok(updated);
         }).RequireAuthorization("VorstandOrAdmin");
 
         app.MapDelete("/verbrauchsmaterial/{id:guid}", async (Guid id, IVerbrauchsmaterialService verbrauchsmaterialService) =>
@@ -657,6 +758,24 @@ public static class Program
 
             var created = await calendarService.CreateEventAsync(
                 dto.CalendarId, config.Name, config.Color, dto, creatorName, user.Email);
+
+            // Alle Nutzer mit aktivierter "Veranstaltungen"-Präferenz benachrichtigen
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var push = app.Services.GetRequiredService<IPushNotificationService>();
+                    var startText = created.Start.HasValue
+                        ? created.Start.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                        : string.Empty;
+                    await push.NotifyUsersWithPreferenceAsync(
+                        p => p.Veranstaltungen,
+                        "Neuer Termin",
+                        $"{created.Title}{(string.IsNullOrEmpty(startText) ? "" : $" – {startText}")}",
+                        url: "/kalender");
+                }
+                catch { /* Notification-Fehler sollen Request nicht blockieren */ }
+            });
 
             return Results.Created($"/calendar/events/{dto.CalendarId}/{created.Id}", created);
         }).RequireAuthorization("AnyRole");
