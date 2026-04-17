@@ -114,8 +114,10 @@
     @if (saving()) {
       <mat-spinner diameter="20" />
     } @else {
-      <mat-icon>{{ isEdit ? 'save' : 'add' }}</mat-icon>
-      {{ isEdit ? 'Speichern' : 'Hinzufügen' }}
+      <span class="btn-inner">
+        <mat-icon>{{ isEdit ? 'save' : 'add' }}</mat-icon>
+        {{ isEdit ? 'Speichern' : 'Hinzufügen' }}
+      </span>
     }
   </button>
 </mat-dialog-actions>
