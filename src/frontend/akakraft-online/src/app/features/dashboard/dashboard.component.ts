@@ -7,9 +7,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
+import { ApiService } from '../../core/api/api.service';
 import { CalendarService } from '../../core/calendar/calendar.service';
 import { UserPreferencesService } from '../../core/user/user-preferences.service';
 import { CalendarEvent } from '../../models/calendar.model';
+import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
 import { Role } from '../../models/user.model';
 
 export interface NavItem {
@@ -44,11 +46,13 @@ const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial'];
 })
 export class DashboardComponent implements OnInit {
   readonly auth = inject(AuthService);
+  private readonly api = inject(ApiService);
   private readonly calendarService = inject(CalendarService);
   private readonly prefsService = inject(UserPreferencesService);
 
   readonly upcomingEvents = signal<CalendarEvent[]>([]);
   readonly loadingEvents = signal(true);
+  readonly lowStockItems = signal<Verbrauchsmaterial[]>([]);
 
   readonly favoriteRoutes = signal<string[]>(DEFAULT_FAVORITES);
   readonly editMode = signal(false);
@@ -74,6 +78,13 @@ export class DashboardComponent implements OnInit {
     this.calendarService.getUpcomingEvents().subscribe({
       next: events => { this.upcomingEvents.set(events); this.loadingEvents.set(false); },
       error: () => this.loadingEvents.set(false),
+    });
+
+    this.api.get<Verbrauchsmaterial[]>('/verbrauchsmaterial').subscribe({
+      next: items => this.lowStockItems.set(
+        items.filter(v => v.minQuantity != null && v.quantity <= v.minQuantity)
+      ),
+      error: () => { /* kein Fehler anzeigen, Dashboard bleibt funktionsfähig */ },
     });
 
     this.prefsService.getPreferences().subscribe({

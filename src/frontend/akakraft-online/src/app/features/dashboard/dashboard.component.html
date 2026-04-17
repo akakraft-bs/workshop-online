@@ -28,6 +28,32 @@
     }
   </section>
 
+  <!-- Niedriger Bestand -->
+  @if (lowStockItems().length > 0) {
+    <section class="section">
+      <h2 class="section-title">
+        <mat-icon class="section-title-icon">warning</mat-icon>
+        Niedriger Bestand
+      </h2>
+      <div class="events-list">
+        @for (item of lowStockItems(); track item.id) {
+          <a class="event-item stock-item" routerLink="/verbrauchsmaterial">
+            <mat-icon class="stock-warn-icon">inventory_2</mat-icon>
+            <div class="event-info">
+              <span class="event-title">{{ item.name }}</span>
+              <span class="event-date">
+                {{ item.quantity }} {{ item.unit }} vorhanden
+                @if (item.minQuantity != null) {
+                  · Mindestbestand: {{ item.minQuantity }} {{ item.unit }}
+                }
+              </span>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
   <!-- Schnellzugriff -->
   <section class="section">
     <div class="section-header">

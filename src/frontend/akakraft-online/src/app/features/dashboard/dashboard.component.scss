@@ -104,6 +104,33 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
+// ---- Niedriger Bestand -----------------------------------------------------
+
+.section-title-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 4px;
+  color: var(--mat-sys-error);
+}
+
+.stock-item {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-low);
+  }
+}
+
+.stock-warn-icon {
+  color: var(--mat-sys-error);
+  flex-shrink: 0;
+}
+
 // ---- Schnellzugriff --------------------------------------------------------
 
 .quick-links {
