@@ -45,17 +45,24 @@ export class WerkzeugListComponent implements OnInit {
   readonly loading = signal(true);
   readonly searchQuery = signal('');
   readonly showOnlyBorrowed = signal(false);
+  readonly selectedCategory = signal<string | null>(null);
   readonly pendingDeleteId = signal<string | null>(null);
 
   readonly canManage = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
 
+  readonly categories = computed(() =>
+    [...new Set(this.items().map(w => w.category))].sort()
+  );
+
   readonly filteredItems = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     const onlyBorrowed = this.showOnlyBorrowed();
+    const cat = this.selectedCategory();
 
     return this.items().filter(w => {
       if (onlyBorrowed && w.isAvailable) return false;
+      if (cat && w.category !== cat) return false;
       if (!q) return true;
       return (
         w.name.toLowerCase().includes(q) ||

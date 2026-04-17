@@ -35,6 +35,25 @@
   </div>
 </div>
 
+@if (!loading() && categories().length > 1) {
+  <div class="category-filter">
+    <mat-chip-set>
+      <mat-chip
+        [highlighted]="selectedCategory() === null"
+        (click)="selectedCategory.set(null)">
+        Alle
+      </mat-chip>
+      @for (cat of categories(); track cat) {
+        <mat-chip
+          [highlighted]="selectedCategory() === cat"
+          (click)="selectedCategory.set(cat)">
+          {{ cat }}
+        </mat-chip>
+      }
+    </mat-chip-set>
+  </div>
+}
+
 @if (loading()) {
   <div class="loading-state">
     <mat-spinner diameter="48" />
@@ -145,7 +164,7 @@
     @empty {
       <div class="empty-state">
         <mat-icon>{{ showOnlyBorrowed() ? 'check_circle' : 'search_off' }}</mat-icon>
-        <p>{{ showOnlyBorrowed() ? 'Kein Werkzeug gerade ausgeliehen' : 'Keine Werkzeuge gefunden' }}</p>
+        <p>{{ showOnlyBorrowed() ? 'Kein Werkzeug gerade ausgeliehen' : selectedCategory() ? 'Kein Werkzeug in dieser Kategorie' : 'Keine Werkzeuge gefunden' }}</p>
       </div>
     }
   </div>
