@@ -22,6 +22,25 @@
   }
 </div>
 
+@if (!loading() && categories().length > 1) {
+  <div class="category-filter">
+    <mat-chip-set>
+      <mat-chip
+        [highlighted]="selectedCategory() === null"
+        (click)="selectedCategory.set(null)">
+        Alle
+      </mat-chip>
+      @for (cat of categories(); track cat) {
+        <mat-chip
+          [highlighted]="selectedCategory() === cat"
+          (click)="selectedCategory.set(cat)">
+          {{ cat }}
+        </mat-chip>
+      }
+    </mat-chip-set>
+  </div>
+}
+
 @if (loading()) {
   <div class="loading-state">
     <mat-spinner diameter="48" />
@@ -29,7 +48,7 @@
 } @else if (filteredItems().length === 0) {
   <div class="empty-state">
     <mat-icon>search_off</mat-icon>
-    <p>Keine Materialien gefunden</p>
+    <p>{{ selectedCategory() ? 'Kein Material in dieser Kategorie' : 'Keine Materialien gefunden' }}</p>
   </div>
 } @else {
   <div class="table-container mat-elevation-z1">

@@ -35,6 +35,7 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   readonly items = signal<Verbrauchsmaterial[]>([]);
   readonly loading = signal(true);
   readonly searchQuery = signal('');
+  readonly selectedCategory = signal<string | null>(null);
 
   readonly canManage = computed(() => this.auth.isVorstand() || this.auth.isAdmin());
 
@@ -44,14 +45,18 @@ export class VerbrauchsmaterialListComponent implements OnInit {
       : ['image', 'name', 'category', 'quantity', 'status']
   );
 
+  readonly categories = computed(() =>
+    [...new Set(this.items().map(v => v.category))].sort()
+  );
+
   readonly filteredItems = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
-    if (!q) return this.items();
-    return this.items().filter(
-      v =>
-        v.name.toLowerCase().includes(q) ||
-        v.category.toLowerCase().includes(q)
-    );
+    const cat = this.selectedCategory();
+    return this.items().filter(v => {
+      if (cat && v.category !== cat) return false;
+      if (!q) return true;
+      return v.name.toLowerCase().includes(q) || v.category.toLowerCase().includes(q);
+    });
   });
 
   ngOnInit(): void {
