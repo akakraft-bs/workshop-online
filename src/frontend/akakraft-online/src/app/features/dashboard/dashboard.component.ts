@@ -28,6 +28,7 @@ const ALL_QUICK_ITEMS: NavItem[] = [
   { label: 'Nutzerverwaltung', description: 'Nutzer und Rollen verwalten', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
   { label: 'Kalender-Einstellungen', description: 'Kalender konfigurieren', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
   { label: 'Feedback', description: 'Eingegangenes Feedback verwalten', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },
+  { label: 'Test-Benachrichtigung', description: 'Push-Benachrichtigung senden', icon: 'notifications_active', route: '/admin/push', requiredRoles: [Role.Admin] },
 ];
 
 const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial'];
@@ -54,6 +55,10 @@ export class DashboardComponent implements OnInit {
   readonly editMode = signal(false);
   readonly savingPrefs = signal(false);
 
+  private notifyLeihruckgabe = true;
+  private notifyVeranstaltungen = true;
+  private notifyMindestbestand = true;
+
   /** All nav items the current user may access (role-filtered) */
   readonly availableItems = computed(() =>
     ALL_QUICK_ITEMS.filter(item =>
@@ -78,6 +83,9 @@ export class DashboardComponent implements OnInit {
           this.favoriteRoutes.set(prefs.favoriteRoutes);
         }
         this.displayName.set(prefs.displayName);
+        this.notifyLeihruckgabe = prefs.notifyLeihruckgabe;
+        this.notifyVeranstaltungen = prefs.notifyVeranstaltungen;
+        this.notifyMindestbestand = prefs.notifyMindestbestand;
       },
       error: () => { /* keep defaults */ },
     });
@@ -98,7 +106,13 @@ export class DashboardComponent implements OnInit {
 
   private savePreferences(routes: string[]): void {
     this.savingPrefs.set(true);
-    this.prefsService.updatePreferences(routes, this.displayName()).subscribe({
+    this.prefsService.updatePreferences({
+      favoriteRoutes: routes,
+      displayName: this.displayName(),
+      notifyLeihruckgabe: this.notifyLeihruckgabe,
+      notifyVeranstaltungen: this.notifyVeranstaltungen,
+      notifyMindestbestand: this.notifyMindestbestand,
+    }).subscribe({
       next: prefs => { this.favoriteRoutes.set(prefs.favoriteRoutes); this.savingPrefs.set(false); },
       error: () => this.savingPrefs.set(false),
     });

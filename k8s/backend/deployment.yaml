@@ -89,6 +89,13 @@ spec:
                   name: akakraft-secrets
                   key: admin-email
 
+            # --- Firebase (Push-Notifications) ---
+            - name: Firebase__AdminSdkJson
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: firebase-admin-json
+
             # --- Frontend-URL (für OAuth-Callback-Redirect) ---
             - name: Frontend__BaseUrl
               value: "https://beta-app.akakraft-bs.de/app"

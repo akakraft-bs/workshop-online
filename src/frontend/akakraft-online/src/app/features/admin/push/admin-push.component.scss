@@ -1,0 +1,31 @@
+.admin-push {
+  max-width: 600px;
+}
+
+.hint {
+  color: var(--mat-sys-on-surface-variant, #666);
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.push-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}

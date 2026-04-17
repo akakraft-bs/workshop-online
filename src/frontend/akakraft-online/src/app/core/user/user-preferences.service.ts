@@ -5,6 +5,17 @@ import { ApiService } from '../api/api.service';
 export interface UserPreferences {
   favoriteRoutes: string[];
   displayName: string | null;
+  notifyLeihruckgabe: boolean;
+  notifyVeranstaltungen: boolean;
+  notifyMindestbestand: boolean;
+}
+
+export interface UpdateUserPreferences {
+  favoriteRoutes: string[];
+  displayName: string | null;
+  notifyLeihruckgabe: boolean;
+  notifyVeranstaltungen: boolean;
+  notifyMindestbestand: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -15,7 +26,7 @@ export class UserPreferencesService {
     return this.api.get<UserPreferences>('/users/me/preferences');
   }
 
-  updatePreferences(favoriteRoutes: string[], displayName: string | null): Observable<UserPreferences> {
-    return this.api.put<UserPreferences>('/users/me/preferences', { favoriteRoutes, displayName });
+  updatePreferences(update: UpdateUserPreferences): Observable<UserPreferences> {
+    return this.api.put<UserPreferences>('/users/me/preferences', update);
   }
 }

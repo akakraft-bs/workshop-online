@@ -14,6 +14,9 @@ import { AuthService } from '../../core/auth/auth.service';
 import { Role } from '../../models/user.model';
 import { FeedbackDialogComponent } from '../../features/feedback/feedback-dialog/feedback-dialog.component';
 import { ProfileDialogComponent } from '../../features/profile/profile-dialog.component';
+import { PushNotificationService } from '../../core/push/push-notification.service';
+import { PushPromptDialogComponent } from '../../features/push/push-prompt-dialog.component';
+import { IosInstallBannerComponent } from '../../features/push/ios-install-banner.component';
 
 interface NavItem {
   label: string;
@@ -31,6 +34,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
   { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
   { label: 'Kalender-Einstellungen', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
   { label: 'Feedback', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },
+  { label: 'Test-Benachrichtigung', icon: 'notifications_active', route: '/admin/push', requiredRoles: [Role.Admin] },
 ];
 
 @Component({
@@ -39,6 +43,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     RouterOutlet, RouterLink, RouterLinkActive,
     MatSidenavModule, MatToolbarModule, MatIconModule,
     MatButtonModule, MatListModule, MatMenuModule, MatDividerModule, MatTooltipModule,
+    IosInstallBannerComponent,
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
@@ -47,9 +52,11 @@ export class MainLayoutComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly dialog = inject(MatDialog);
+  private readonly push = inject(PushNotificationService);
 
   readonly sidenavRef = viewChild.required<MatSidenav>('sidenav');
   readonly isMobile = signal(false);
+  readonly showIosBanner = signal(false);
   logoFailed = false;
   readonly currentUser = this.auth.currentUser;
 
@@ -63,6 +70,26 @@ export class MainLayoutComponent implements OnInit {
     this.breakpointObserver
       .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
       .subscribe(result => this.isMobile.set(result.matches));
+
+    // Push-Prompt nach kurzer Verzögerung zeigen damit die UI settled ist
+    setTimeout(() => this.checkPushPrompt(), 1200);
+  }
+
+  private checkPushPrompt(): void {
+    if (!this.auth.hasAccess()) return;
+
+    if (this.push.shouldShowIosInstallHint()) {
+      this.showIosBanner.set(true);
+      return;
+    }
+
+    if (this.push.shouldShowPushPrompt()) {
+      this.dialog.open(PushPromptDialogComponent, {
+        width: '380px',
+        maxWidth: '95vw',
+        disableClose: true,
+      });
+    }
   }
 
   logout(): void {

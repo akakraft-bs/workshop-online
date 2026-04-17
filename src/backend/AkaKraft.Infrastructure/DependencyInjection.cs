@@ -2,9 +2,12 @@ using AkaKraft.Application.Interfaces;
 using AkaKraft.Infrastructure.Data;
 using AkaKraft.Infrastructure.Options;
 using AkaKraft.Infrastructure.Services;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Minio;
 
 
@@ -30,6 +33,22 @@ public static class DependencyInjection
             .WithCredentials(minioOpts.AccessKey, minioOpts.SecretKey)
             .WithSSL(minioOpts.UseSSL)
             .Build());
+
+        // Firebase Admin SDK (optional – Push-Notifications werden nur gesendet wenn konfiguriert)
+        var firebaseJson = configuration["Firebase:AdminSdkJson"];
+        if (!string.IsNullOrWhiteSpace(firebaseJson))
+        {
+            var firebaseApp = FirebaseApp.DefaultInstance ?? FirebaseApp.Create(new AppOptions
+            {
+                Credential = GoogleCredential.FromJson(firebaseJson),
+            });
+            services.AddSingleton(firebaseApp);
+            services.AddScoped<IPushNotificationService, FcmPushNotificationService>();
+        }
+        else
+        {
+            services.AddScoped<IPushNotificationService, NoOpPushNotificationService>();
+        }
 
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();

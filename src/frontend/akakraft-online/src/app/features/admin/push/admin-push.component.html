@@ -1,0 +1,61 @@
+<div class="admin-push">
+
+  <h1 class="page-title">Test-Benachrichtigung</h1>
+
+  <p class="hint">
+    Sende eine Push-Benachrichtigung an einen einzelnen Nutzer oder an alle Nutzer,
+    die Push auf mindestens einem Gerät aktiviert haben.
+  </p>
+
+  <mat-card appearance="outlined" class="form-card">
+    <mat-card-content>
+
+      @if (loading()) {
+        <div class="loading-center">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else {
+        <form [formGroup]="form" class="push-form">
+
+          <mat-form-field appearance="outline">
+            <mat-label>Empfänger</mat-label>
+            <mat-select formControlName="userId">
+              <mat-option [value]="null">Alle Nutzer (mit aktiviertem Push)</mat-option>
+              @for (user of users(); track user.id) {
+                <mat-option [value]="user.id">{{ user.name }} – {{ user.email }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Titel</mat-label>
+            <input matInput formControlName="title">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nachricht</mat-label>
+            <textarea matInput formControlName="body" rows="3"></textarea>
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="send()"
+              [disabled]="sending() || form.invalid">
+              @if (sending()) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <mat-icon>send</mat-icon>
+              }
+              Senden
+            </button>
+          </div>
+
+        </form>
+      }
+
+    </mat-card-content>
+  </mat-card>
+
+</div>

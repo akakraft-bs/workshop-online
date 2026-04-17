@@ -28,6 +28,9 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
                 UserId = userId,
                 FavoriteRoutesJson = json,
                 DisplayName = displayName,
+                NotifyLeihruckgabe = dto.NotifyLeihruckgabe,
+                NotifyVeranstaltungen = dto.NotifyVeranstaltungen,
+                NotifyMindestbestand = dto.NotifyMindestbestand,
             };
             db.UserPreferences.Add(prefs);
         }
@@ -35,6 +38,9 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
         {
             prefs.FavoriteRoutesJson = json;
             prefs.DisplayName = displayName;
+            prefs.NotifyLeihruckgabe = dto.NotifyLeihruckgabe;
+            prefs.NotifyVeranstaltungen = dto.NotifyVeranstaltungen;
+            prefs.NotifyMindestbestand = dto.NotifyMindestbestand;
         }
 
         await db.SaveChangesAsync();
@@ -44,16 +50,21 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
     private static UserPreferencesDto ToDto(UserPreferences? prefs)
     {
         if (prefs is null)
-            return new UserPreferencesDto([], null);
+            return new UserPreferencesDto([], null, true, true, true);
 
         try
         {
             var routes = JsonSerializer.Deserialize<List<string>>(prefs.FavoriteRoutesJson) ?? [];
-            return new UserPreferencesDto(routes, prefs.DisplayName);
+            return new UserPreferencesDto(
+                routes,
+                prefs.DisplayName,
+                prefs.NotifyLeihruckgabe,
+                prefs.NotifyVeranstaltungen,
+                prefs.NotifyMindestbestand);
         }
         catch
         {
-            return new UserPreferencesDto([], null);
+            return new UserPreferencesDto([], null, true, true, true);
         }
     }
 }

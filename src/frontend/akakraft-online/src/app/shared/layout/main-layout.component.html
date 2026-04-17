@@ -88,3 +88,7 @@
   </mat-sidenav-content>
 
 </mat-sidenav-container>
+
+@if (showIosBanner()) {
+  <app-ios-install-banner (closed)="showIosBanner.set(false)" />
+}

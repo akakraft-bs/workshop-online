@@ -58,6 +58,13 @@ export const routes: Routes = [
         data: { roles: [Role.Admin] },
       },
       {
+        path: 'admin/push',
+        loadComponent: () =>
+          import('./features/admin/push/admin-push.component').then(m => m.AdminPushComponent),
+        canActivate: [roleGuard],
+        data: { roles: [Role.Admin] },
+      },
+      {
         path: 'kalender',
         loadComponent: () =>
           import('./features/kalender/kalender-page.component').then(m => m.KalenderPageComponent),

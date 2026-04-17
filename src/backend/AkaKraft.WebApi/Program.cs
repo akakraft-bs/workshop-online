@@ -7,6 +7,7 @@ using AkaKraft.Application.Interfaces;
 using AkaKraft.Domain.Enums;
 using AkaKraft.Infrastructure;
 using AkaKraft.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -451,6 +452,85 @@ public static class Program
             }
         }).RequireAuthorization("VorstandOrAdmin")
           .DisableAntiforgery();
+
+        // -------------------------------------------------------------------------
+        // Push-Notification Token Endpoints
+        // -------------------------------------------------------------------------
+
+        // FCM-Token für dieses Gerät registrieren
+        app.MapPost("/push/tokens", async (
+            HttpContext ctx,
+            RegisterFcmTokenDto dto,
+            ApplicationDbContext db) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return Results.Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(dto.Token))
+                return Results.BadRequest("Token darf nicht leer sein.");
+
+            // Upsert: Token existiert bereits → RegisteredAt aktualisieren
+            var existing = await db.FcmTokens
+                .FirstOrDefaultAsync(t => t.Token == dto.Token);
+
+            if (existing is null)
+            {
+                db.FcmTokens.Add(new AkaKraft.Domain.Entities.FcmToken
+                {
+                    UserId = parsedUserId,
+                    Token = dto.Token,
+                });
+            }
+            else
+            {
+                existing.UserId = parsedUserId;
+                existing.RegisteredAt = DateTime.UtcNow;
+            }
+
+            await db.SaveChangesAsync();
+            return Results.Ok();
+        }).RequireAuthorization("JwtApi");
+
+        // FCM-Token für dieses Gerät entfernen
+        app.MapDelete("/push/tokens/{token}", async (
+            string token,
+            HttpContext ctx,
+            ApplicationDbContext db) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return Results.Unauthorized();
+
+            var existing = await db.FcmTokens
+                .FirstOrDefaultAsync(t => t.Token == token && t.UserId == parsedUserId);
+
+            if (existing is not null)
+            {
+                db.FcmTokens.Remove(existing);
+                await db.SaveChangesAsync();
+            }
+
+            return Results.Ok();
+        }).RequireAuthorization("JwtApi");
+
+        // Test-Notification an einen oder alle Nutzer senden (Admin)
+        app.MapPost("/admin/push/test", async (
+            SendTestPushDto dto,
+            IPushNotificationService pushService) =>
+        {
+            if (string.IsNullOrWhiteSpace(dto.Title) || string.IsNullOrWhiteSpace(dto.Body))
+                return Results.BadRequest("Titel und Text dürfen nicht leer sein.");
+
+            if (dto.UserId.HasValue)
+                await pushService.SendToUserAsync(dto.UserId.Value, dto.Title, dto.Body);
+            else
+                await pushService.SendToUsersWithPreferenceAsync(_ => true, dto.Title, dto.Body);
+
+            return Results.Ok();
+        }).RequireAuthorization("AdminOnly");
 
         // -------------------------------------------------------------------------
         // Feedback Endpoints
