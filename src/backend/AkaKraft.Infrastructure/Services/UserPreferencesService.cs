@@ -31,6 +31,7 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
                 NotifyLeihruckgabe = dto.NotifyLeihruckgabe,
                 NotifyVeranstaltungen = dto.NotifyVeranstaltungen,
                 NotifyMindestbestand = dto.NotifyMindestbestand,
+                NotifyUmfragen = dto.NotifyUmfragen,
             };
             db.UserPreferences.Add(prefs);
         }
@@ -41,6 +42,7 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
             prefs.NotifyLeihruckgabe = dto.NotifyLeihruckgabe;
             prefs.NotifyVeranstaltungen = dto.NotifyVeranstaltungen;
             prefs.NotifyMindestbestand = dto.NotifyMindestbestand;
+            prefs.NotifyUmfragen = dto.NotifyUmfragen;
         }
 
         await db.SaveChangesAsync();
@@ -50,7 +52,7 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
     private static UserPreferencesDto ToDto(UserPreferences? prefs)
     {
         if (prefs is null)
-            return new UserPreferencesDto([], null, true, true, true);
+            return new UserPreferencesDto([], null, true, true, true, true);
 
         try
         {
@@ -60,11 +62,12 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
                 prefs.DisplayName,
                 prefs.NotifyLeihruckgabe,
                 prefs.NotifyVeranstaltungen,
-                prefs.NotifyMindestbestand);
+                prefs.NotifyMindestbestand,
+                prefs.NotifyUmfragen);
         }
         catch
         {
-            return new UserPreferencesDto([], null, true, true, true);
+            return new UserPreferencesDto([], null, true, true, true, true);
         }
     }
 }

@@ -5,11 +5,13 @@ public record UserPreferencesDto(
     string? DisplayName,
     bool NotifyLeihruckgabe,
     bool NotifyVeranstaltungen,
-    bool NotifyMindestbestand);
+    bool NotifyMindestbestand,
+    bool NotifyUmfragen);
 
 public record UpdateUserPreferencesDto(
     List<string> FavoriteRoutes,
     string? DisplayName,
     bool NotifyLeihruckgabe,
     bool NotifyVeranstaltungen,
-    bool NotifyMindestbestand);
+    bool NotifyMindestbestand,
+    bool NotifyUmfragen);

@@ -1,0 +1,86 @@
+.umfrage-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 360px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.options-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.options-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: 2px;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .option-field {
+    flex: 1;
+    margin-bottom: -16px; // collapse form-field bottom margin
+  }
+}
+
+.add-option-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.toggles-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.toggle-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  &.sub-toggle {
+    padding-left: 16px;
+    border-left: 2px solid var(--mat-sys-outline-variant);
+  }
+}
+
+.toggle-hint {
+  font-size: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  margin-left: 52px; // align with toggle label
+}
+
+.deadline-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 6px;
+
+  .date-field {
+    flex: 2;
+  }
+
+  .time-field {
+    flex: 1;
+    min-width: 110px;
+  }
+}

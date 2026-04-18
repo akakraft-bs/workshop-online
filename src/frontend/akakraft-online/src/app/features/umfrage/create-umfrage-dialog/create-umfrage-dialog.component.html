@@ -1,0 +1,103 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Umfrage bearbeiten' : 'Neue Umfrage' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="umfrage-form">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Frage / Thema</mat-label>
+      <textarea matInput formControlName="question" rows="2"
+                placeholder="Was soll abgestimmt werden?"
+                cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
+      @if (form.get('question')?.hasError('required') && form.get('question')?.touched) {
+        <mat-error>Frage ist erforderlich.</mat-error>
+      }
+      @if (form.get('question')?.hasError('maxlength')) {
+        <mat-error>Maximal 500 Zeichen.</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Options -->
+    <div class="options-section">
+      <div class="options-label">Antwortmöglichkeiten</div>
+      <div formArrayName="options" class="options-list">
+        @for (ctrl of optionControls; track $index) {
+          <div [formGroupName]="$index" class="option-row">
+            <mat-form-field appearance="outline" class="option-field">
+              <mat-label>Option {{ $index + 1 }}</mat-label>
+              <input matInput formControlName="text" [placeholder]="'Option ' + ($index + 1)">
+              @if (ctrl.get('text')?.hasError('required') && ctrl.get('text')?.touched) {
+                <mat-error>Darf nicht leer sein.</mat-error>
+              }
+            </mat-form-field>
+            <button mat-icon-button type="button"
+                    [disabled]="optionControls.length <= 2"
+                    (click)="removeOption($index)"
+                    matTooltip="Entfernen">
+              <mat-icon>remove_circle_outline</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+      <button mat-stroked-button type="button" (click)="addOption()" class="add-option-btn">
+        <mat-icon>add</mat-icon>
+        Option hinzufügen
+      </button>
+    </div>
+
+    <div class="toggles-section">
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="isMultipleChoice">
+          Mehrfachauswahl erlauben
+        </mat-slide-toggle>
+        <span class="toggle-hint">Teilnehmer können mehrere Optionen wählen</span>
+      </div>
+
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="resultsVisible">
+          Ergebnisse sichtbar
+        </mat-slide-toggle>
+        <span class="toggle-hint">Abstimmungsergebnisse für alle Mitglieder sichtbar</span>
+      </div>
+
+      @if (!resultsVisibleValue) {
+        <div class="toggle-row sub-toggle">
+          <mat-slide-toggle formControlName="revealAfterClose">
+            Ergebnisse nach Schließen zeigen
+          </mat-slide-toggle>
+          <span class="toggle-hint">Ergebnisse werden nach dem Schließen der Umfrage sichtbar</span>
+        </div>
+      }
+
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="hasDeadline">
+          Abstimmungsfrist setzen
+        </mat-slide-toggle>
+        <span class="toggle-hint">Umfrage schließt sich automatisch zur Frist</span>
+      </div>
+
+      @if (hasDeadlineValue) {
+        <div class="deadline-row">
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>Datum</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="deadlineDate"
+                   [min]="today">
+            <mat-datepicker-toggle matIconSuffix [for]="picker" />
+            <mat-datepicker #picker />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="time-field">
+            <mat-label>Uhrzeit</mat-label>
+            <input matInput type="time" formControlName="deadlineTime">
+          </mat-form-field>
+        </div>
+      }
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+  <button mat-flat-button color="primary" (click)="submit()">
+    {{ isEdit ? 'Speichern' : 'Erstellen' }}
+  </button>
+</mat-dialog-actions>

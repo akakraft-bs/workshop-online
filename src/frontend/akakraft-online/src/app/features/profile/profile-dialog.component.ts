@@ -50,6 +50,7 @@ export class ProfileDialogComponent implements OnInit {
     notifyLeihruckgabe: [true],
     notifyVeranstaltungen: [true],
     notifyMindestbestand: [true],
+    notifyUmfragen: [true],
   });
 
   previewName(): string {
@@ -66,6 +67,7 @@ export class ProfileDialogComponent implements OnInit {
           notifyLeihruckgabe: prefs.notifyLeihruckgabe,
           notifyVeranstaltungen: prefs.notifyVeranstaltungen,
           notifyMindestbestand: prefs.notifyMindestbestand,
+          notifyUmfragen: prefs.notifyUmfragen,
         });
         this.form.markAsPristine();
       },
@@ -99,6 +101,7 @@ export class ProfileDialogComponent implements OnInit {
       notifyLeihruckgabe: this.form.get('notifyLeihruckgabe')!.value ?? true,
       notifyVeranstaltungen: this.form.get('notifyVeranstaltungen')!.value ?? true,
       notifyMindestbestand: this.form.get('notifyMindestbestand')!.value ?? true,
+      notifyUmfragen: this.form.get('notifyUmfragen')!.value ?? true,
     }).subscribe({
       next: () => { this.saving.set(false); this.auth.refreshCurrentUser(); this.dialogRef.close(true); },
       error: () => this.saving.set(false),

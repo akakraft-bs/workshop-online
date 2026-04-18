@@ -30,6 +30,7 @@ const ALL_QUICK_ITEMS: NavItem[] = [
   { label: 'Verbrauchsmaterial', description: 'Aktuellen Bestand einsehen', icon: 'inventory_2', route: '/verbrauchsmaterial' },
   { label: 'Mängelmelder', description: 'Mängel melden und einsehen', icon: 'report_problem', route: '/mangel' },
   { label: 'Wunschliste', description: 'Neuanschaffungen vorschlagen', icon: 'playlist_add', route: '/wunsch' },
+  { label: 'Umfragen', description: 'Umfragen erstellen und abstimmen', icon: 'poll', route: '/umfrage' },
   { label: 'Nutzerverwaltung', description: 'Nutzer und Rollen verwalten', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
   { label: 'Kalender-Einstellungen', description: 'Kalender konfigurieren', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
   { label: 'Feedback', description: 'Eingegangenes Feedback verwalten', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },
@@ -65,6 +66,7 @@ export class DashboardComponent implements OnInit {
   private notifyLeihruckgabe = true;
   private notifyVeranstaltungen = true;
   private notifyMindestbestand = true;
+  private notifyUmfragen = true;
 
   /** All nav items the current user may access (role-filtered) */
   readonly availableItems = computed(() =>
@@ -106,6 +108,7 @@ export class DashboardComponent implements OnInit {
         this.notifyLeihruckgabe = prefs.notifyLeihruckgabe;
         this.notifyVeranstaltungen = prefs.notifyVeranstaltungen;
         this.notifyMindestbestand = prefs.notifyMindestbestand;
+        this.notifyUmfragen = prefs.notifyUmfragen;
       },
       error: () => { /* keep defaults */ },
     });
@@ -132,6 +135,7 @@ export class DashboardComponent implements OnInit {
       notifyLeihruckgabe: this.notifyLeihruckgabe,
       notifyVeranstaltungen: this.notifyVeranstaltungen,
       notifyMindestbestand: this.notifyMindestbestand,
+      notifyUmfragen: this.notifyUmfragen,
     }).subscribe({
       next: prefs => { this.favoriteRoutes.set(prefs.favoriteRoutes); this.savingPrefs.set(false); },
       error: () => this.savingPrefs.set(false),

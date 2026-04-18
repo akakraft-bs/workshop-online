@@ -1,0 +1,161 @@
+<div class="page-header">
+  <h1 class="mat-headline-small" style="margin:0">
+    Umfragen
+    @if (openCount() > 0) {
+      <span class="count-badge">{{ openCount() }}</span>
+    }
+  </h1>
+
+  <div style="flex:1"></div>
+
+  <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
+    <mat-button-toggle value="offen">Offen</mat-button-toggle>
+    <mat-button-toggle value="geschlossen">Geschlossen</mat-button-toggle>
+    <mat-button-toggle value="alle">Alle</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
+    <mat-icon>add</mat-icon>
+    Neue Umfrage
+  </button>
+  <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="40" />
+    <span>Umfragen werden geladen …</span>
+  </div>
+} @else if (filteredItems().length === 0) {
+  <div class="empty-state">
+    <mat-icon>poll</mat-icon>
+    <span>Keine Umfragen vorhanden.</span>
+  </div>
+} @else {
+  <div class="umfrage-list">
+    @for (umfrage of filteredItems(); track umfrage.id) {
+      <div class="umfrage-card" [class.closed]="umfrage.status === 'Geschlossen'">
+
+        <!-- Header -->
+        <div class="card-header">
+          <div class="title-row">
+            <p class="umfrage-question">{{ umfrage.question }}</p>
+            @if (umfrage.status === 'Geschlossen') {
+              <span class="status-chip status-closed">
+                <mat-icon class="status-icon">lock</mat-icon>
+                Geschlossen
+              </span>
+            }
+            @if (umfrage.isMultipleChoice) {
+              <span class="badge-multi" matTooltip="Mehrfachauswahl möglich">
+                <mat-icon class="badge-icon">checklist</mat-icon>
+              </span>
+            }
+            @if (umfrage.deadline && umfrage.status === 'Offen') {
+              <span class="deadline-chip" [class.urgent]="isDeadlineUrgent(umfrage)">
+                <mat-icon class="deadline-icon">schedule</mat-icon>
+                {{ deadlineLabel(umfrage) }}
+              </span>
+            }
+            @if (!umfrage.resultsVisible) {
+              <span class="badge-hidden" matTooltip="Ergebnisse sind{{umfrage.revealAfterClose ? ' nach Schließen' : ''}} versteckt">
+                <mat-icon class="badge-icon">visibility_off</mat-icon>
+              </span>
+            }
+          </div>
+
+          <div class="card-actions">
+            @if (canEdit(umfrage) && umfrage.status === 'Offen') {
+              <button mat-icon-button class="action-btn"
+                      matTooltip="Bearbeiten"
+                      (click)="openEditDialog(umfrage)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+            @if (canClose(umfrage)) {
+              <button mat-icon-button class="action-btn"
+                      matTooltip="Schließen"
+                      (click)="closeUmfrage(umfrage)">
+                <mat-icon>lock_open</mat-icon>
+              </button>
+            }
+            @if (canEdit(umfrage)) {
+              <button mat-icon-button class="action-btn action-btn-delete"
+                      matTooltip="Löschen"
+                      (click)="deleteUmfrage(umfrage)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="options-list">
+          @for (option of umfrage.options; track option.id) {
+            <button
+              class="option-btn"
+              [class.selected]="isSelected(umfrage, option)"
+              [class.voted]="umfrage.currentUserOptionIds.length > 0"
+              [disabled]="umfrage.status !== 'Offen' || pendingVoteId() === umfrage.id"
+              (click)="vote(umfrage, option)">
+
+              <div class="option-content">
+                <span class="option-check">
+                  @if (isSelected(umfrage, option)) {
+                    <mat-icon class="check-icon">{{ umfrage.isMultipleChoice ? 'check_box' : 'radio_button_checked' }}</mat-icon>
+                  } @else {
+                    <mat-icon class="check-icon unset">{{ umfrage.isMultipleChoice ? 'check_box_outline_blank' : 'radio_button_unchecked' }}</mat-icon>
+                  }
+                </span>
+                <span class="option-text">{{ option.text }}</span>
+                @if (option.voteCount !== null) {
+                  <span class="option-count"
+                        [matTooltip]="option.voters?.join(', ') ?? ''">
+                    {{ option.voteCount }}
+                    @if (option.voters && option.voters.length > 0) {
+                      <mat-icon class="voters-icon">people</mat-icon>
+                    }
+                  </span>
+                }
+              </div>
+
+              @if (option.voteCount !== null && totalVotes(umfrage) > 0) {
+                <mat-progress-bar
+                  class="option-bar"
+                  mode="determinate"
+                  [value]="votePercent(option, umfrage)"
+                  [class.selected-bar]="isSelected(umfrage, option)" />
+              }
+            </button>
+          }
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer">
+          <span class="reporter">
+            <mat-icon class="footer-icon">person</mat-icon>
+            {{ umfrage.createdByName }}
+          </span>
+          <span class="participant-count">
+            <mat-icon class="footer-icon">how_to_vote</mat-icon>
+            {{ umfrage.participantCount }} {{ umfrage.participantCount === 1 ? 'Teilnehmer' : 'Teilnehmer' }}
+          </span>
+          <span class="date">{{ umfrage.createdAt | date:'dd.MM.yyyy' }}</span>
+        </div>
+
+        @if (umfrage.status === 'Geschlossen' && umfrage.closedByName) {
+          <div class="closed-by">
+            <mat-icon class="footer-icon">lock</mat-icon>
+            Geschlossen von {{ umfrage.closedByName }}
+            @if (umfrage.closedAt) {
+              am {{ umfrage.closedAt | date:'dd.MM.yyyy HH:mm' }} Uhr
+            }
+          </div>
+        }
+
+      </div>
+    }
+  </div>
+}

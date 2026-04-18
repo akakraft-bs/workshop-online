@@ -90,6 +90,16 @@
         <p class="notification-hint">Neue Termine und Erinnerungen</p>
         </div>
 
+        <div class="notification-item">
+        <mat-slide-toggle
+            [checked]="push.isSubscribed() && !!form.get('notifyUmfragen')?.value"
+            [disabled]="!push.isSubscribed()"
+            (change)="form.get('notifyUmfragen')!.setValue($event.checked); form.markAsDirty()">
+            Umfragen
+        </mat-slide-toggle>
+        <p class="notification-hint">Neue Umfragen und Fristerinnerungen</p>
+        </div>
+
         @if (isHallenwart()) {
         <div class="notification-item">
             <mat-slide-toggle

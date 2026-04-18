@@ -8,6 +8,7 @@ export interface UserPreferences {
   notifyLeihruckgabe: boolean;
   notifyVeranstaltungen: boolean;
   notifyMindestbestand: boolean;
+  notifyUmfragen: boolean;
 }
 
 export interface UpdateUserPreferences {
@@ -16,6 +17,7 @@ export interface UpdateUserPreferences {
   notifyLeihruckgabe: boolean;
   notifyVeranstaltungen: boolean;
   notifyMindestbestand: boolean;
+  notifyUmfragen: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

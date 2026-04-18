@@ -28,4 +28,9 @@ public class UserPreferences
     /// Benachrichtigung wenn ein Verbrauchsmittel den Mindestbestand unterschreitet.
     /// </summary>
     public bool NotifyMindestbestand { get; set; } = true;
+
+    /// <summary>
+    /// Benachrichtigung bei neuen Umfragen und eine Stunde vor Fristablauf.
+    /// </summary>
+    public bool NotifyUmfragen { get; set; } = true;
 }
