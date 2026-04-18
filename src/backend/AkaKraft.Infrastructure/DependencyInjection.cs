@@ -60,6 +60,7 @@ public static class DependencyInjection
         services.AddSingleton<ICalendarService, GoogleCalendarService>();
         services.AddScoped<IUserPreferencesService, UserPreferencesService>();
         services.AddScoped<IMangelService, MangelService>();
+        services.AddScoped<IWunschService, WunschService>();
 
         return services;
     }

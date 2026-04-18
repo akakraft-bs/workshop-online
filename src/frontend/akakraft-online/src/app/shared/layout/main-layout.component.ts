@@ -33,6 +33,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
   { label: 'Werkzeug', icon: 'build', route: '/werkzeug' },
   { label: 'Verbrauchsmaterial', icon: 'inventory_2', route: '/verbrauchsmaterial' },
   { label: 'Mängelmelder', icon: 'report_problem', route: '/mangel' },
+  { label: 'Wunschliste', icon: 'playlist_add', route: '/wunsch' },
   { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
   { label: 'Kalender-Einstellungen', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
   { label: 'Feedback', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },

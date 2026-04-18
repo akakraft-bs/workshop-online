@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>Vorschlag abschließen</h2>
+
+<mat-dialog-content>
+  <p class="wunsch-title">„{{ data.wunsch.title }}"</p>
+
+  <form [formGroup]="form">
+    <p class="field-label">Ergebnis</p>
+    <mat-button-toggle-group formControlName="status" class="status-toggle">
+      <mat-button-toggle value="Angeschafft">
+        <mat-icon>check_circle</mat-icon>
+        Angeschafft
+      </mat-button-toggle>
+      <mat-button-toggle value="Abgelehnt">
+        <mat-icon>cancel</mat-icon>
+        Abgelehnt
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-form-field appearance="outline" class="full-width note-field">
+      <mat-label>
+        @if (form.controls.status.value === 'Abgelehnt') {
+          Begründung (optional)
+        } @else {
+          Anmerkung (optional)
+        }
+      </mat-label>
+      <textarea matInput formControlName="closeNote" rows="3"
+                placeholder="Kurze Erläuterung..."></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Abbrechen</button>
+  <button mat-flat-button
+          [color]="form.controls.status.value === 'Angeschafft' ? 'primary' : 'warn'"
+          (click)="submit()">
+    Abschließen
+  </button>
+</mat-dialog-actions>

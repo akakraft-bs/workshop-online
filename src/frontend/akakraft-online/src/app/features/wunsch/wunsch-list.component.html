@@ -1,0 +1,132 @@
+<h1 class="page-title">Wunschliste</h1>
+
+<div class="page-header">
+  <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
+    <mat-button-toggle value="offen">
+      Offen
+      @if (openCount() > 0) {
+        <span class="count-badge">{{ openCount() }}</span>
+      }
+    </mat-button-toggle>
+    <mat-button-toggle value="abgeschlossen">Abgeschlossen</mat-button-toggle>
+    <mat-button-toggle value="alle">Alle</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
+    <mat-icon>add</mat-icon>
+    Vorschlag einreichen
+  </button>
+  <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="48" />
+  </div>
+} @else if (filteredItems().length === 0) {
+  <div class="empty-state">
+    <mat-icon>playlist_add</mat-icon>
+    <p>{{ statusFilter() === 'offen' ? 'Keine offenen Vorschläge.' : 'Keine Einträge in dieser Ansicht.' }}</p>
+  </div>
+} @else {
+  <div class="wunsch-list">
+    @for (wunsch of filteredItems(); track wunsch.id) {
+      <div class="wunsch-card" [class.closed]="wunsch.status !== 'Offen'">
+
+        <!-- Vote column -->
+        <div class="vote-col">
+          <button mat-icon-button
+                  class="vote-btn"
+                  [class.active-up]="wunsch.currentUserVote === true"
+                  [disabled]="wunsch.status !== 'Offen' || pendingVoteId() === wunsch.id"
+                  [matTooltip]="wunsch.currentUserVote === true ? 'Stimme entfernen' : 'Dafür'"
+                  (click)="vote(wunsch, true)">
+            <mat-icon>thumb_up</mat-icon>
+          </button>
+          <span class="vote-score" [class.positive]="wunsch.upVotes > wunsch.downVotes"
+                                   [class.negative]="wunsch.downVotes > wunsch.upVotes">
+            {{ wunsch.upVotes - wunsch.downVotes }}
+          </span>
+          <button mat-icon-button
+                  class="vote-btn"
+                  [class.active-down]="wunsch.currentUserVote === false"
+                  [disabled]="wunsch.status !== 'Offen' || pendingVoteId() === wunsch.id"
+                  [matTooltip]="wunsch.currentUserVote === false ? 'Stimme entfernen' : 'Dagegen'"
+                  (click)="vote(wunsch, false)">
+            <mat-icon>thumb_down</mat-icon>
+          </button>
+        </div>
+
+        <!-- Content column -->
+        <div class="content-col">
+          <div class="card-header">
+            <div class="title-row">
+              <h3 class="wunsch-title">{{ wunsch.title }}</h3>
+              @if (wunsch.status !== 'Offen') {
+                <span class="status-chip status-{{ wunsch.status.toLowerCase() }}">
+                  <mat-icon class="status-icon">{{ statusIcon(wunsch.status) }}</mat-icon>
+                  {{ statusLabel(wunsch.status) }}
+                </span>
+              }
+            </div>
+            <div class="card-actions">
+              @if (canEdit(wunsch)) {
+                <button mat-icon-button
+                        matTooltip="Bearbeiten"
+                        class="action-btn"
+                        (click)="openEditDialog(wunsch)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              }
+              @if (canClose() && wunsch.status === 'Offen') {
+                <button mat-icon-button
+                        matTooltip="Abschließen"
+                        class="action-btn"
+                        (click)="openCloseDialog(wunsch)">
+                  <mat-icon>task_alt</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+
+          <p class="wunsch-description">{{ wunsch.description }}</p>
+
+          @if (wunsch.link) {
+            <a [href]="wunsch.link" target="_blank" rel="noopener" class="wunsch-link">
+              <mat-icon class="link-icon">open_in_new</mat-icon>
+              {{ wunsch.link }}
+            </a>
+          }
+
+          <div class="card-footer">
+            <span class="reporter">
+              <mat-icon class="footer-icon">person</mat-icon>
+              {{ wunsch.createdByName }}
+            </span>
+            <span class="date">{{ wunsch.createdAt | date:'dd.MM.yyyy' }}</span>
+          </div>
+
+          @if (wunsch.closeNote) {
+            <div class="close-note">
+              <mat-icon class="note-icon">comment</mat-icon>
+              <span>{{ wunsch.closeNote }}</span>
+            </div>
+          }
+
+          @if (wunsch.closedByName) {
+            <div class="closed-by">
+              <mat-icon class="footer-icon">manage_accounts</mat-icon>
+              {{ wunsch.closedByName }}
+              @if (wunsch.closedAt) {
+                · {{ wunsch.closedAt | date:'dd.MM.yyyy' }}
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+    }
+  </div>
+}

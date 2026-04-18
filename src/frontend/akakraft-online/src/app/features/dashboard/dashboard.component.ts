@@ -29,6 +29,7 @@ const ALL_QUICK_ITEMS: NavItem[] = [
   { label: 'Werkzeug', description: 'Werkzeug einsehen und ausleihen', icon: 'build', route: '/werkzeug' },
   { label: 'Verbrauchsmaterial', description: 'Aktuellen Bestand einsehen', icon: 'inventory_2', route: '/verbrauchsmaterial' },
   { label: 'Mängelmelder', description: 'Mängel melden und einsehen', icon: 'report_problem', route: '/mangel' },
+  { label: 'Wunschliste', description: 'Neuanschaffungen vorschlagen', icon: 'playlist_add', route: '/wunsch' },
   { label: 'Nutzerverwaltung', description: 'Nutzer und Rollen verwalten', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
   { label: 'Kalender-Einstellungen', description: 'Kalender konfigurieren', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
   { label: 'Feedback', description: 'Eingegangenes Feedback verwalten', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },

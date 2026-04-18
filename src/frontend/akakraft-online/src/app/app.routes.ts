@@ -49,6 +49,11 @@ export const routes: Routes = [
           import('./features/mangel/mangel-list.component').then(m => m.MangelListComponent),
       },
       {
+        path: 'wunsch',
+        loadComponent: () =>
+          import('./features/wunsch/wunsch-list.component').then(m => m.WunschListComponent),
+      },
+      {
         path: 'admin/users',
         loadComponent: () =>
           import('./features/admin/users/user-list.component').then(m => m.UserListComponent),

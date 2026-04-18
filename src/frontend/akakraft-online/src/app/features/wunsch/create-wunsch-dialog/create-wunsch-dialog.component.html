@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Vorschlag bearbeiten' : 'Vorschlag einreichen' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Titel</mat-label>
+      <input matInput formControlName="title" placeholder="Was soll angeschafft werden?">
+      @if (form.controls.title.hasError('required')) {
+        <mat-error>Titel ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Beschreibung</mat-label>
+      <textarea matInput formControlName="description" rows="4"
+                placeholder="Warum ist diese Anschaffung sinnvoll?"></textarea>
+      @if (form.controls.description.hasError('required')) {
+        <mat-error>Beschreibung ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Link (optional)</mat-label>
+      <mat-icon matPrefix>link</mat-icon>
+      <input matInput formControlName="link" placeholder="https://...">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Abbrechen</button>
+  @if (isEdit) {
+    <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid || !form.dirty">
+      <span class="btn-inner">
+        <mat-icon>save</mat-icon>
+        Speichern
+      </span>
+    </button>
+  } @else {
+    <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">
+      <span class="btn-inner">
+        <mat-icon>thumb_up</mat-icon>
+        Vorschlagen
+      </span>
+    </button>
+  }
+</mat-dialog-actions>
