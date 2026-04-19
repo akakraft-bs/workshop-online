@@ -5,9 +5,9 @@ using AkaKraft.Application.Interfaces;
 
 namespace AkaKraft.WebApi.Endpoints;
 
-public static class MangelApi
+internal static class MangelEndpoints
 {
-    public static WebApplication AddMangelApi(this WebApplication app)
+    internal static WebApplication MapMangelEndpoints(this WebApplication app)
     {
         // -------------------------------------------------------------------------
         // Mängelmelder Endpoints

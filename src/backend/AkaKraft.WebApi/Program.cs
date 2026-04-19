@@ -81,18 +81,18 @@ public static class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app
-            .AddAuthApi()
-            .AddUserApi()
-            .AddUploadApi()
-            .AddWerkzeugApi()
-            .AddverbrauchsmaterialApi()
-            .AddMangelApi()
-            .AddWunschApi()
-            .AddPushApi()
-            .AddAdminApi()
-            .AddFeedbackApi()
-            .AddCalendarApi();
+        app.MapAuthEndpoints();
+        app.MapUserEndpoints();
+        app.MapUploadEndpoints();
+        app.MapWerkzeugEndpoints();
+        app.MapVerbrauchsmaterialEndpoints();
+        app.MapMangelEndpoints();
+        app.MapWunschEndpoints();
+        app.MapUmfrageEndpoints();
+        app.MapPushEndpoints();
+        app.MapFeedbackEndpoints();
+        app.MapCalendarEndpoints();
+        app.MapHallenbuchEndpoints();
 
         app.Run();
     }

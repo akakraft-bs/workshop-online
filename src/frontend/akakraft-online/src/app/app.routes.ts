@@ -59,6 +59,11 @@ export const routes: Routes = [
           import('./features/umfrage/umfrage-list.component').then(m => m.UmfrageListComponent),
       },
       {
+        path: 'hallenbuch',
+        loadComponent: () =>
+          import('./features/hallenbuch/hallenbuch-list.component').then(m => m.HallenbuchListComponent),
+      },
+      {
         path: 'admin/users',
         loadComponent: () =>
           import('./features/admin/users/user-list.component').then(m => m.UserListComponent),

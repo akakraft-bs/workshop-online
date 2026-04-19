@@ -1,0 +1,105 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Eintrag bearbeiten' : 'Hallenbuch-Eintrag' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="hallenbuch-form">
+
+    <div class="hint-banner">
+      <mat-icon class="hint-icon">info_outline</mat-icon>
+      <span>Bei schmutziger Halle oder defektem Werkzeug bitte den <strong>Mängelmelder</strong> nutzen.</span>
+    </div>
+
+    <!-- Startzeit -->
+    <div class="date-time-row">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Beginn</mat-label>
+        <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker" />
+        <mat-datepicker #startPicker />
+        @if (form.get('startDate')?.hasError('required') && form.get('startDate')?.touched) {
+          <mat-error>Pflichtfeld</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="time-field">
+        <mat-label>Uhrzeit</mat-label>
+        <input matInput type="time" formControlName="startTime">
+        @if (form.get('startTime')?.hasError('required') && form.get('startTime')?.touched) {
+          <mat-error>Pflichtfeld</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Endzeit -->
+    <div class="date-time-row">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Ende</mat-label>
+        <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker" />
+        <mat-datepicker #endPicker />
+        @if (form.get('endDate')?.hasError('required') && form.get('endDate')?.touched) {
+          <mat-error>Pflichtfeld</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="time-field">
+        <mat-label>Uhrzeit</mat-label>
+        <input matInput type="time" formControlName="endTime">
+        @if (form.get('endTime')?.hasError('required') && form.get('endTime')?.touched) {
+          <mat-error>Pflichtfeld</mat-error>
+        }
+        @if (form.get('endTime')?.hasError('afterStart')) {
+          <mat-error>Endzeit muss nach der Startzeit liegen.</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Beschreibung -->
+    <mat-form-field appearance="outline">
+      <mat-label>Was wurde gemacht?</mat-label>
+      <textarea matInput formControlName="description" rows="3"
+                cdkTextareaAutosize cdkAutosizeMinRows="3"
+                placeholder="Kurze Beschreibung (max. 256 Zeichen)"></textarea>
+      @if (form.get('description')?.hasError('required') && form.get('description')?.touched) {
+        <mat-error>Beschreibung ist erforderlich.</mat-error>
+      }
+      @if (form.get('description')?.hasError('maxlength')) {
+        <mat-error>Maximal 256 Zeichen.</mat-error>
+      }
+      <mat-hint align="end">{{ descriptionLength }}/256</mat-hint>
+    </mat-form-field>
+
+    <mat-divider />
+
+    <!-- Gastschrauben -->
+    <div class="toggle-row">
+      <mat-slide-toggle formControlName="hatGastgeschraubt">
+        Gastgeschraubt
+      </mat-slide-toggle>
+      <span class="toggle-hint">Jemand hat als Gast mitgeschraubt</span>
+    </div>
+
+    @if (hatGast) {
+      <div class="gast-details">
+        <mat-form-field appearance="outline">
+          <mat-label>Zahlungsart</mat-label>
+          <mat-select formControlName="gastschraubenArt">
+            <mat-option value="KastenPremiumbier">Kasten Premiumbier</mat-option>
+            <mat-option value="ZwanzigEuroPayPal">20€ PayPal</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="toggle-row">
+          <mat-slide-toggle formControlName="gastschraubenBezahlt">
+            Bereits bezahlt
+          </mat-slide-toggle>
+        </div>
+      </div>
+    }
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Abbrechen</button>
+  <button mat-flat-button color="primary" (click)="submit()">
+    {{ isEdit ? 'Speichern' : 'Eintragen' }}
+  </button>
+</mat-dialog-actions>

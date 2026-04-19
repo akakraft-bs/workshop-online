@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Authentication.Google;
 
 namespace AkaKraft.WebApi.Endpoints;
 
-public static class AuthApi
+internal static class AuthEndpoints
 {
     // -------------------------------------------------------------------------
     // Auth Endpoints
     // -------------------------------------------------------------------------
-    public static WebApplication AddAuthApi(this WebApplication app)
+    public static WebApplication MapAuthEndpoints(this WebApplication app)
     {
         // Schritt 1: Frontend leitet hierher weiter → Google-Login startet
         app.MapGet("/auth/login/google", (HttpContext ctx) =>

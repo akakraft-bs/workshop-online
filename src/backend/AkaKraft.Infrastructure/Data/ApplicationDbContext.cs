@@ -22,6 +22,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Umfrage> Umfragen => Set<Umfrage>();
     public DbSet<UmfrageOption> UmfrageOptions => Set<UmfrageOption>();
     public DbSet<UmfrageAntwort> UmfrageAntworten => Set<UmfrageAntwort>();
+    public DbSet<HallenbuchEintrag> HallenbuchEintraege => Set<HallenbuchEintrag>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,5 +42,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new UmfrageConfiguration());
         modelBuilder.ApplyConfiguration(new UmfrageOptionConfiguration());
         modelBuilder.ApplyConfiguration(new UmfrageAntwortConfiguration());
+        modelBuilder.ApplyConfiguration(new HallenbuchEintragConfiguration());
     }
 }

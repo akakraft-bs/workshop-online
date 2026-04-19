@@ -2,9 +2,9 @@ using AkaKraft.Application.Interfaces;
 
 namespace AkaKraft.WebApi.Endpoints;
 
-public static class UploadApi
+internal static class UploadEndpoints
 {
-    public static WebApplication AddUploadApi(this WebApplication app)
+    internal static WebApplication MapUploadEndpoints(this WebApplication app)
     {
         // -------------------------------------------------------------------------
         // Upload Endpoints

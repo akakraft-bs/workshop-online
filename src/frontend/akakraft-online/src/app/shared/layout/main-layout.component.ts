@@ -35,6 +35,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
   { label: 'Mängelmelder', icon: 'report_problem', route: '/mangel' },
   { label: 'Wunschliste', icon: 'playlist_add', route: '/wunsch' },
   { label: 'Umfragen', icon: 'poll', route: '/umfrage' },
+  { label: 'Hallenbuch', icon: 'menu_book', route: '/hallenbuch' },
   { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
   { label: 'Kalender-Einstellungen', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
   { label: 'Feedback', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },

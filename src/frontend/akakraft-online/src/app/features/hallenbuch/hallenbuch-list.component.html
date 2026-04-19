@@ -1,0 +1,77 @@
+<h1 class="page-title">Hallenbuch</h1>
+
+<div class="page-header">
+  @if (isPrivileged()) {
+    <button mat-stroked-button (click)="openStatistikDialog()" class="stat-btn">
+      <mat-icon>download</mat-icon>
+      Statistik
+    </button>
+  }
+  <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
+    <mat-icon>add</mat-icon>
+    Eintrag hinzufügen
+  </button>
+  <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="48" />
+  </div>
+} @else if (items().length === 0) {
+  <div class="empty-state">
+    <mat-icon>menu_book</mat-icon>
+    <p>Noch keine Einträge vorhanden.</p>
+  </div>
+} @else {
+  <div class="eintrag-list">
+    @for (eintrag of items(); track eintrag.id) {
+      <div class="eintrag-card">
+
+        <div class="eintrag-header">
+          <div class="date-block">
+            <span class="start-date">{{ eintrag.start | date:'dd.MM.yyyy' }}</span>
+            <span class="time-range">
+              {{ eintrag.start | date:'HH:mm' }} – {{ eintrag.end | date:'HH:mm' }}
+            </span>
+            <span class="duration">{{ duration(eintrag) }}</span>
+          </div>
+
+          <div class="card-actions">
+            @if (canEdit(eintrag)) {
+              <button mat-icon-button matTooltip="Bearbeiten" class="action-btn"
+                      (click)="openEditDialog(eintrag)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Löschen" class="action-btn delete-btn"
+                      (click)="deleteEintrag(eintrag)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+
+        <p class="description">{{ eintrag.description }}</p>
+
+        <div class="footer">
+          <span class="user">
+            <mat-icon class="footer-icon">person</mat-icon>
+            {{ eintrag.userName }}
+          </span>
+
+          @if (eintrag.hatGastgeschraubt) {
+            <mat-chip class="gast-chip"
+                      [class.bezahlt]="eintrag.gastschraubenBezahlt"
+                      [class.offen]="!eintrag.gastschraubenBezahlt">
+              <mat-icon matChipAvatar>group</mat-icon>
+              Gast: {{ gastschraubenLabel(eintrag) }}
+            </mat-chip>
+          }
+        </div>
+
+      </div>
+    }
+  </div>
+}

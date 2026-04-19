@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Routing.Template;
 
 namespace AkaKraft.WebApi.Endpoints;
 
-public static class UserApi
+internal static class UserEndpoints
 {
-    public static WebApplication AddUserApi(this WebApplication app)
+    internal static WebApplication MapUserEndpoints(this WebApplication app)
     {
         // -------------------------------------------------------------------------
         // User-Management (Admin)

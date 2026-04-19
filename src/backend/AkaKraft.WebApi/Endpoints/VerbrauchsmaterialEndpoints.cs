@@ -3,9 +3,9 @@ using AkaKraft.Application.Interfaces;
 
 namespace AkaKraft.WebApi;
 
-public static class verbrauchsmaterialApi
+internal static class VerbrauchsmaterialEndlpoints
 {
-    public static WebApplication AddverbrauchsmaterialApi(this WebApplication app)
+    internal static WebApplication MapVerbrauchsmaterialEndpoints(this WebApplication app)
     {
         // -------------------------------------------------------------------------
         // Verbrauchsmaterial Endpoints

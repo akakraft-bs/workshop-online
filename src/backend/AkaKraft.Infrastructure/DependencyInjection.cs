@@ -62,6 +62,7 @@ public static class DependencyInjection
         services.AddScoped<IMangelService, MangelService>();
         services.AddScoped<IWunschService, WunschService>();
         services.AddScoped<IUmfrageService, UmfrageService>();
+        services.AddScoped<IHallenbuchService, HallenbuchService>();
 
         return services;
     }

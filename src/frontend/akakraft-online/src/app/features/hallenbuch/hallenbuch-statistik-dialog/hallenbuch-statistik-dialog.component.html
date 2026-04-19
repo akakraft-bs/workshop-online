@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>Statistik herunterladen</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="statistik-form">
+    <p class="hint">CSV-Export mit Schraubzeiten pro Mitglied für den gewählten Zeitraum.</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Von</mat-label>
+      <input matInput [matDatepicker]="fromPicker" formControlName="from">
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+      @if (form.get('from')?.hasError('required') && form.get('from')?.touched) {
+        <mat-error>Pflichtfeld</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Bis</mat-label>
+      <input matInput [matDatepicker]="toPicker" formControlName="to">
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+      @if (form.get('to')?.hasError('required') && form.get('to')?.touched) {
+        <mat-error>Pflichtfeld</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Abbrechen</button>
+  <button mat-flat-button color="primary" (click)="download()">
+    <mat-icon>download</mat-icon>
+    CSV herunterladen
+  </button>
+</mat-dialog-actions>

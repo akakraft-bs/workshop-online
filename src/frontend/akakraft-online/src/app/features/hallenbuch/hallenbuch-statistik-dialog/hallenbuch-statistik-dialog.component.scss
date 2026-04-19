@@ -1,0 +1,16 @@
+.statistik-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 300px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+}

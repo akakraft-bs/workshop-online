@@ -7,9 +7,9 @@ using AkaKraft.Domain.Enums;
 
 namespace AkaKraft.WebApi.Endpoints;
 
-public static class WerkzeugApi
+internal static class WerkzeugEndpoints
 {
-    public static WebApplication AddWerkzeugApi(this WebApplication app)
+    internal static WebApplication MapWerkzeugEndpoints(this WebApplication app)
     {
         // -------------------------------------------------------------------------
         // Werkzeug Endpoints
