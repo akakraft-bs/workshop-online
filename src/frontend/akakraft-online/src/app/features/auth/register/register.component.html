@@ -1,0 +1,95 @@
+<div class="auth-page">
+  <div class="auth-panel">
+    <div class="auth-inner">
+      <div class="logo">
+        @if (!logoFailed) {
+          <img src="/assets/logo.svg" alt="AkaKraft Logo" (error)="logoFailed = true">
+        } @else {
+          <mat-icon>handyman</mat-icon>
+        }
+      </div>
+
+      <h1>Registrieren</h1>
+      <p class="subtitle">AkaKraft Online</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Anzeigename</mat-label>
+          <input matInput formControlName="displayName" autocomplete="name"
+                 placeholder="z. B. Max Mustermann">
+          @if (form.get('displayName')?.hasError('required') && form.get('displayName')?.touched) {
+            <mat-error>Pflichtfeld</mat-error>
+          }
+          @if (form.get('displayName')?.hasError('minlength') && form.get('displayName')?.touched) {
+            <mat-error>Mindestens 2 Zeichen</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>E-Mail-Adresse</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email">
+          @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+            <mat-error>Pflichtfeld</mat-error>
+          }
+          @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+            <mat-error>Ungültige E-Mail-Adresse</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Passwort</mat-label>
+          <input matInput [type]="showPassword() ? 'text' : 'password'"
+                 formControlName="password" autocomplete="new-password">
+          <button mat-icon-button matSuffix type="button"
+                  (click)="showPassword.set(!showPassword())">
+            <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+            <mat-error>Pflichtfeld</mat-error>
+          }
+          @if (form.get('password')?.hasError('minlength') && form.get('password')?.touched) {
+            <mat-error>Mindestens 8 Zeichen</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Passwort bestätigen</mat-label>
+          <input matInput [type]="showPasswordConfirm() ? 'text' : 'password'"
+                 formControlName="passwordConfirm" autocomplete="new-password">
+          <button mat-icon-button matSuffix type="button"
+                  (click)="showPasswordConfirm.set(!showPasswordConfirm())">
+            <mat-icon>{{ showPasswordConfirm() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('passwordConfirm')?.hasError('required') && form.get('passwordConfirm')?.touched) {
+            <mat-error>Pflichtfeld</mat-error>
+          }
+          @if (form.hasError('passwordMismatch') && form.get('passwordConfirm')?.touched) {
+            <mat-error>Passwörter stimmen nicht überein</mat-error>
+          }
+        </mat-form-field>
+
+        @if (error()) {
+          <p class="form-error">{{ error() }}</p>
+        }
+
+        <button mat-raised-button type="submit" class="submit-btn" [class.is-loading]="loading()" [disabled]="loading()">
+          <mat-icon>person_add</mat-icon>
+          <span>Registrieren</span>
+          <mat-spinner diameter="20" class="btn-spinner" />
+        </button>
+      </form>
+
+      <p class="switch-hint">
+        Bereits registriert?
+        <a routerLink="/login">Anmelden</a>
+      </p>
+
+      <div class="legal-links">
+        <a href="nutzungsbedingungen.html" target="_blank">Nutzungsbedingungen</a>
+        <span class="separator">·</span>
+        <a href="datenschutz.html" target="_blank">Datenschutz</a>
+      </div>
+    </div>
+  </div>
+</div>

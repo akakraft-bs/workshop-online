@@ -50,6 +50,10 @@ public static class DependencyInjection
             services.AddScoped<IPushNotificationService, NoOpPushNotificationService>();
         }
 
+        // E-Mail
+        services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
+        services.AddScoped<IEmailService, SmtpEmailService>();
+
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IWerkzeugService, WerkzeugService>();

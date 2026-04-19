@@ -11,11 +11,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.GoogleId)
-            .IsRequired()
             .HasMaxLength(128);
 
+        // Gefilteter Index: nur eindeutig wenn der Wert nicht NULL ist (E-Mail-Nutzer haben kein GoogleId)
         builder.HasIndex(u => u.GoogleId)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("\"GoogleId\" IS NOT NULL");
 
         builder.Property(u => u.Email)
             .IsRequired()

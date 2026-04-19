@@ -1,0 +1,36 @@
+<div class="auth-page">
+  <div class="auth-panel">
+    <div class="auth-inner">
+
+      @if (state() === 'loading') {
+        <mat-spinner diameter="48" />
+        <p class="status-text">E-Mail-Adresse wird bestätigt…</p>
+      }
+
+      @if (state() === 'success') {
+        <div class="icon-circle success">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <h1>E-Mail bestätigt!</h1>
+        <p class="status-text">
+          Dein Account wurde erfolgreich aktiviert.<br>
+          Du wirst weitergeleitet…
+        </p>
+      }
+
+      @if (state() === 'error') {
+        <div class="icon-circle error">
+          <mat-icon>error_outline</mat-icon>
+        </div>
+        <h1>Link ungültig</h1>
+        <p class="status-text">
+          Der Bestätigungslink ist ungültig oder abgelaufen.
+        </p>
+        <a routerLink="/login" mat-raised-button class="back-btn">
+          Zur Anmeldung
+        </a>
+      }
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,78 @@
+.auth-page {
+  min-height: 100vh;
+  background-image: url('/assets/motorbike_sunset.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-panel {
+  width: 100%;
+  max-width: 400px;
+  margin: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+}
+
+.auth-inner {
+  padding: 56px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  text-align: center;
+
+  @media (max-width: 480px) { padding: 40px 24px; }
+}
+
+mat-spinner { margin-bottom: 24px; }
+
+.icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+
+  mat-icon { font-size: 40px; width: 40px; height: 40px; }
+
+  &.success {
+    background: rgba(76, 175, 80, 0.25);
+    border: 2px solid rgba(76, 175, 80, 0.5);
+    mat-icon { color: #a5d6a7; }
+  }
+
+  &.error {
+    background: rgba(244, 67, 54, 0.2);
+    border: 2px solid rgba(244, 67, 54, 0.4);
+    mat-icon { color: #ef9a9a; }
+  }
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 12px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.status-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #1a1a1a !important;
+  border-radius: 8px !important;
+}

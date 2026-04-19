@@ -10,6 +10,7 @@ public interface IUserService
     Task<UserDto?> GetByEmailAsync(string email);
     Task<IReadOnlyList<UserDto>> GetAllAsync();
     Task<UserDto> CreateAsync(string googleId, string email, string name, string? pictureUrl);
+    Task<UserDto> CreateEmailUserAsync(string email, string name, string passwordHash, string confirmationToken, DateTime confirmationTokenExpiry, string? displayName);
     Task<UserDto> AssignRoleAsync(Guid userId, Role role);
     Task<UserDto> RemoveRoleAsync(Guid userId, Role role);
 }

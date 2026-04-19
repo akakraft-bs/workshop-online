@@ -1,0 +1,42 @@
+<div class="auth-page">
+  <div class="auth-panel">
+    <div class="auth-inner">
+      <div class="icon-circle">
+        <mat-icon>mark_email_unread</mat-icon>
+      </div>
+
+      <h1>E-Mail bestätigen</h1>
+
+      <p class="message">
+        Wir haben eine Bestätigungsmail an
+        @if (email) {
+          <strong>{{ email }}</strong>
+        } @else {
+          deine E-Mail-Adresse
+        }
+        gesendet.<br>
+        Bitte klicke auf den Link in der E-Mail, um deinen Account zu aktivieren.
+      </p>
+
+      @if (resent()) {
+        <p class="success-hint">
+          <mat-icon>check_circle</mat-icon>
+          E-Mail erneut gesendet.
+        </p>
+      } @else {
+        <button mat-stroked-button (click)="resend()" [disabled]="resending()" class="resend-btn">
+          @if (resending()) {
+            Wird gesendet…
+          } @else {
+            E-Mail erneut senden
+          }
+        </button>
+      }
+
+      <a routerLink="/login" class="back-link">
+        <mat-icon>arrow_back</mat-icon>
+        Zurück zur Anmeldung
+      </a>
+    </div>
+  </div>
+</div>

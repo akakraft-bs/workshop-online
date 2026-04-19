@@ -14,6 +14,7 @@ namespace AkaKraft.Infrastructure.Services;
 
 public class AuthService(
     IUserService userService,
+    IEmailService emailService,
     IConfiguration configuration,
     ApplicationDbContext db) : IAuthService
 {
@@ -150,6 +151,154 @@ public class AuthService(
         if (stored is null) return;
         stored.IsRevoked = true;
         await db.SaveChangesAsync();
+    }
+
+    // -------------------------------------------------------------------------
+    // E-Mail-Registrierung
+    // -------------------------------------------------------------------------
+
+    public async Task<string?> RegisterAsync(RegisterRequest request, string frontendBaseUrl)
+    {
+        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+
+        var existing = await db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+        if (existing is not null)
+            return "Diese E-Mail-Adresse ist bereits registriert.";
+
+        var passwordHash = HashPassword(request.Password);
+        var token = GenerateSecureToken();
+        var expiry = DateTime.UtcNow.AddHours(24);
+        var displayName = request.DisplayName.Trim();
+        var name = displayName; // Name = DisplayName bei Registrierung
+
+        await userService.CreateEmailUserAsync(
+            normalizedEmail, name, passwordHash, token, expiry, displayName);
+
+        var link = $"{frontendBaseUrl}/auth/confirm-email?token={Uri.EscapeDataString(token)}";
+        await emailService.SendEmailConfirmationAsync(normalizedEmail, name, link);
+
+        return null;
+    }
+
+    public async Task<(AuthResultDto? Result, string? Error)> ConfirmEmailAsync(string token)
+    {
+        var user = await db.Users
+            .Include(u => u.UserRoles)
+            .FirstOrDefaultAsync(u => u.EmailConfirmationToken == token);
+
+        if (user is null || user.EmailConfirmationTokenExpiry < DateTime.UtcNow)
+            return (null, "Der Bestätigungslink ist ungültig oder abgelaufen.");
+
+        user.EmailConfirmedAt = DateTime.UtcNow;
+        user.EmailConfirmationToken = null;
+        user.EmailConfirmationTokenExpiry = null;
+        await db.SaveChangesAsync();
+
+        var jwt = GenerateJwtToken(user);
+        var expiryMinutes = configuration.GetValue<int>("Authentication:Jwt:ExpiryMinutes");
+        var userDto = await userService.GetByIdAsync(user.Id)!
+            ?? throw new InvalidOperationException("User not found after confirm.");
+        return (new AuthResultDto(jwt, DateTime.UtcNow.AddMinutes(expiryMinutes), userDto), null);
+    }
+
+    public async Task<(AuthResultDto? Result, string? Error)> LoginAsync(LoginRequest request)
+    {
+        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+
+        var user = await db.Users
+            .Include(u => u.UserRoles)
+            .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+
+        if (user is null || string.IsNullOrEmpty(user.PasswordHash) || !VerifyPassword(request.Password, user.PasswordHash))
+            return (null, "invalid_credentials");
+
+        if (user.EmailConfirmedAt is null)
+            return (null, "email_not_confirmed");
+
+        var jwt = GenerateJwtToken(user);
+        var expiryMinutes = configuration.GetValue<int>("Authentication:Jwt:ExpiryMinutes");
+        var userDto = await userService.GetByIdAsync(user.Id)!
+            ?? throw new InvalidOperationException("User not found after login.");
+        return (new AuthResultDto(jwt, DateTime.UtcNow.AddMinutes(expiryMinutes), userDto), null);
+    }
+
+    public async Task ResendConfirmationAsync(string email, string frontendBaseUrl)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+
+        if (user is null || user.EmailConfirmedAt is not null)
+            return; // Silently ignore
+
+        var token = GenerateSecureToken();
+        user.EmailConfirmationToken = token;
+        user.EmailConfirmationTokenExpiry = DateTime.UtcNow.AddHours(24);
+        await db.SaveChangesAsync();
+
+        var link = $"{frontendBaseUrl}/auth/confirm-email?token={Uri.EscapeDataString(token)}";
+        await emailService.SendEmailConfirmationAsync(user.Email, user.Name, link);
+    }
+
+    // -------------------------------------------------------------------------
+    // Passwort zurücksetzen
+    // -------------------------------------------------------------------------
+
+    public async Task RequestPasswordResetAsync(string email, string frontendBaseUrl)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+
+        // Immer 200 zurückgeben – nie verraten ob die E-Mail existiert
+        if (user is null || !string.IsNullOrEmpty(user.GoogleId))
+            return;
+
+        var token = GenerateSecureToken();
+        user.PasswordResetToken = token;
+        user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+        await db.SaveChangesAsync();
+
+        var link = $"{frontendBaseUrl}/auth/reset-password?token={Uri.EscapeDataString(token)}";
+        await emailService.SendPasswordResetAsync(user.Email, user.Name, link);
+    }
+
+    public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
+    {
+        var user = await db.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == request.Token);
+
+        if (user is null || user.PasswordResetTokenExpiry < DateTime.UtcNow)
+            return false;
+
+        user.PasswordHash = HashPassword(request.NewPassword);
+        user.PasswordResetToken = null;
+        user.PasswordResetTokenExpiry = null;
+        await db.SaveChangesAsync();
+
+        return true;
+    }
+
+    // -------------------------------------------------------------------------
+    // Hilfsmethoden
+    // -------------------------------------------------------------------------
+
+    private static string HashPassword(string password)
+    {
+        var salt = RandomNumberGenerator.GetBytes(16);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(
+            password, salt, iterations: 350_000,
+            HashAlgorithmName.SHA512, outputLength: 32);
+        return $"{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
+    }
+
+    private static bool VerifyPassword(string password, string storedHash)
+    {
+        var parts = storedHash.Split('.');
+        if (parts.Length != 2) return false;
+        var salt = Convert.FromBase64String(parts[0]);
+        var expectedHash = Convert.FromBase64String(parts[1]);
+        var actualHash = Rfc2898DeriveBytes.Pbkdf2(
+            password, salt, iterations: 350_000,
+            HashAlgorithmName.SHA512, outputLength: 32);
+        return CryptographicOperations.FixedTimeEquals(expectedHash, actualHash);
     }
 
     private static string GenerateSecureToken()

@@ -127,12 +127,47 @@ public class UserService(ApplicationDbContext db) : IUserService
             Name = name,
             PictureUrl = pictureUrl,
             CreatedAt = DateTime.UtcNow,
+            // Google hat die E-Mail-Adresse bereits verifiziert
+            EmailConfirmedAt = DateTime.UtcNow,
         };
 
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
         return MapToDto(user, null);
+    }
+
+    public async Task<UserDto> CreateEmailUserAsync(
+        string email, string name, string passwordHash,
+        string confirmationToken, DateTime confirmationTokenExpiry,
+        string? displayName)
+    {
+        var userId = Guid.NewGuid();
+        var user = new User
+        {
+            Id = userId,
+            Email = email,
+            Name = name,
+            PasswordHash = passwordHash,
+            EmailConfirmationToken = confirmationToken,
+            EmailConfirmationTokenExpiry = confirmationTokenExpiry,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        db.Users.Add(user);
+
+        if (!string.IsNullOrWhiteSpace(displayName))
+        {
+            db.UserPreferences.Add(new UserPreferences
+            {
+                UserId = userId,
+                DisplayName = displayName,
+            });
+        }
+
+        await db.SaveChangesAsync();
+
+        return MapToDto(user, displayName);
     }
 
     private static UserDto MapToDto(User user, string? displayName) =>

@@ -31,6 +31,60 @@ export class AuthService {
     window.location.href = `${environment.apiUrl}/auth/login/google`;
   }
 
+  register(email: string, password: string, displayName: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<{ message: string }>(
+        `${environment.apiUrl}/auth/register`,
+        { email, password, displayName },
+        { withCredentials: true }
+      )
+    ).then(() => undefined);
+  }
+
+  confirmEmail(token: string): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(
+      `${environment.apiUrl}/auth/confirm-email`,
+      { token },
+      { withCredentials: true }
+    ).pipe(
+      tap(res => localStorage.setItem(this.TOKEN_KEY, res.token)),
+    );
+  }
+
+  loginWithEmail(email: string, password: string): Observable<{ token: string; expiresAt: string }> {
+    return this.http.post<{ token: string; expiresAt: string }>(
+      `${environment.apiUrl}/auth/login`,
+      { email, password },
+      { withCredentials: true }
+    ).pipe(
+      tap(res => localStorage.setItem(this.TOKEN_KEY, res.token)),
+    );
+  }
+
+  resendConfirmation(email: string): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiUrl}/auth/resend-confirmation`,
+      { email },
+      { withCredentials: true }
+    );
+  }
+
+  requestPasswordReset(email: string): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiUrl}/auth/request-password-reset`,
+      { email },
+      { withCredentials: true }
+    );
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiUrl}/auth/reset-password`,
+      { token, newPassword },
+      { withCredentials: true }
+    );
+  }
+
   handleCallback(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
     this.http.get<User>(`${environment.apiUrl}/auth/me`, { withCredentials: true })

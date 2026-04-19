@@ -12,12 +12,68 @@
       <h1>AkaKraft Online</h1>
       <p class="subtitle">Vereinsverwaltung</p>
 
-      <p class="hint">Melde dich mit deinem Google-Konto an, um auf die Vereinsverwaltung zuzugreifen.</p>
+      <!-- Mode-Tabs -->
+      <div class="mode-tabs">
+        <button class="tab-btn" [class.active]="mode() === 'google'" (click)="switchMode('google')">
+          Google
+        </button>
+        <button class="tab-btn" [class.active]="mode() === 'email'" (click)="switchMode('email')">
+          E-Mail
+        </button>
+      </div>
 
-      <button mat-raised-button color="primary" (click)="login()" class="login-btn">
-        <mat-icon>login</mat-icon>
-        Mit Google anmelden
-      </button>
+      @if (mode() === 'google') {
+        <p class="hint">Melde dich mit deinem Google-Konto an, um auf die Vereinsverwaltung zuzugreifen.</p>
+        <button mat-raised-button (click)="loginGoogle()" class="login-btn google-btn">
+          <mat-icon>login</mat-icon>
+          Mit Google anmelden
+        </button>
+      }
+
+      @if (mode() === 'email') {
+        <form [formGroup]="form" (ngSubmit)="submitEmail()" class="email-form">
+          <mat-form-field appearance="outline">
+            <mat-label>E-Mail-Adresse</mat-label>
+            <input matInput type="email" formControlName="email" autocomplete="email">
+            @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+              <mat-error>Pflichtfeld</mat-error>
+            }
+            @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+              <mat-error>Ungültige E-Mail-Adresse</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Passwort</mat-label>
+            <input matInput [type]="showPassword() ? 'text' : 'password'"
+                   formControlName="password" autocomplete="current-password">
+            <button mat-icon-button matSuffix type="button"
+                    (click)="showPassword.set(!showPassword())">
+              <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+              <mat-error>Pflichtfeld</mat-error>
+            }
+          </mat-form-field>
+
+          @if (error()) {
+            <p class="form-error">{{ error() }}</p>
+          }
+
+          <button mat-raised-button type="submit" class="login-btn" [class.is-loading]="loading()" [disabled]="loading()">
+            <mat-icon>login</mat-icon>
+            <span>Anmelden</span>
+            <mat-spinner diameter="20" class="btn-spinner" />
+          </button>
+
+          <a class="forgot-link" routerLink="/auth/forgot-password">Passwort vergessen?</a>
+        </form>
+      }
+
+      <div class="register-hint">
+        Noch kein Konto?
+        <a routerLink="/auth/register">Jetzt registrieren</a>
+      </div>
 
       <div class="legal-links">
         <a href="nutzungsbedingungen.html" target="_blank">Nutzungsbedingungen</a>
