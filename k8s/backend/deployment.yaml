@@ -82,6 +82,43 @@ spec:
                   name: google-calendar-secret
                   key: service-account-json
 
+            # --- E-Mail / SMTP ---
+            - name: Email__SmtpHost
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: email-smtp-host
+            - name: Email__SmtpPort
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: email-smtp-port
+            - name: Email__SmtpRequiresAuth
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: email-smtp-requires-auth
+            - name: Email__SmtpUsername
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: email-smtp-username
+            - name: Email__SmtpPassword
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: email-smtp-password
+            - name: Email__FromAddress
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: email-from-address
+            - name: Email__FromName
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: email-from-name
+
             # --- Admin ---
             - name: Admin__Email
               valueFrom:
