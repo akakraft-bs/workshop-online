@@ -82,6 +82,17 @@ server {
     }
 
     # -------------------------------------------------------------------------
+    # Logo direkt unter der Root-Domain verfügbar machen
+    # -------------------------------------------------------------------------
+    location = /logo.svg {
+        alias /usr/share/nginx/html/app/logo.svg;
+        expires 30d;
+        add_header Cache-Control "public";
+        add_header Content-Type "image/svg+xml";
+        access_log off;
+    }
+
+    # -------------------------------------------------------------------------
     # Redirect: / → /app/
     # -------------------------------------------------------------------------
     location = / {
