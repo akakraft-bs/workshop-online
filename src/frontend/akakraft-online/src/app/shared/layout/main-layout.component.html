@@ -12,6 +12,11 @@
         <mat-icon class="brand-icon">handyman</mat-icon>
       }
       <span class="brand-name">AkaKraft Braunschweig</span>
+      @if (isMobile()) {
+        <button mat-icon-button class="sidenav-close-btn" (click)="sidenavRef().close()" aria-label="Menü schließen">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
     </div>
 
     <mat-nav-list>

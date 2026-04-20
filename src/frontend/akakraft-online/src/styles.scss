@@ -9,6 +9,16 @@ html {
     typography: Roboto,
     density: 0,
   ));
+
+  // -----------------------------------------------------------------------
+  // AkaKraft-Primärfarbe (#293748 – Navy aus dem Logo)
+  // Überschreibt die Material-3-Tokens nach dem Mixin.
+  // -----------------------------------------------------------------------
+  --mat-sys-primary:              #293748;
+  --mat-sys-on-primary:           #ffffff;
+  --mat-sys-primary-container:    #d0e4f5;
+  --mat-sys-on-primary-container: #0a1c2a;
+  --mat-sys-inverse-primary:      #9ab5cc;
 }
 
 * {
@@ -20,23 +30,21 @@ body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
-// Einheitliche Seitenüberschrift über der jeweiligen Toolbar
+// Einheitliche Seitenüberschrift
 .page-title {
   font-size: 1.4rem;
   font-weight: 600;
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   color: var(--mat-sys-on-surface);
 }
 
-// Mat-Dialog: erstes mat-form-field mit outline-appearance braucht oben
-// etwas Platz damit das floating label nicht abgeschnitten wird.
+// Mat-Dialog: erstes outline-field braucht oben Platz für floating label
 mat-dialog-content {
   padding-top: 8px !important;
   overflow-x: hidden;
 }
 
-// Responsive Desktop/Mobile Button-Sichtbarkeit.
-// Verwendung: class="create-btn-desktop" bzw. class="create-btn-mobile"
+// Responsive Desktop/Mobile Button-Sichtbarkeit
 .create-btn-mobile {
   display: none !important;
 }
@@ -45,7 +53,6 @@ mat-dialog-content {
   .create-btn-desktop {
     display: none !important;
   }
-
   .create-btn-mobile {
     display: inline-flex !important;
   }
