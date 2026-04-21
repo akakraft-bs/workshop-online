@@ -7,7 +7,6 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Umfrage, CreateUmfrageDto, UpdateUmfrageDto } from '../../../models/umfrage.model';
@@ -28,7 +27,6 @@ export interface UmfrageDialogData {
     MatCheckboxModule,
     MatSlideToggleModule,
     MatDatepickerModule,
-    MatNativeDateModule,
     MatTooltipModule,
   ],
   templateUrl: './create-umfrage-dialog.component.html',

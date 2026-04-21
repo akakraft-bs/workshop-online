@@ -6,7 +6,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { ApiService } from '../../../core/api/api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -21,7 +20,7 @@ function toDateStr(d: Date): string {
     ReactiveFormsModule,
     MatDialogModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule,
-    MatDatepickerModule, MatNativeDateModule,
+    MatDatepickerModule,
   ],
   templateUrl: './hallenbuch-statistik-dialog.component.html',
   styleUrl: './hallenbuch-statistik-dialog.component.scss',

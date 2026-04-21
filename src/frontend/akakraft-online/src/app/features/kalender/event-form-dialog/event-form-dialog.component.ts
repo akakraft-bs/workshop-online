@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { CalendarConfig, CalendarEvent } from '../../../models/calendar.model';
 
 export interface EventFormDialogData {
@@ -38,7 +37,6 @@ export interface EventFormDialogResult {
     MatSelectModule,
     MatCheckboxModule,
     MatDatepickerModule,
-    MatNativeDateModule,
   ],
   template: `
     <h2 mat-dialog-title>{{ data.event ? 'Termin bearbeiten' : 'Neuer Termin' }}</h2>

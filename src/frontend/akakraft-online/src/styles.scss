@@ -49,6 +49,12 @@ mat-dialog-content {
   display: none !important;
 }
 
+// M3 mini-FAB: background und Icon-Farbe direkt setzen
+button.create-btn-mobile {
+  background-color: var(--mat-sys-primary) !important;
+  color: var(--mat-sys-on-primary) !important;
+}
+
 @media (max-width: 599px) {
   .create-btn-desktop {
     display: none !important;

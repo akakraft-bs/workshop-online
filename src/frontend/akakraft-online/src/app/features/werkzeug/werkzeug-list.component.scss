@@ -24,6 +24,11 @@
     gap: 8px;
     flex-wrap: wrap;
 
+    .create-btn-desktop,
+    .create-btn-mobile {
+      margin-left: auto;
+    }
+
     .active-filter {
       background: var(--mat-sys-secondary-container);
       color: var(--mat-sys-on-secondary-container);

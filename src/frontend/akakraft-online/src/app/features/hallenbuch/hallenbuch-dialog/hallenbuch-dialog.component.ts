@@ -9,7 +9,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { HallenbuchEintrag, GastschraubenArt, CreateHallenbuchEintragDto } from '../../../models/hallenbuch.model';
 
 export interface HallenbuchDialogData {
@@ -39,7 +38,7 @@ function combineDateTime(date: Date, timeStr: string): Date {
     MatDialogModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatSlideToggleModule,
     MatSelectModule, MatDividerModule,
-    MatDatepickerModule, MatNativeDateModule,
+    MatDatepickerModule,
   ],
   templateUrl: './hallenbuch-dialog.component.html',
   styleUrl: './hallenbuch-dialog.component.scss',
