@@ -22,12 +22,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-left: auto;
     flex-wrap: wrap;
-
-    .create-btn-desktop,
-    .create-btn-mobile {
-      margin-left: auto;
-    }
 
     .active-filter {
       background: var(--mat-sys-secondary-container);
@@ -81,7 +77,13 @@
 .werkzeug-card {
   display: flex;
   flex-direction: column;
-  transition: box-shadow 0.2s;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
 
   &.overdue {
     border-color: var(--mat-sys-error) !important;
@@ -107,29 +109,20 @@
       width: 48px;
       height: 48px;
       color: var(--mat-sys-on-surface-variant);
+      opacity: 0.4;
     }
   }
 
   mat-card-content {
     flex: 1;
 
-    .description {
-      font-size: 14px;
-      color: var(--mat-sys-on-surface-variant);
-      margin: 8px 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .meta-row {
+    .borrow-summary {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       font-size: 13px;
       color: var(--mat-sys-on-surface-variant);
-      margin: 4px 0;
+      margin: 8px 0 0;
 
       mat-icon {
         font-size: 15px;
@@ -137,72 +130,6 @@
         height: 15px;
         flex-shrink: 0;
       }
-
-      &.overdue-text {
-        color: var(--mat-sys-error);
-        font-weight: 500;
-      }
-    }
-
-    .borrow-info {
-      margin-top: 10px;
-      padding: 8px 10px;
-      background: var(--mat-sys-surface-variant);
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-
-      .you-badge {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 1px 6px;
-        border-radius: 8px;
-        background: var(--mat-sys-primary-container);
-        color: var(--mat-sys-on-primary-container);
-      }
-    }
-  }
-
-  mat-card-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-right: 4px;
-
-    &:not(.has-manage) {
-      justify-content: flex-start;
-    }
-
-    .primary-actions {
-      display: flex;
-    }
-
-    .manage-actions {
-      display: flex;
-      gap: 2px;
-      margin-left: auto;
-    }
-  }
-
-  .delete-confirm {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 8px 16px 12px;
-    background: var(--mat-sys-error-container);
-    border-radius: 0 0 12px 12px;
-
-    span {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--mat-sys-on-error-container);
-    }
-
-    .delete-confirm-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
     }
   }
 }

@@ -44,6 +44,15 @@ mat-dialog-content {
   overflow-x: hidden;
 }
 
+// Werkzeug-Detail-Dialog: kein Padding am oberen Rand (Bild läuft bis zum Rand)
+.werkzeug-detail-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  overflow: hidden;
+  border-radius: 12px;
+}
+.werkzeug-detail-panel mat-dialog-content {
+  padding-top: 0 !important;
+}
+
 // Responsive Desktop/Mobile Button-Sichtbarkeit
 .create-btn-mobile {
   display: none !important;

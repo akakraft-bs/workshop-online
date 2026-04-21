@@ -1,0 +1,165 @@
+.detail-image-wrap {
+  position: relative;
+  width: 100%;
+  background: var(--mat-sys-surface-variant);
+  flex-shrink: 0;
+
+  .close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+
+    &:hover { background: rgba(0, 0, 0, 0.65); }
+  }
+}
+
+.detail-image {
+  width: 100%;
+  max-height: 340px;
+  object-fit: contain;
+  display: block;
+}
+
+.detail-image-placeholder {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 72px;
+    width: 72px;
+    height: 72px;
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.3;
+  }
+}
+
+// ---- Content ---------------------------------------------------------------
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.detail-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.detail-name {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.detail-category {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.detail-description {
+  font-size: 14px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 12px;
+  white-space: pre-wrap;
+  line-height: 1.65;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 8px;
+
+  &.overdue {
+    color: var(--mat-sys-error);
+    font-weight: 500;
+
+    .row-icon { color: var(--mat-sys-error); }
+  }
+
+  .row-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.borrow-section {
+  padding-top: 12px;
+}
+
+.you-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+// ---- Dialog Actions --------------------------------------------------------
+
+::ng-deep .werkzeug-detail-panel mat-dialog-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+// ---- Return-Button Loading-State -------------------------------------------
+
+.return-btn {
+  position: relative;
+  overflow: hidden;
+
+  .btn-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+
+  mat-icon, span { transition: opacity 0.15s; }
+
+  &.is-loading {
+    mat-icon, span { opacity: 0; }
+    .btn-spinner { opacity: 1; }
+  }
+}
+
+// ---- Delete confirm --------------------------------------------------------
+
+.delete-confirm-box {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--mat-sys-error-container);
+  border-radius: 10px;
+
+  p {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mat-sys-on-error-container);
+  }
+
+  .delete-confirm-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+}

@@ -11,6 +11,7 @@
     }
   </mat-form-field>
 
+  <div class="header-actions">
   @if (canManage()) {
     <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
       <mat-icon>add</mat-icon>
@@ -20,6 +21,7 @@
       <mat-icon>add</mat-icon>
     </button>
   }
+  </div>
 </div>
 
 @if (!loading() && categories().length > 1) {

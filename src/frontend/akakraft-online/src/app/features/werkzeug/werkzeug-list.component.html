@@ -24,13 +24,13 @@
     </button>
 
     @if (canManage()) {
-    <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
-      <mat-icon>add</mat-icon>
-      Neues Werkzeug
-    </button>
-    <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
-      <mat-icon>add</mat-icon>
-    </button>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
+        <mat-icon>add</mat-icon>
+        Neues Werkzeug
+      </button>
+      <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+        <mat-icon>add</mat-icon>
+      </button>
     }
   </div>
 </div>
@@ -38,15 +38,11 @@
 @if (!loading() && categories().length > 1) {
   <div class="category-filter">
     <mat-chip-set>
-      <mat-chip
-        [highlighted]="selectedCategory() === null"
-        (click)="selectedCategory.set(null)">
+      <mat-chip [highlighted]="selectedCategory() === null" (click)="selectedCategory.set(null)">
         Alle
       </mat-chip>
       @for (cat of categories(); track cat) {
-        <mat-chip
-          [highlighted]="selectedCategory() === cat"
-          (click)="selectedCategory.set(cat)">
+        <mat-chip [highlighted]="selectedCategory() === cat" (click)="selectedCategory.set(cat)">
           {{ cat }}
         </mat-chip>
       }
@@ -62,8 +58,8 @@
   <div class="card-grid">
     @for (item of filteredItems(); track item.id) {
       <mat-card class="werkzeug-card" appearance="outlined"
-        [class.borrowed]="!item.isAvailable"
-        [class.overdue]="isOverdue(item)">
+        [class.overdue]="isOverdue(item)"
+        (click)="openDetailDialog(item)">
 
         <div class="card-image">
           @if (item.imageUrl) {
@@ -79,15 +75,6 @@
         </mat-card-header>
 
         <mat-card-content>
-          <p class="description">{{ item.description }}</p>
-
-          @if (item.dimensions) {
-            <p class="meta-row">
-              <mat-icon>straighten</mat-icon>
-              {{ item.dimensions }}
-            </p>
-          }
-
           <mat-chip-set>
             <mat-chip [highlighted]="true" [color]="item.isAvailable ? 'primary' : 'warn'">
               {{ item.isAvailable ? 'Verfügbar' : 'Ausgeliehen' }}
@@ -98,66 +85,13 @@
           </mat-chip-set>
 
           @if (!item.isAvailable && item.borrowedByName) {
-            <div class="borrow-info">
-              <p class="meta-row">
-                <mat-icon>person</mat-icon>
-                <span>{{ item.borrowedByName }}</span>
-                @if (isMyBorrow(item)) {
-                  <span class="you-badge">Du</span>
-                }
-              </p>
-              @if (item.borrowedAt) {
-                <p class="meta-row">
-                  <mat-icon>calendar_today</mat-icon>
-                  Seit {{ item.borrowedAt | date:'dd.MM.yyyy' }}
-                </p>
-              }
-              @if (item.expectedReturnAt) {
-                <p class="meta-row" [class.overdue-text]="isOverdue(item)">
-                  <mat-icon>event</mat-icon>
-                  Rückgabe bis {{ item.expectedReturnAt | date:'dd.MM.yyyy' }}
-                </p>
-              }
-            </div>
+            <p class="borrow-summary">
+              <mat-icon>person</mat-icon>
+              {{ item.borrowedByName }}
+            </p>
           }
         </mat-card-content>
 
-        @if (pendingDeleteId() === item.id) {
-          <div class="delete-confirm">
-            <span>Wirklich löschen?</span>
-            <div class="delete-confirm-actions">
-              <button mat-button (click)="cancelDelete()">Abbrechen</button>
-              <button mat-raised-button color="warn" (click)="confirmDelete(item)">Löschen</button>
-            </div>
-          </div>
-        } @else {
-          <mat-card-actions [class.has-manage]="canManage()">
-            <div class="primary-actions">
-              @if (item.isAvailable) {
-                <button mat-button color="primary" (click)="openBorrowDialog(item)">
-                  <mat-icon>shopping_cart</mat-icon>
-                  Ausleihen
-                </button>
-              } @else if (canReturn(item)) {
-                <button mat-button color="accent" (click)="returnItem(item)">
-                  <mat-icon>assignment_return</mat-icon>
-                  Zurückgeben
-                </button>
-              }
-            </div>
-
-            @if (canManage()) {
-              <div class="manage-actions">
-                <button mat-icon-button matTooltip="Bearbeiten" (click)="openEditDialog(item)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button matTooltip="Löschen" color="warn" (click)="requestDelete(item)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-            }
-          </mat-card-actions>
-        }
       </mat-card>
     }
 

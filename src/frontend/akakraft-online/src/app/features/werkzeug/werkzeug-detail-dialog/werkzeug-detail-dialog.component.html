@@ -1,0 +1,112 @@
+<!-- Bild-Header mit Close-Button -->
+<div class="detail-image-wrap">
+  @if (item().imageUrl) {
+    <img class="detail-image" [src]="item().imageUrl" [alt]="item().name">
+  } @else {
+    <div class="detail-image-placeholder">
+      <mat-icon>build</mat-icon>
+    </div>
+  }
+  <button mat-icon-button class="close-btn" (click)="dialogRef.close()" matTooltip="Schließen">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content>
+
+  <div class="detail-header">
+    <div class="detail-title-group">
+      <h2 class="detail-name">{{ item().name }}</h2>
+      <span class="detail-category">{{ item().category }}</span>
+    </div>
+    <mat-chip-set>
+      <mat-chip [highlighted]="true" [color]="item().isAvailable ? 'primary' : 'warn'">
+        {{ item().isAvailable ? 'Verfügbar' : 'Ausgeliehen' }}
+      </mat-chip>
+      @if (isOverdue()) {
+        <mat-chip [highlighted]="true" color="warn">Überfällig</mat-chip>
+      }
+    </mat-chip-set>
+  </div>
+
+  @if (item().description) {
+    <p class="detail-description">{{ item().description }}</p>
+  }
+
+  @if (item().dimensions) {
+    <div class="detail-row">
+      <mat-icon class="row-icon">straighten</mat-icon>
+      <span>{{ item().dimensions }}</span>
+    </div>
+  }
+
+  @if (!item().isAvailable) {
+    <mat-divider />
+    <div class="borrow-section">
+      @if (item().borrowedByName) {
+        <div class="detail-row">
+          <mat-icon class="row-icon">person</mat-icon>
+          <span>{{ item().borrowedByName }}</span>
+          @if (isMyBorrow()) {
+            <span class="you-badge">Du</span>
+          }
+        </div>
+      }
+      @if (item().borrowedAt) {
+        <div class="detail-row">
+          <mat-icon class="row-icon">calendar_today</mat-icon>
+          <span>Ausgeliehen seit {{ item().borrowedAt | date:'dd.MM.yyyy' }}</span>
+        </div>
+      }
+      @if (item().expectedReturnAt) {
+        <div class="detail-row" [class.overdue]="isOverdue()">
+          <mat-icon class="row-icon">event</mat-icon>
+          <span>Rückgabe bis {{ item().expectedReturnAt | date:'dd.MM.yyyy' }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  @if (showDeleteConfirm()) {
+    <div class="delete-confirm-box">
+      <p>Werkzeug wirklich löschen?</p>
+      <div class="delete-confirm-actions">
+        <button mat-button (click)="showDeleteConfirm.set(false)" [disabled]="deleting()">Abbrechen</button>
+        <button mat-raised-button color="warn" (click)="delete()" [disabled]="deleting()">
+          @if (deleting()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            Löschen
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (canManage() && !showDeleteConfirm()) {
+    <button mat-icon-button color="warn" matTooltip="Löschen"
+            (click)="showDeleteConfirm.set(true)" style="margin-right: auto">
+      <mat-icon>delete</mat-icon>
+    </button>
+    <button mat-stroked-button (click)="edit()">
+      <mat-icon>edit</mat-icon>
+      Bearbeiten
+    </button>
+  }
+  @if (item().isAvailable) {
+    <button mat-flat-button color="primary" (click)="borrow()">
+      <mat-icon>shopping_cart</mat-icon>
+      Ausleihen
+    </button>
+  } @else if (canReturn()) {
+    <button mat-flat-button color="accent" (click)="returnItem()" [disabled]="returning()"
+            [class.is-loading]="returning()" class="return-btn">
+      <mat-icon>assignment_return</mat-icon>
+      <span>Zurückgeben</span>
+      <mat-spinner diameter="18" class="btn-spinner" />
+    </button>
+  }
+</mat-dialog-actions>

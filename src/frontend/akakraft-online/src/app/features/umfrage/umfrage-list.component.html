@@ -11,13 +11,15 @@
     <mat-button-toggle value="alle">Alle</mat-button-toggle>
   </mat-button-toggle-group>
 
-  <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
-    <mat-icon>add</mat-icon>
-    Neue Umfrage
-  </button>
-  <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
-    <mat-icon>add</mat-icon>
-  </button>
+  <div class="header-actions">
+    <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
+      <mat-icon>add</mat-icon>
+      Neue Umfrage
+    </button>
+    <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
 </div>
 
 @if (loading()) {
