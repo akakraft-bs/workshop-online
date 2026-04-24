@@ -10,9 +10,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { HallenbuchEintrag, GastschraubenArt, CreateHallenbuchEintragDto } from '../../../models/hallenbuch.model';
+import { MangelKategorie } from '../../../models/mangel.model';
 
 export interface HallenbuchDialogData {
   eintrag?: HallenbuchEintrag;
+}
+
+export interface HallenbuchDialogResult {
+  hallenbuch: CreateHallenbuchEintragDto;
+  mangel?: { title: string; description: string; kategorie: MangelKategorie };
 }
 
 function dateOnly(d: Date): Date {
@@ -51,23 +57,41 @@ export class HallenbuchDialogComponent implements OnInit {
   readonly isEdit = !!this.data?.eintrag;
   readonly eintrag = this.data?.eintrag;
 
+  readonly kategorien: MangelKategorie[] = ['Halle', 'Werkzeug', 'Sonstiges'];
+
   readonly form = this.fb.group({
-    startDate:           [null as Date | null, Validators.required],
-    startTime:           ['', Validators.required],
-    endDate:             [null as Date | null, Validators.required],
-    endTime:             ['', Validators.required],
-    description:         ['', [Validators.required, Validators.maxLength(256)]],
-    hatGastgeschraubt:   [false],
-    gastschraubenArt:    [null as GastschraubenArt | null],
-    gastschraubenBezahlt:[false],
+    startDate:            [null as Date | null, Validators.required],
+    startTime:            ['', Validators.required],
+    endDate:              [null as Date | null, Validators.required],
+    endTime:              ['', Validators.required],
+    description:          ['', [Validators.required, Validators.maxLength(256)]],
+    hatGastgeschraubt:    [false],
+    gastschraubenArt:     [null as GastschraubenArt | null],
+    gastschraubenBezahlt: [false],
+    mangelMelden:         [false],
+    mangelTitel:          ['', Validators.maxLength(200)],
+    mangelKategorie:      ['' as MangelKategorie | ''],
+    mangelBeschreibung:   ['', Validators.maxLength(2000)],
   });
 
   get hatGast(): boolean {
     return !!this.form.get('hatGastgeschraubt')!.value;
   }
 
+  get mangelMelden(): boolean {
+    return !!this.form.get('mangelMelden')!.value;
+  }
+
   get descriptionLength(): number {
     return this.form.get('description')!.value?.length ?? 0;
+  }
+
+  get mangelTitelLength(): number {
+    return this.form.get('mangelTitel')!.value?.length ?? 0;
+  }
+
+  get mangelBeschreibungLength(): number {
+    return this.form.get('mangelBeschreibung')!.value?.length ?? 0;
   }
 
   ngOnInit(): void {
@@ -133,7 +157,27 @@ export class HallenbuchDialogComponent implements OnInit {
       return;
     }
 
-    const dto: CreateHallenbuchEintragDto = {
+    if (v.mangelMelden) {
+      let mangelValid = true;
+      if (!v.mangelTitel?.trim()) {
+        this.form.get('mangelTitel')!.setErrors({ required: true });
+        this.form.get('mangelTitel')!.markAsTouched();
+        mangelValid = false;
+      }
+      if (!v.mangelKategorie) {
+        this.form.get('mangelKategorie')!.setErrors({ required: true });
+        this.form.get('mangelKategorie')!.markAsTouched();
+        mangelValid = false;
+      }
+      if (!v.mangelBeschreibung?.trim()) {
+        this.form.get('mangelBeschreibung')!.setErrors({ required: true });
+        this.form.get('mangelBeschreibung')!.markAsTouched();
+        mangelValid = false;
+      }
+      if (!mangelValid) return;
+    }
+
+    const hallenbuch: CreateHallenbuchEintragDto = {
       start: start.toISOString(),
       end:   end.toISOString(),
       description: v.description!,
@@ -142,7 +186,16 @@ export class HallenbuchDialogComponent implements OnInit {
       gastschraubenBezahlt: v.hatGastgeschraubt ? !!v.gastschraubenBezahlt : null,
     };
 
-    this.dialogRef.close(dto);
+    const result: HallenbuchDialogResult = { hallenbuch };
+    if (v.mangelMelden && v.mangelTitel && v.mangelKategorie && v.mangelBeschreibung) {
+      result.mangel = {
+        title: v.mangelTitel,
+        kategorie: v.mangelKategorie as MangelKategorie,
+        description: v.mangelBeschreibung,
+      };
+    }
+
+    this.dialogRef.close(result);
   }
 
   cancel(): void {

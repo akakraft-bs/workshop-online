@@ -63,3 +63,16 @@ mat-divider {
   background: var(--mat-sys-surface-container-low);
   border-radius: 8px;
 }
+
+.mangel-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--mat-sys-error) 6%, transparent);
+  border-radius: 8px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}

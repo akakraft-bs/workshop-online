@@ -3,11 +3,6 @@
 <mat-dialog-content>
   <form [formGroup]="form" class="hallenbuch-form">
 
-    <div class="hint-banner">
-      <mat-icon class="hint-icon">info_outline</mat-icon>
-      <span>Bei schmutziger Halle oder defektem Werkzeug bitte den <strong>Mängelmelder</strong> nutzen.</span>
-    </div>
-
     <!-- Startzeit -->
     <div class="date-time-row">
       <mat-form-field appearance="outline" class="date-field">
@@ -92,6 +87,56 @@
           </mat-slide-toggle>
         </div>
       </div>
+    }
+
+    @if (!isEdit) {
+      <mat-divider />
+
+      <!-- Mangel mitmelden -->
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="mangelMelden">
+          Mangel mitmelden
+        </mat-slide-toggle>
+        <span class="toggle-hint">Schaden oder Defekt direkt hier melden</span>
+      </div>
+
+      @if (mangelMelden) {
+        <div class="mangel-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Titel des Mangels</mat-label>
+            <input matInput formControlName="mangelTitel" placeholder="z.B. Schweißgerät defekt">
+            @if (form.get('mangelTitel')?.hasError('required') && form.get('mangelTitel')?.touched) {
+              <mat-error>Titel ist erforderlich.</mat-error>
+            }
+            @if (form.get('mangelTitel')?.hasError('maxlength')) {
+              <mat-error>Maximal 200 Zeichen.</mat-error>
+            }
+            <mat-hint align="end">{{ mangelTitelLength }}/200</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Kategorie</mat-label>
+            <mat-select formControlName="mangelKategorie">
+              @for (k of kategorien; track k) {
+                <mat-option [value]="k">{{ k }}</mat-option>
+              }
+            </mat-select>
+            @if (form.get('mangelKategorie')?.hasError('required') && form.get('mangelKategorie')?.touched) {
+              <mat-error>Kategorie ist erforderlich.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Beschreibung</mat-label>
+            <textarea matInput formControlName="mangelBeschreibung" rows="3"
+                      placeholder="Detaillierte Beschreibung des Mangels…"></textarea>
+            @if (form.get('mangelBeschreibung')?.hasError('required') && form.get('mangelBeschreibung')?.touched) {
+              <mat-error>Beschreibung ist erforderlich.</mat-error>
+            }
+            <mat-hint align="end">{{ mangelBeschreibungLength }}/2000</mat-hint>
+          </mat-form-field>
+        </div>
+      }
     }
 
   </form>

@@ -9,14 +9,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ApiService } from '../../core/api/api.service';
 import { AuthService } from '../../core/auth/auth.service';
-import {
-  HallenbuchEintrag,
-  CreateHallenbuchEintragDto,
-} from '../../models/hallenbuch.model';
+import { HallenbuchEintrag } from '../../models/hallenbuch.model';
 import {
   HallenbuchDialogComponent,
   HallenbuchDialogData,
+  HallenbuchDialogResult,
 } from './hallenbuch-dialog/hallenbuch-dialog.component';
+import { Mangel } from '../../models/mangel.model';
 import { HallenbuchStatistikDialogComponent } from './hallenbuch-statistik-dialog/hallenbuch-statistik-dialog.component';
 
 @Component({
@@ -84,12 +83,23 @@ export class HallenbuchListComponent implements OnInit {
     this.dialog
       .open(HallenbuchDialogComponent, { width: '520px' })
       .afterClosed()
-      .subscribe((result: CreateHallenbuchEintragDto | undefined) => {
+      .subscribe((result: HallenbuchDialogResult | undefined) => {
         if (!result) return;
-        this.api.post<HallenbuchEintrag>('/hallenbuch', result).subscribe({
+        this.api.post<HallenbuchEintrag>('/hallenbuch', result.hallenbuch).subscribe({
           next: created => {
             this.items.update(list => this.sortByStart([created, ...list]));
-            this.snackBar.open('Eintrag wurde gespeichert.', 'OK', { duration: 3000 });
+            if (result.mangel) {
+              this.api.post<Mangel>('/mangel', result.mangel).subscribe({
+                next: () => {
+                  this.snackBar.open('Eintrag und Mangel wurden gespeichert.', 'OK', { duration: 3000 });
+                },
+                error: () => {
+                  this.snackBar.open('Eintrag gespeichert, Mangel konnte nicht gemeldet werden.', 'OK', { duration: 4000 });
+                },
+              });
+            } else {
+              this.snackBar.open('Eintrag wurde gespeichert.', 'OK', { duration: 3000 });
+            }
           },
           error: (err) => {
             const msg = err?.error ?? 'Fehler beim Speichern.';
@@ -104,9 +114,9 @@ export class HallenbuchListComponent implements OnInit {
     this.dialog
       .open(HallenbuchDialogComponent, { data, width: '520px' })
       .afterClosed()
-      .subscribe((result: CreateHallenbuchEintragDto | undefined) => {
+      .subscribe((result: HallenbuchDialogResult | undefined) => {
         if (!result) return;
-        this.api.put<HallenbuchEintrag>(`/hallenbuch/${eintrag.id}`, result).subscribe({
+        this.api.put<HallenbuchEintrag>(`/hallenbuch/${eintrag.id}`, result.hallenbuch).subscribe({
           next: updated => {
             this.items.update(list => this.sortByStart(list.map(e => e.id === updated.id ? updated : e)));
             this.snackBar.open('Eintrag wurde aktualisiert.', 'OK', { duration: 3000 });
