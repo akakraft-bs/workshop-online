@@ -3,6 +3,31 @@
     Hallo, {{ auth.currentUser()?.displayName || (auth.currentUser()?.name ?? 'Mitglied').split(' ')[0] }}!
   </h1>
 
+  <!-- Offene Umfragen -->
+  @if (pendingUmfragen().length > 0) {
+    <section class="section">
+      <h2 class="section-title">
+        <mat-icon class="section-title-icon umfrage-icon">poll</mat-icon>
+        Offene Umfragen
+      </h2>
+      <div class="events-list">
+        @for (umfrage of pendingUmfragen(); track umfrage.id) {
+          <a class="event-item stock-item" routerLink="/umfrage">
+            <mat-icon class="stock-warn-icon umfrage-poll-icon">how_to_vote</mat-icon>
+            <div class="event-info">
+              <span class="event-title">{{ umfrage.question }}</span>
+              @if (formatUmfrageDeadline(umfrage.deadline); as frist) {
+                <span class="event-date umfrage-deadline">Frist: {{ frist }}</span>
+              } @else {
+                <span class="event-date">Noch nicht abgestimmt</span>
+              }
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
   <!-- Nächste Veranstaltungen -->
   <section class="section">
     <h2 class="section-title">Nächste Veranstaltungen</h2>

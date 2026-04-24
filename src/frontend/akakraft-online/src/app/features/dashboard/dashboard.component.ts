@@ -13,6 +13,7 @@ import { UserPreferencesService } from '../../core/user/user-preferences.service
 import { CalendarEvent } from '../../models/calendar.model';
 import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
 import { Mangel } from '../../models/mangel.model';
+import { Umfrage } from '../../models/umfrage.model';
 import { Role } from '../../models/user.model';
 
 export interface NavItem {
@@ -59,6 +60,7 @@ export class DashboardComponent implements OnInit {
   readonly loadingEvents = signal(true);
   readonly lowStockItems = signal<Verbrauchsmaterial[]>([]);
   readonly openMaengel = signal<Mangel[]>([]);
+  readonly pendingUmfragen = signal<Umfrage[]>([]);
 
   readonly favoriteRoutes = signal<string[]>(DEFAULT_FAVORITES);
   readonly editMode = signal(false);
@@ -97,6 +99,13 @@ export class DashboardComponent implements OnInit {
     this.api.get<Mangel[]>('/mangel').subscribe({
       next: items => this.openMaengel.set(
         items.filter(m => m.status === 'Offen' || m.status === 'Kenntnisgenommen')
+      ),
+      error: () => { /* kein Fehler anzeigen */ },
+    });
+
+    this.api.get<Umfrage[]>('/umfrage').subscribe({
+      next: items => this.pendingUmfragen.set(
+        items.filter(u => u.status === 'Offen' && u.currentUserOptionIds.length === 0)
       ),
       error: () => { /* kein Fehler anzeigen */ },
     });
@@ -141,6 +150,16 @@ export class DashboardComponent implements OnInit {
       next: prefs => { this.favoriteRoutes.set(prefs.favoriteRoutes); this.savingPrefs.set(false); },
       error: () => this.savingPrefs.set(false),
     });
+  }
+
+  formatUmfrageDeadline(deadline: string | null | undefined): string | null {
+    if (!deadline) return null;
+    const d = new Date(deadline);
+    const diffH = Math.round((d.getTime() - Date.now()) / 3_600_000);
+    if (diffH < 0) return 'Abgelaufen';
+    if (diffH < 24) return `Noch ${diffH}h`;
+    if (diffH < 48) return 'Morgen';
+    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
   }
 
   formatEventDate(event: CalendarEvent): string {
