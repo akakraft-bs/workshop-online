@@ -112,9 +112,13 @@ export class AuthService {
   }
 
   logout(): void {
+    // Fire-and-forget: Refresh-Token serverseitig widerrufen.
+    // clearSession() läuft unabhängig davon, ob der Call gelingt (z.B. abgelaufenes JWT → 401).
     this.http.post(`${environment.apiUrl}/auth/logout`, {}, { withCredentials: true })
       .pipe(catchError(() => EMPTY))
-      .subscribe(() => { this.clearSession(); this.router.navigate(['/login']); });
+      .subscribe();
+    this.clearSession();
+    this.router.navigate(['/login']);
   }
 
   /** Versucht per Refresh-Token (httpOnly-Cookie) ein neues JWT zu holen. */
