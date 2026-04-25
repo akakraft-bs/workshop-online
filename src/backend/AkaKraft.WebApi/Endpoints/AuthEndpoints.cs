@@ -43,7 +43,7 @@ internal static class AuthEndpoints
                 Secure = true,
                 SameSite = SameSiteMode.None,
                 MaxAge = TimeSpan.FromDays(30),
-                Path = "/api/auth",
+                Path = $"{ctx.Request.PathBase}/auth",
             });
 
             var frontendUrl = config["Frontend:BaseUrl"];
@@ -60,7 +60,7 @@ internal static class AuthEndpoints
             var result = await authService.UseRefreshTokenAsync(refreshToken);
             if (result is null)
             {
-                ctx.Response.Cookies.Delete("refresh_token", new CookieOptions { Path = "/api/auth" });
+                ctx.Response.Cookies.Delete("refresh_token", new CookieOptions { Path = $"{ctx.Request.PathBase}/auth" });
                 return Results.Unauthorized();
             }
 
@@ -70,7 +70,7 @@ internal static class AuthEndpoints
                 Secure = true,
                 SameSite = SameSiteMode.None,
                 MaxAge = TimeSpan.FromDays(30),
-                Path = "/api/auth",
+                Path = $"{ctx.Request.PathBase}/auth",
             });
 
             return Results.Ok(new { token = result.Token, expiresAt = result.ExpiresAt });
@@ -83,7 +83,7 @@ internal static class AuthEndpoints
             if (!string.IsNullOrEmpty(refreshToken))
                 await authService.RevokeRefreshTokenAsync(refreshToken);
 
-            ctx.Response.Cookies.Delete("refresh_token", new CookieOptions { Path = "/api/auth" });
+            ctx.Response.Cookies.Delete("refresh_token", new CookieOptions { Path = $"{ctx.Request.PathBase}/auth" });
             return Results.Ok();
         }).RequireAuthorization("JwtApi");
 
@@ -138,7 +138,7 @@ internal static class AuthEndpoints
                 HttpOnly = true, Secure = true,
                 SameSite = SameSiteMode.None,
                 MaxAge = TimeSpan.FromDays(30),
-                Path = "/api/auth",
+                Path = $"{ctx.Request.PathBase}/auth",
             });
 
             return Results.Ok(new { token = result.Token, expiresAt = result.ExpiresAt });
@@ -172,7 +172,7 @@ internal static class AuthEndpoints
                 HttpOnly = true, Secure = true,
                 SameSite = SameSiteMode.None,
                 MaxAge = TimeSpan.FromDays(30),
-                Path = "/api/auth",
+                Path = $"{ctx.Request.PathBase}/auth",
             });
 
             return Results.Ok(new { token = result.Token, expiresAt = result.ExpiresAt });
