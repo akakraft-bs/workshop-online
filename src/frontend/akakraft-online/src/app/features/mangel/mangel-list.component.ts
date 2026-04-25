@@ -129,7 +129,7 @@ export class MangelListComponent implements OnInit {
   }
 
   canResolve(mangel: Mangel): boolean {
-    return this.canManage() && (mangel.status === 'Offen' || mangel.status === 'Kenntnisgenommen');
+    return mangel.status === 'Offen' || mangel.status === 'Kenntnisgenommen';
   }
 
   statusColor(status: MangelStatus): string {

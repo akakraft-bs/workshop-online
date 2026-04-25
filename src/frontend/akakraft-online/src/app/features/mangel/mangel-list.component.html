@@ -103,10 +103,12 @@
 
         @if (mangel.resolvedByName) {
           <div class="resolved-by">
-            <mat-icon class="footer-icon">manage_accounts</mat-icon>
-            {{ mangel.resolvedByName }}
+            <span class="reporter">
+              <mat-icon class="footer-icon">manage_accounts</mat-icon>
+              {{ mangel.resolvedByName }}
+            </span>
             @if (mangel.resolvedAt) {
-              · {{ mangel.resolvedAt | date:'dd.MM.yyyy' }}
+              <span class="date">{{ mangel.resolvedAt | date:'dd.MM.yyyy' }}</span>
             }
           </div>
         }

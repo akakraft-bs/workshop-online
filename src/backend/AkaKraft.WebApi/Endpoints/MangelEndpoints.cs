@@ -62,7 +62,7 @@ internal static class MangelEndpoints
 
             var updated = await mangelService.UpdateStatusAsync(id, parsedUserId, dto);
             return updated is null ? Results.NotFound() : Results.Ok(updated);
-        }).RequireAuthorization("VorstandOrAdmin");
+        }).RequireAuthorization("AnyRole");
 
         return app;
     }
