@@ -18,5 +18,7 @@ public class HallenbuchEintrag
     public GastschraubenArt? GastschraubenArt { get; set; }
     public bool? GastschraubenBezahlt { get; set; }
 
+    public bool HatFamiliegeschraubt { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

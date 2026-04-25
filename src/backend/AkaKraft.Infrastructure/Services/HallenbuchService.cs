@@ -34,6 +34,7 @@ public class HallenbuchService(ApplicationDbContext db) : IHallenbuchService
             HatGastgeschraubt = dto.HatGastgeschraubt,
             GastschraubenArt = dto.HatGastgeschraubt ? dto.GastschraubenArt : null,
             GastschraubenBezahlt = dto.HatGastgeschraubt ? dto.GastschraubenBezahlt : null,
+            HatFamiliegeschraubt = dto.HatFamiliegeschraubt,
             CreatedAt = DateTime.UtcNow,
         };
 
@@ -71,6 +72,7 @@ public class HallenbuchService(ApplicationDbContext db) : IHallenbuchService
         eintrag.HatGastgeschraubt = dto.HatGastgeschraubt;
         eintrag.GastschraubenArt = dto.HatGastgeschraubt ? dto.GastschraubenArt : null;
         eintrag.GastschraubenBezahlt = dto.HatGastgeschraubt ? dto.GastschraubenBezahlt : null;
+        eintrag.HatFamiliegeschraubt = dto.HatFamiliegeschraubt;
 
         await db.SaveChangesAsync();
 
@@ -121,7 +123,9 @@ public class HallenbuchService(ApplicationDbContext db) : IHallenbuchService
                 var eigeneStunden = g.Sum(h => (h.End - h.Start).TotalHours);
                 var gastStunden = g.Where(h => h.HatGastgeschraubt)
                                    .Sum(h => (h.End - h.Start).TotalHours);
-                return new HallenbuchStatistikEintragDto(g.Key, name, eigeneStunden, gastStunden);
+                var familieStunden = g.Where(h => h.HatFamiliegeschraubt)
+                                      .Sum(h => (h.End - h.Start).TotalHours);
+                return new HallenbuchStatistikEintragDto(g.Key, name, eigeneStunden, gastStunden, familieStunden);
             })
             .OrderBy(s => s.UserName);
     }
@@ -133,6 +137,7 @@ public class HallenbuchService(ApplicationDbContext db) : IHallenbuchService
             h.Id, h.UserId, name,
             h.Start, h.End, h.Description,
             h.HatGastgeschraubt, h.GastschraubenArt, h.GastschraubenBezahlt,
+            h.HatFamiliegeschraubt,
             h.CreatedAt);
     }
 }

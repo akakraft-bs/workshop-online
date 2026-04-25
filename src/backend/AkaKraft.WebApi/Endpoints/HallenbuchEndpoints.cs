@@ -70,10 +70,10 @@ internal static class HallenbuchEndpoints
             var data = (await service.GetStatistikAsync(from, to)).ToList();
 
             var sb = new StringBuilder();
-            sb.AppendLine("Name;Eigene Stunden;Gast-Stunden");
+            sb.AppendLine("Name;Eigene Stunden;Gast-Stunden;Familie-Stunden");
 
             foreach (var row in data)
-                sb.AppendLine($"{row.UserName};{row.EigeneStunden:F2};{row.GastStunden:F2}");
+                sb.AppendLine($"{row.UserName};{row.EigeneStunden:F2};{row.GastStunden:F2};{row.FamilieStunden:F2}");
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToString());
             var fileName = $"hallenbuch-statistik_{from:yyyy-MM-dd}_{to:yyyy-MM-dd}.csv";

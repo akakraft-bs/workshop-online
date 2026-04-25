@@ -12,6 +12,7 @@ public record HallenbuchEintragDto(
     bool HatGastgeschraubt,
     GastschraubenArt? GastschraubenArt,
     bool? GastschraubenBezahlt,
+    bool HatFamiliegeschraubt,
     DateTime CreatedAt);
 
 public record CreateHallenbuchEintragDto(
@@ -20,7 +21,8 @@ public record CreateHallenbuchEintragDto(
     string Description,
     bool HatGastgeschraubt,
     GastschraubenArt? GastschraubenArt,
-    bool? GastschraubenBezahlt);
+    bool? GastschraubenBezahlt,
+    bool HatFamiliegeschraubt);
 
 public record UpdateHallenbuchEintragDto(
     DateTime Start,
@@ -28,10 +30,12 @@ public record UpdateHallenbuchEintragDto(
     string Description,
     bool HatGastgeschraubt,
     GastschraubenArt? GastschraubenArt,
-    bool? GastschraubenBezahlt);
+    bool? GastschraubenBezahlt,
+    bool HatFamiliegeschraubt);
 
 public record HallenbuchStatistikEintragDto(
     Guid UserId,
     string UserName,
     double EigeneStunden,
-    double GastStunden);
+    double GastStunden,
+    double FamilieStunden);

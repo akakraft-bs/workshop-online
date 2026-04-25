@@ -10,6 +10,7 @@ export interface HallenbuchEintrag {
   hatGastgeschraubt: boolean;
   gastschraubenArt: GastschraubenArt | null;
   gastschraubenBezahlt: boolean | null;
+  hatFamiliegeschraubt: boolean;
   createdAt: string;
 }
 
@@ -20,6 +21,7 @@ export interface CreateHallenbuchEintragDto {
   hatGastgeschraubt: boolean;
   gastschraubenArt: GastschraubenArt | null;
   gastschraubenBezahlt: boolean | null;
+  hatFamiliegeschraubt: boolean;
 }
 
 export interface UpdateHallenbuchEintragDto {
@@ -29,4 +31,5 @@ export interface UpdateHallenbuchEintragDto {
   hatGastgeschraubt: boolean;
   gastschraubenArt: GastschraubenArt | null;
   gastschraubenBezahlt: boolean | null;
+  hatFamiliegeschraubt: boolean;
 }

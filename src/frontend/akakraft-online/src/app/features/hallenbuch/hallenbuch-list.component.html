@@ -69,6 +69,12 @@
               Gast: {{ gastschraubenLabel(eintrag) }}
             </mat-chip>
           }
+          @if (eintrag.hatFamiliegeschraubt) {
+            <mat-chip class="familie-chip">
+              <mat-icon matChipAvatar>family_restroom</mat-icon>
+              Familienmitglied
+            </mat-chip>
+          }
         </div>
 
       </div>

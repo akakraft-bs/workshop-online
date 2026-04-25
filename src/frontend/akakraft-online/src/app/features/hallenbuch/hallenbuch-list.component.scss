@@ -139,3 +139,9 @@
     color: var(--mat-sys-error);
   }
 }
+
+.familie-chip {
+  font-size: 12px;
+  background: color-mix(in srgb, var(--mat-sys-secondary) 12%, transparent);
+  color: var(--mat-sys-secondary);
+}

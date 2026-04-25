@@ -68,6 +68,7 @@ export class HallenbuchDialogComponent implements OnInit {
     hatGastgeschraubt:    [false],
     gastschraubenArt:     [null as GastschraubenArt | null],
     gastschraubenBezahlt: [false],
+    hatFamiliegeschraubt: [false],
     mangelMelden:         [false],
     mangelTitel:          ['', Validators.maxLength(200)],
     mangelKategorie:      ['' as MangelKategorie | ''],
@@ -76,6 +77,10 @@ export class HallenbuchDialogComponent implements OnInit {
 
   get hatGast(): boolean {
     return !!this.form.get('hatGastgeschraubt')!.value;
+  }
+
+  get hatFamilie(): boolean {
+    return !!this.form.get('hatFamiliegeschraubt')!.value;
   }
 
   get mangelMelden(): boolean {
@@ -107,6 +112,7 @@ export class HallenbuchDialogComponent implements OnInit {
         hatGastgeschraubt:    this.eintrag.hatGastgeschraubt,
         gastschraubenArt:     this.eintrag.gastschraubenArt,
         gastschraubenBezahlt: this.eintrag.gastschraubenBezahlt ?? false,
+        hatFamiliegeschraubt: this.eintrag.hatFamiliegeschraubt,
       });
     } else {
       const now = new Date();
@@ -122,6 +128,14 @@ export class HallenbuchDialogComponent implements OnInit {
     // Auto-adjust end if start moves past it
     this.form.get('startDate')!.valueChanges.subscribe(() => this.adjustEndIfNeeded());
     this.form.get('startTime')!.valueChanges.subscribe(() => this.adjustEndIfNeeded());
+
+    // Gast und Familie schließen sich gegenseitig aus
+    this.form.get('hatGastgeschraubt')!.valueChanges.subscribe(v => {
+      if (v) this.form.get('hatFamiliegeschraubt')!.setValue(false, { emitEvent: false });
+    });
+    this.form.get('hatFamiliegeschraubt')!.valueChanges.subscribe(v => {
+      if (v) this.form.get('hatGastgeschraubt')!.setValue(false, { emitEvent: false });
+    });
   }
 
   private adjustEndIfNeeded(): void {
@@ -184,6 +198,7 @@ export class HallenbuchDialogComponent implements OnInit {
       hatGastgeschraubt: !!v.hatGastgeschraubt,
       gastschraubenArt:  v.hatGastgeschraubt ? v.gastschraubenArt : null,
       gastschraubenBezahlt: v.hatGastgeschraubt ? !!v.gastschraubenBezahlt : null,
+      hatFamiliegeschraubt: !!v.hatFamiliegeschraubt,
     };
 
     const result: HallenbuchDialogResult = { hallenbuch };
