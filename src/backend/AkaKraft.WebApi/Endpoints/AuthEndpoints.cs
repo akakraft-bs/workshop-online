@@ -37,14 +37,7 @@ internal static class AuthEndpoints
             var authResult = await authService.HandleGoogleCallbackAsync(googleId, email, name, picture);
             var refreshToken = await authService.CreateRefreshTokenAsync(authResult.User.Id);
 
-            ctx.Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                MaxAge = TimeSpan.FromDays(30),
-                Path = $"{ctx.Request.PathBase}/auth",
-            });
+            ctx.Response.Cookies.Append("refresh_token", refreshToken, RefreshCookieOptions(ctx));
 
             var frontendUrl = config["Frontend:BaseUrl"];
             return Results.Redirect($"{frontendUrl}/auth/callback?token={authResult.Token}");
@@ -64,14 +57,7 @@ internal static class AuthEndpoints
                 return Results.Unauthorized();
             }
 
-            ctx.Response.Cookies.Append("refresh_token", result.RefreshToken!, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                MaxAge = TimeSpan.FromDays(30),
-                Path = $"{ctx.Request.PathBase}/auth",
-            });
+            ctx.Response.Cookies.Append("refresh_token", result.RefreshToken!, RefreshCookieOptions(ctx));
 
             return Results.Ok(new { token = result.Token, expiresAt = result.ExpiresAt });
         });
@@ -133,13 +119,7 @@ internal static class AuthEndpoints
                 return Results.BadRequest(new { error });
 
             var refreshToken = await authService.CreateRefreshTokenAsync(result.User.Id);
-            ctx.Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
-            {
-                HttpOnly = true, Secure = true,
-                SameSite = SameSiteMode.None,
-                MaxAge = TimeSpan.FromDays(30),
-                Path = $"{ctx.Request.PathBase}/auth",
-            });
+            ctx.Response.Cookies.Append("refresh_token", refreshToken, RefreshCookieOptions(ctx));
 
             return Results.Ok(new { token = result.Token, expiresAt = result.ExpiresAt });
         });
@@ -167,13 +147,7 @@ internal static class AuthEndpoints
             }
 
             var refreshToken = await authService.CreateRefreshTokenAsync(result.User.Id);
-            ctx.Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
-            {
-                HttpOnly = true, Secure = true,
-                SameSite = SameSiteMode.None,
-                MaxAge = TimeSpan.FromDays(30),
-                Path = $"{ctx.Request.PathBase}/auth",
-            });
+            ctx.Response.Cookies.Append("refresh_token", refreshToken, RefreshCookieOptions(ctx));
 
             return Results.Ok(new { token = result.Token, expiresAt = result.ExpiresAt });
         });
@@ -207,4 +181,16 @@ internal static class AuthEndpoints
 
         return app;
     }
+
+    // Lokal (HTTP): Secure=false + SameSite=Lax – Browser speichert den Cookie,
+    // localhost-Ports gelten als same-site, sodass der Cookie mitgesendet wird.
+    // Produktion (HTTPS): Secure=true + SameSite=None – nötig für cross-origin.
+    private static CookieOptions RefreshCookieOptions(HttpContext ctx) => new()
+    {
+        HttpOnly = true,
+        Secure   = ctx.Request.IsHttps,
+        SameSite = ctx.Request.IsHttps ? SameSiteMode.None : SameSiteMode.Lax,
+        MaxAge   = TimeSpan.FromDays(30),
+        Path     = $"{ctx.Request.PathBase}/auth",
+    };
 }

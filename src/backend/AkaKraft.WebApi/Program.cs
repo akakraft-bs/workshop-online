@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using AkaKraft.Infrastructure;
+using Microsoft.AspNetCore.HttpOverrides;
 using AkaKraft.Infrastructure.Data;
 using AkaKraft.WebApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +53,7 @@ public static class Program
         // Nötig damit X-Forwarded-Proto: https vom nginx akzeptiert wird.
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor;
             options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
         });
@@ -74,6 +76,7 @@ public static class Program
         // Nginx leitet /api/... an das Backend weiter (ohne Prefix zu strippen).
         // UsePathBase entfernt /api aus dem Pfad und fügt es bei URL-Konstruktionen
         // (z. B. OAuth redirect_uri) automatisch wieder hinzu.
+        app.UseForwardedHeaders();
         app.UsePathBase("/api");
 
         app.UseCors("Frontend");
