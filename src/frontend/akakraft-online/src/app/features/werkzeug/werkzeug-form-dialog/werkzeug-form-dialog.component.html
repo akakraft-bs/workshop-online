@@ -19,45 +19,25 @@
       </div>
 
       <div class="image-controls">
-        <mat-button-toggle-group [value]="imageMode()" (change)="setImageMode($event.value)"
-          class="mode-toggle">
-          <mat-button-toggle value="url">
-            <mat-icon>link</mat-icon>
-            URL
-          </mat-button-toggle>
-          <mat-button-toggle value="upload">
-            <mat-icon>upload</mat-icon>
-            Hochladen
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-
-        @if (imageMode() === 'url') {
-          <mat-form-field appearance="outline" class="url-field">
-            <mat-label>Bild-URL</mat-label>
-            <input matInput formControlName="imageUrl"
-              placeholder="https://..."
-              (input)="onUrlInput()">
-          </mat-form-field>
-        } @else {
-          <div class="upload-area">
-            @if (selectedFile()) {
-              <div class="file-chip">
-                <mat-icon>check_circle</mat-icon>
-                <span>{{ selectedFile()!.name }}</span>
-              </div>
-            } @else {
-              <p class="upload-hint">JPEG, PNG, WebP oder GIF · max. 5 MB</p>
-            }
-            <div class="upload-btn">
-              <input #fileInput type="file" accept="image/jpeg,image/png,image/webp,image/gif"
-                (change)="onFileSelected($event)" hidden>
-              <button type="button" mat-stroked-button (click)="fileInput.click()">
-                <mat-icon>folder_open</mat-icon>
-                {{ selectedFile() ? 'Andere Datei wählen' : 'Datei wählen' }}
-              </button>
-            </div>
+        @if (selectedFile()) {
+          <div class="file-chip">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ selectedFile()!.name }}</span>
           </div>
         }
+        <div class="upload-btns">
+          <input #fileInput type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+            (change)="onFileSelected($event)" hidden>
+          <button type="button" mat-stroked-button (click)="fileInput.click()">
+            <mat-icon>folder_open</mat-icon>
+            {{ selectedFile() ? 'Andere Datei' : 'Datei wählen' }}
+          </button>
+          <button type="button" mat-stroked-button (click)="pasteFromClipboard()">
+            <mat-icon>content_paste</mat-icon>
+            Zwischenablage
+          </button>
+        </div>
+        <p class="upload-hint">JPEG, PNG, WebP oder GIF · max. 5 MB · oder ⌘+V / Strg+V</p>
       </div>
     </div>
 

@@ -99,30 +99,22 @@ mat-dialog-content {
   min-width: 0;
 }
 
-.mode-toggle {
-  align-self: flex-start;
-
-  mat-button-toggle {
-    font-size: 13px;
-    height: 36px;
-
-    mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-      margin-right: 4px;
-    }
-  }
-}
-
-.url-field {
-  margin-bottom: -16px; // mat-form-field bottom padding ausgleichen
-}
-
 .upload-area {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.upload-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  button {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+  }
 }
 
 .upload-hint {

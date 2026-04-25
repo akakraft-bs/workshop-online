@@ -64,36 +64,25 @@
 
     <!-- Bildauswahl -->
     <div class="image-section span-2">
-      <div class="image-mode-toggle">
-        <mat-button-toggle-group [value]="imageMode()" (change)="setImageMode($event.value)">
-          <mat-button-toggle value="url">
-            <mat-icon>link</mat-icon>
-            URL
-          </mat-button-toggle>
-          <mat-button-toggle value="upload">
-            <mat-icon>upload</mat-icon>
-            Hochladen
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-      </div>
-
-      @if (imageMode() === 'url') {
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Bild-URL (optional)</mat-label>
-          <input matInput formControlName="imageUrl" (input)="onUrlInput()" placeholder="https://...">
-        </mat-form-field>
-      } @else {
-        <div class="upload-area">
-          <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+      <div class="upload-controls">
+        <div class="upload-btns">
+          <input #fileInput type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+            (change)="onFileSelected($event)" hidden>
           <button type="button" mat-stroked-button (click)="fileInput.click()">
-            <mat-icon>photo_camera</mat-icon>
-            Bild auswählen
+            <mat-icon>folder_open</mat-icon>
+            {{ selectedFile() ? 'Andere Datei' : 'Datei wählen' }}
           </button>
-          @if (selectedFile()) {
-            <span class="file-name">{{ selectedFile()!.name }}</span>
-          }
+          <button type="button" mat-stroked-button (click)="pasteFromClipboard()">
+            <mat-icon>content_paste</mat-icon>
+            Zwischenablage
+          </button>
         </div>
-      }
+        @if (selectedFile()) {
+          <span class="file-name">{{ selectedFile()!.name }}</span>
+        } @else {
+          <p class="upload-hint">JPEG, PNG, WebP oder GIF · max. 5 MB · oder ⌘+V / Strg+V</p>
+        }
+      </div>
 
       @if (previewUrl()) {
         <div class="image-preview">

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, HostListener, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -6,15 +6,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, switchMap, of, map, startWith } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { ApiService } from '../../../core/api/api.service';
 import { Verbrauchsmaterial } from '../../../models/verbrauchsmaterial.model';
-
-type ImageMode = 'url' | 'upload';
 
 export interface VerbrauchsmaterialFormDialogData {
   item: Verbrauchsmaterial | null;
@@ -26,7 +23,7 @@ export interface VerbrauchsmaterialFormDialogData {
     ReactiveFormsModule, AsyncPipe,
     MatDialogModule, MatButtonModule, MatFormFieldModule,
     MatInputModule, MatProgressSpinnerModule, MatIconModule,
-    MatButtonToggleModule, MatAutocompleteModule,
+    MatAutocompleteModule,
   ],
   templateUrl: './verbrauchsmaterial-form-dialog.component.html',
   styleUrl: './verbrauchsmaterial-form-dialog.component.scss',
@@ -40,7 +37,6 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
 
   readonly saving = signal(false);
   readonly isEdit = this.data?.item !== null && this.data?.item !== undefined;
-  readonly imageMode = signal<ImageMode>('url');
   readonly selectedFile = signal<File | null>(null);
   readonly previewUrl = signal<string | null>(this.data?.item?.imageUrl ?? null);
 
@@ -56,8 +52,20 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
     unit:        [this.data?.item?.unit        ?? '', Validators.required],
     quantity:    [this.data?.item?.quantity    ?? 0,  [Validators.required, Validators.min(0)]],
     minQuantity: [this.data?.item?.minQuantity ?? null as number | null],
-    imageUrl:    [this.data?.item?.imageUrl    ?? ''],
   });
+
+  @HostListener('paste', ['$event'])
+  onPaste(event: ClipboardEvent): void {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        const file = items[i].getAsFile();
+        if (file) { this.setFile(file); event.preventDefault(); }
+        return;
+      }
+    }
+  }
 
   ngOnInit(): void {
     this.api.get<string[]>('/verbrauchsmaterial/categories').subscribe(cats => {
@@ -84,42 +92,36 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
     );
   }
 
-  setImageMode(mode: ImageMode): void {
-    this.imageMode.set(mode);
-    if (mode === 'url') {
-      this.selectedFile.set(null);
-      this.previewUrl.set(this.form.controls.imageUrl.value || null);
-    }
-  }
-
-  onUrlInput(): void {
-    if (this.imageMode() === 'url') {
-      this.previewUrl.set(this.form.controls.imageUrl.value || null);
-    }
-  }
-
   onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+    if (file) this.setFile(file);
+  }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      this.snackBar.open('Ungültiger Dateityp. Erlaubt: JPEG, PNG, WebP, GIF.', 'OK', { duration: 4000 });
+  async pasteFromClipboard(): Promise<void> {
+    if (!navigator.clipboard?.read) {
+      this.snackBar.open('Bitte Bild mit ⌘+V / Strg+V einfügen.', 'OK', { duration: 3000 });
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      this.snackBar.open('Datei zu groß. Maximal 5 MB erlaubt.', 'OK', { duration: 4000 });
-      return;
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const imageType = item.types.find(t => t.startsWith('image/'));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const ext = imageType.split('/')[1] ?? 'png';
+          this.setFile(new File([blob], `clipboard.${ext}`, { type: imageType }));
+          return;
+        }
+      }
+      this.snackBar.open('Kein Bild in der Zwischenablage.', 'OK', { duration: 3000 });
+    } catch {
+      this.snackBar.open('Kein Zugriff – bitte ⌘+V / Strg+V nutzen.', 'OK', { duration: 3000 });
     }
-
-    this.selectedFile.set(file);
-    this.previewUrl.set(URL.createObjectURL(file));
   }
 
   clearImage(): void {
     this.selectedFile.set(null);
     this.previewUrl.set(null);
-    this.form.controls.imageUrl.setValue('');
   }
 
   save(): void {
@@ -131,20 +133,19 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
     this.saving.set(true);
     const value = this.form.getRawValue();
     const file = this.selectedFile();
+    const existingImageUrl = this.previewUrl();
 
-    const upload$: Observable<{ url: string } | null> =
-      this.imageMode() === 'upload' && file
-        ? (() => {
-            const formData = new FormData();
-            formData.append('file', file);
-            return this.api.postFormData<{ url: string }>('/uploads/verbrauchsmaterial', formData);
-          })()
-        : of(null);
+    const upload$: Observable<{ url: string } | null> = file
+      ? (() => {
+          const formData = new FormData();
+          formData.append('file', file);
+          return this.api.postFormData<{ url: string }>('/uploads/verbrauchsmaterial', formData);
+        })()
+      : of(null);
 
     upload$.pipe(
       switchMap((uploadResult: { url: string } | null) => {
-        const imageUrl = uploadResult?.url
-          ?? (this.imageMode() === 'url' ? (value.imageUrl || null) : null);
+        const imageUrl = uploadResult?.url ?? existingImageUrl;
 
         const body = {
           name:        value.name,
@@ -167,5 +168,19 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
         this.saving.set(false);
       },
     });
+  }
+
+  private setFile(file: File): void {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      this.snackBar.open('Ungültiger Dateityp. Erlaubt: JPEG, PNG, WebP, GIF.', 'OK', { duration: 4000 });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.snackBar.open('Datei zu groß. Maximal 5 MB erlaubt.', 'OK', { duration: 4000 });
+      return;
+    }
+    this.selectedFile.set(file);
+    this.previewUrl.set(URL.createObjectURL(file));
   }
 }
