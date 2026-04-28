@@ -11,18 +11,16 @@ public class FeedbackService(ApplicationDbContext db) : IFeedbackService
 {
     public async Task<IEnumerable<FeedbackDto>> GetAllAsync()
     {
-        return await db.Feedbacks
+        var feedbacks = await db.Feedbacks
             .Include(f => f.User)
             .OrderByDescending(f => f.CreatedAt)
-            .Select(f => new FeedbackDto(
-                f.Id,
-                f.UserId,
-                f.User.Name,
-                f.Text,
-                f.PageUrl,
-                f.Status,
-                f.CreatedAt))
             .ToListAsync();
+
+        var userPrefs = await db.UserPreferences
+            .Where(p => p.DisplayName != null)
+            .ToDictionaryAsync(p => p.UserId, p => p.DisplayName!);
+
+        return feedbacks.Select(f => ToDto(f, userPrefs));
     }
 
     public async Task<FeedbackDto> CreateAsync(Guid userId, CreateFeedbackDto dto)
@@ -42,14 +40,11 @@ public class FeedbackService(ApplicationDbContext db) : IFeedbackService
 
         await db.Entry(feedback).Reference(f => f.User).LoadAsync();
 
-        return new FeedbackDto(
-            feedback.Id,
-            feedback.UserId,
-            feedback.User.Name,
-            feedback.Text,
-            feedback.PageUrl,
-            feedback.Status,
-            feedback.CreatedAt);
+        var createPrefs = await db.UserPreferences
+            .Where(p => p.UserId == userId && p.DisplayName != null)
+            .ToDictionaryAsync(p => p.UserId, p => p.DisplayName!);
+
+        return ToDto(feedback, createPrefs);
     }
 
     public async Task<FeedbackDto?> UpdateStatusAsync(Guid id, FeedbackStatus status)
@@ -64,13 +59,16 @@ public class FeedbackService(ApplicationDbContext db) : IFeedbackService
         feedback.Status = status;
         await db.SaveChangesAsync();
 
-        return new FeedbackDto(
-            feedback.Id,
-            feedback.UserId,
-            feedback.User.Name,
-            feedback.Text,
-            feedback.PageUrl,
-            feedback.Status,
-            feedback.CreatedAt);
+        var updatePrefs = await db.UserPreferences
+            .Where(p => p.UserId == feedback.UserId && p.DisplayName != null)
+            .ToDictionaryAsync(p => p.UserId, p => p.DisplayName!);
+
+        return ToDto(feedback, updatePrefs);
+    }
+
+    private static FeedbackDto ToDto(Feedback f, Dictionary<Guid, string> prefs)
+    {
+        var name = prefs.TryGetValue(f.UserId, out var n) ? n : f.User.Name;
+        return new FeedbackDto(f.Id, f.UserId, name, f.Text, f.PageUrl, f.Status, f.CreatedAt);
     }
 }
