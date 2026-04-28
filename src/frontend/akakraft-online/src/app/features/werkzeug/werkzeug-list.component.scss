@@ -1,3 +1,7 @@
+.view-toggle {
+  flex-shrink: 0;
+}
+
 .category-filter {
   margin-bottom: 16px;
 }
@@ -73,6 +77,92 @@
     grid-template-columns: 1fr;
   }
 }
+
+// ---- Table view ---------------------------------------------------------
+
+.table-wrapper {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.werkzeug-table {
+  width: 100%;
+
+  .mat-mdc-header-row {
+    background: var(--mat-sys-surface-variant);
+  }
+
+  .table-row {
+    cursor: pointer;
+    transition: background-color 0.15s;
+
+    &:hover {
+      background: color-mix(in srgb, var(--mat-sys-primary) 6%, transparent);
+    }
+
+    &.overdue-row td {
+      color: var(--mat-sys-error);
+    }
+  }
+}
+
+.name-with-thumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: var(--mat-sys-surface-variant);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: var(--mat-sys-on-surface-variant);
+      opacity: 0.5;
+    }
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.available {
+    background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+    color: var(--mat-sys-primary);
+  }
+
+  &.borrowed {
+    background: color-mix(in srgb, var(--mat-sys-tertiary) 12%, transparent);
+    color: var(--mat-sys-tertiary);
+  }
+
+  &.overdue {
+    background: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+    color: var(--mat-sys-error);
+  }
+}
+
+// ---- Card view ----------------------------------------------------------
 
 .werkzeug-card {
   display: flex;

@@ -3,12 +3,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableModule } from '@angular/material/table';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { DatePipe } from '@angular/common';
 import { ApiService } from '../../core/api/api.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { Werkzeug } from '../../models/werkzeug.model';
@@ -19,8 +22,9 @@ import { WerkzeugDetailDialogComponent, WerkzeugDetailResult } from './werkzeug-
   selector: 'app-werkzeug-list',
   imports: [
     MatFormFieldModule, MatInputModule, MatIconModule,
-    MatButtonModule, MatCardModule, MatChipsModule,
-    MatProgressSpinnerModule, MatTooltipModule,
+    MatButtonModule, MatButtonToggleModule, MatCardModule, MatChipsModule,
+    MatProgressSpinnerModule, MatTableModule, MatTooltipModule,
+    DatePipe,
   ],
   templateUrl: './werkzeug-list.component.html',
   styleUrl: './werkzeug-list.component.scss',
@@ -36,6 +40,12 @@ export class WerkzeugListComponent implements OnInit {
   readonly searchQuery      = signal('');
   readonly showOnlyBorrowed = signal(false);
   readonly selectedCategory = signal<string | null>(null);
+
+  private readonly VIEW_MODE_KEY = 'werkzeug-view-mode';
+  readonly viewMode      = signal<'card' | 'table'>(
+    (localStorage.getItem(this.VIEW_MODE_KEY) as 'card' | 'table') ?? 'card'
+  );
+  readonly tableColumns  = ['name', 'category', 'status', 'borrowedBy', 'expectedReturn'];
 
   readonly canManage    = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
@@ -83,6 +93,11 @@ export class WerkzeugListComponent implements OnInit {
   clearSearch(): void { this.searchQuery.set(''); }
 
   toggleBorrowedFilter(): void { this.showOnlyBorrowed.update(v => !v); }
+
+  setViewMode(mode: 'card' | 'table'): void {
+    this.viewMode.set(mode);
+    localStorage.setItem(this.VIEW_MODE_KEY, mode);
+  }
 
   isOverdue(item: Werkzeug): boolean {
     return !!item.expectedReturnAt && new Date(item.expectedReturnAt) < new Date();

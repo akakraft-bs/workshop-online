@@ -11,6 +11,16 @@
     }
   </mat-form-field>
 
+  <mat-button-toggle-group [value]="viewMode()" (change)="setViewMode($event.value)"
+      class="view-toggle" aria-label="Ansicht">
+    <mat-button-toggle value="card" matTooltip="Kartenansicht">
+      <mat-icon>grid_view</mat-icon>
+    </mat-button-toggle>
+    <mat-button-toggle value="table" matTooltip="Tabellenansicht">
+      <mat-icon>table_rows</mat-icon>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+
   <div class="page-actions">
     @if (canManage()) {
       <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
@@ -53,7 +63,12 @@
   <div class="loading-state">
     <mat-spinner diameter="48" />
   </div>
-} @else {
+} @else if (filteredItems().length === 0) {
+  <div class="empty-state">
+    <mat-icon>{{ showOnlyBorrowed() ? 'check_circle' : 'search_off' }}</mat-icon>
+    <p>{{ showOnlyBorrowed() ? 'Kein Werkzeug gerade ausgeliehen' : selectedCategory() ? 'Kein Werkzeug in dieser Kategorie' : 'Keine Werkzeuge gefunden' }}</p>
+  </div>
+} @else if (viewMode() === 'card') {
   <div class="card-grid">
     @for (item of filteredItems(); track item.id) {
       <mat-card class="werkzeug-card" appearance="outlined"
@@ -93,12 +108,61 @@
 
       </mat-card>
     }
+  </div>
+} @else {
+  <div class="table-wrapper">
+    <table mat-table [dataSource]="filteredItems()" class="werkzeug-table">
 
-    @empty {
-      <div class="empty-state">
-        <mat-icon>{{ showOnlyBorrowed() ? 'check_circle' : 'search_off' }}</mat-icon>
-        <p>{{ showOnlyBorrowed() ? 'Kein Werkzeug gerade ausgeliehen' : selectedCategory() ? 'Kein Werkzeug in dieser Kategorie' : 'Keine Werkzeuge gefunden' }}</p>
-      </div>
-    }
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let item" class="name-cell">
+          <div class="name-with-thumb">
+            <div class="thumb">
+              @if (item.imageUrl) {
+                <img [src]="item.imageUrl" [alt]="item.name">
+              } @else {
+                <mat-icon>build</mat-icon>
+              }
+            </div>
+            <span>{{ item.name }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Kategorie</th>
+        <td mat-cell *matCellDef="let item">{{ item.category }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let item">
+          <span class="status-badge" [class.available]="item.isAvailable" [class.borrowed]="!item.isAvailable" [class.overdue]="isOverdue(item)">
+            @if (isOverdue(item)) {
+              Überfällig
+            } @else {
+              {{ item.isAvailable ? 'Verfügbar' : 'Ausgeliehen' }}
+            }
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="borrowedBy">
+        <th mat-header-cell *matHeaderCellDef>Ausgeliehen von</th>
+        <td mat-cell *matCellDef="let item">{{ item.borrowedByName ?? '–' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="expectedReturn">
+        <th mat-header-cell *matHeaderCellDef>Rückgabe erwartet</th>
+        <td mat-cell *matCellDef="let item">
+          {{ item.expectedReturnAt ? (item.expectedReturnAt | date:'dd.MM.yyyy') : '–' }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: tableColumns;"
+          class="table-row" [class.overdue-row]="isOverdue(row)"
+          (click)="openDetailDialog(row)"></tr>
+    </table>
   </div>
 }
