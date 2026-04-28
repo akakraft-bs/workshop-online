@@ -1,4 +1,4 @@
-.page-header {
+.page-search-and-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -6,8 +6,13 @@
   margin-bottom: 20px;
 }
 
+// On desktop: stat-btn pushes the add-button to the right edge.
+// On mobile: justify-content: flex-end (in global styles) handles right-alignment,
+//            so stat-btn stays at the left without a competing auto-margin.
 .stat-btn {
-  margin-right: auto;
+  @media (min-width: 600px) {
+    margin-right: auto;
+  }
 }
 
 .loading-state,

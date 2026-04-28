@@ -1,17 +1,7 @@
 <h1 class="page-title">Umfragen</h1>
 
-<div class="page-header">
-  <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
-    <mat-button-toggle value="offen">Offen
-    @if (openCount() > 0) {
-      <span class="count-badge">{{ openCount() }}</span>
-    }
-    </mat-button-toggle>
-    <mat-button-toggle value="geschlossen">Geschlossen</mat-button-toggle>
-    <mat-button-toggle value="alle">Alle</mat-button-toggle>
-  </mat-button-toggle-group>
-
-  <div class="header-actions">
+<div class="page-search-and-actions">
+  <div class="page-actions">
     <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
       <mat-icon>add</mat-icon>
       Neue Umfrage
@@ -33,6 +23,18 @@
     <span>Keine Umfragen vorhanden.</span>
   </div>
 } @else {
+  <div class="category-filter">
+
+  <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
+    <mat-button-toggle value="offen">Offen
+    @if (openCount() > 0) {
+      <span class="count-badge">{{ openCount() }}</span>
+    }
+    </mat-button-toggle>
+    <mat-button-toggle value="geschlossen">Geschlossen</mat-button-toggle>
+    <mat-button-toggle value="alle">Alle</mat-button-toggle>
+  </mat-button-toggle-group>
+  </div>
   <div class="umfrage-list">
     @for (umfrage of filteredItems(); track umfrage.id) {
       <div class="umfrage-card" [class.closed]="umfrage.status === 'Geschlossen'">

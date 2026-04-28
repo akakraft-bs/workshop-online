@@ -1,11 +1,15 @@
-.page-header {
+.category-filter {
+  margin-bottom: 16px;
+}
+
+.page-search-and-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 20px;
 
-  .header-actions {
+  .page-actions {
     margin-left: auto;
   }
 }

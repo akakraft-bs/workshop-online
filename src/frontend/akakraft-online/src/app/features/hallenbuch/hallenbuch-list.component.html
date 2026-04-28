@@ -1,19 +1,21 @@
 <h1 class="page-title">Hallenbuch</h1>
 
-<div class="page-header">
+<div class="page-search-and-actions">
   @if (isPrivileged()) {
     <button mat-stroked-button (click)="openStatistikDialog()" class="stat-btn">
       <mat-icon>download</mat-icon>
       Statistik
     </button>
   }
-  <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
-    <mat-icon>add</mat-icon>
-    Eintrag hinzufügen
-  </button>
-  <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
-    <mat-icon>add</mat-icon>
-  </button>
+  <div class="page-actions">
+    <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
+      <mat-icon>add</mat-icon>
+      Eintrag hinzufügen
+    </button>
+    <button mat-mini-fab color="primary" (click)="openCreateDialog()" class="create-btn-mobile">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
 </div>
 
 @if (loading()) {

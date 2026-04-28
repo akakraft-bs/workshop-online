@@ -1,18 +1,7 @@
 <h1 class="page-title">Wunschliste</h1>
 
-<div class="page-header">
-  <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
-    <mat-button-toggle value="offen">
-      Offen
-      @if (openCount() > 0) {
-        <span class="count-badge">{{ openCount() }}</span>
-      }
-    </mat-button-toggle>
-    <mat-button-toggle value="abgeschlossen">Abgeschlossen</mat-button-toggle>
-    <mat-button-toggle value="alle">Alle</mat-button-toggle>
-  </mat-button-toggle-group>
-
-  <div class="header-actions">
+<div class="page-search-and-actions">
+  <div class="page-actions">
     <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
       <mat-icon>add</mat-icon>
       Vorschlag einreichen
@@ -33,6 +22,19 @@
     <p>{{ statusFilter() === 'offen' ? 'Keine offenen Vorschläge.' : 'Keine Einträge in dieser Ansicht.' }}</p>
   </div>
 } @else {
+  <div class="category-filter">
+    <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
+    <mat-button-toggle value="offen">
+      Offen
+      @if (openCount() > 0) {
+        <span class="count-badge">{{ openCount() }}</span>
+      }
+    </mat-button-toggle>
+    <mat-button-toggle value="abgeschlossen">Abgeschlossen</mat-button-toggle>
+    <mat-button-toggle value="alle">Alle</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  </div>
   <div class="wunsch-list">
     @for (wunsch of filteredItems(); track wunsch.id) {
       <div class="wunsch-card" [class.closed]="wunsch.status !== 'Offen'">

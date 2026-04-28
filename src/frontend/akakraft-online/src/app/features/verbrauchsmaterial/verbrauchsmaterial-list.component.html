@@ -1,5 +1,5 @@
 <h1 class="page-title">Verbrauchsmaterial</h1>
-<div class="page-header">
+<div class="page-search-and-actions">
   <mat-form-field appearance="outline" class="search-field">
     <mat-label>Suche</mat-label>
     <mat-icon matPrefix>search</mat-icon>
@@ -11,7 +11,7 @@
     }
   </mat-form-field>
 
-  <div class="header-actions">
+  <div class="page-actions">
   @if (canManage()) {
     <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
       <mat-icon>add</mat-icon>

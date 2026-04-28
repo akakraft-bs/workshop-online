@@ -110,6 +110,16 @@
   bottom: 24px;
   right: 24px;
   z-index: 200;
+
+  // On mobile: sit inside the fixed footer bar, same size as the add mini-fab.
+  // Bar height: 88px → (88 - 40) / 2 = 24px bottom offset to centre the button.
+  @media (max-width: 599px) {
+    bottom: 24px;
+    right: 8px;
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+  }
 }
 
 .toolbar {
@@ -134,8 +144,10 @@
   max-width: 1200px;
   margin: 0 auto;
 
-  @media (max-width: 600px) {
-    padding: 16px 12px;
+  @media (max-width: 599px) {
+    // Bottom padding prevents the last list item from being hidden behind
+    // the fixed footer bar (~64 px min-height + 20 px breathing room).
+    padding: 16px 12px 104px;
   }
 }
 

@@ -1,5 +1,5 @@
 <h1 class="page-title">Werkzeug</h1>
-<div class="page-header">
+<div class="page-search-and-actions">
   <mat-form-field appearance="outline" class="search-field">
     <mat-label>Suche</mat-label>
     <mat-icon matPrefix>search</mat-icon>
@@ -11,18 +11,7 @@
     }
   </mat-form-field>
 
-  <div class="header-actions">
-    <button mat-stroked-button
-      [class.active-filter]="showOnlyBorrowed()"
-      (click)="toggleBorrowedFilter()"
-      matTooltip="Nur ausgeliehene Werkzeuge anzeigen">
-      <mat-icon>history</mat-icon>
-      Ausgeliehen
-      @if (borrowedCount() > 0) {
-        <span class="badge">{{ borrowedCount() }}</span>
-      }
-    </button>
-
+  <div class="page-actions">
     @if (canManage()) {
       <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
         <mat-icon>add</mat-icon>
@@ -37,6 +26,16 @@
 
 @if (!loading() && categories().length > 1) {
   <div class="category-filter">
+    <button mat-stroked-button
+      [class.active-filter]="showOnlyBorrowed()"
+      (click)="toggleBorrowedFilter()"
+      matTooltip="Nur ausgeliehene Werkzeuge anzeigen">
+      <mat-icon>history</mat-icon>
+      Ausgeliehen
+      @if (borrowedCount() > 0) {
+        <span class="badge">{{ borrowedCount() }}</span>
+      }
+    </button>
     <mat-chip-set>
       <mat-chip [highlighted]="selectedCategory() === null" (click)="selectedCategory.set(null)">
         Alle

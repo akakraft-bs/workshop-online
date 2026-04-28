@@ -72,3 +72,73 @@ button.create-btn-mobile {
     display: inline-flex !important;
   }
 }
+
+// ---- Sticky page-search-and-actions (desktop) / Fixed bottom bar (mobile) ----------------
+//
+// Desktop: the header sticks below the toolbar (64 px) so it stays visible
+//          while the user scrolls through long lists.
+// Mobile:  the header is pinned to the bottom of the viewport so search,
+//          filters and the add-button are always reachable. The feedback FAB
+//          is repositioned by main-layout.component.scss to sit inside the bar.
+
+.page-search-and-actions {
+  position: sticky;
+  top: 64px;
+  z-index: 50;
+  // Surface background so scrolling content slides underneath cleanly.
+  background: var(--mat-sys-surface, #fafafa);
+  // Extend the background flush with the edges of .content
+  // (.content has padding: 24px 16px, so –16 px compensates on each side).
+  margin-left: -16px;
+  margin-right: -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (max-width: 599px) {
+  .page-search-and-actions {
+    position: fixed !important;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 150;
+    // Reset the desktop negative-margin trick; fixed uses left/right instead.
+    margin: 0 !important;
+    // Fixed height so every item (form field 56px, mini-fab 40px) centres at
+    // exactly 64/2 = 32 px from the viewport bottom — matching the feedback
+    // FAB whose centre is at bottom: 12px + 20px = 32 px.
+    height: 88px;
+    // No vertical padding; align-items: center handles vertical centering.
+    // Right side reserves space: 8px gap + 40px FAB + 8px from edge = 56px.
+    padding: 0 56px 0 12px !important;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    // Keep all controls in a single row.
+    justify-content: flex-end;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  // Search fields: shrink to fill remaining width and use compact density
+  // so the field is 40 px tall (= mat-mini-fab height).
+  // That keeps the bar at exactly min-height: 64 px and both buttons
+  // are vertically centred at 64/2 = 32 px from the viewport bottom,
+  // matching the feedback FAB at bottom: 12 px + height/2 = 12 + 20 = 32 px.
+  .page-search-and-actions mat-form-field {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+
+  }
+
+  // Action-button group should never shrink (contains the add button).
+  .page-search-and-actions .page-actions {
+    flex-shrink: 0 !important;
+    margin-left: 0 !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+  }
+}

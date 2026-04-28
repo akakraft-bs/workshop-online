@@ -1,18 +1,7 @@
 <h1 class="page-title">Mängelmelder</h1>
 
-<div class="page-header">
-  <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
-    <mat-button-toggle value="aktiv">
-      Aktiv
-      @if (openCount() > 0) {
-        <span class="count-badge">{{ openCount() }}</span>
-      }
-    </mat-button-toggle>
-    <mat-button-toggle value="abgeschlossen">Abgeschlossen</mat-button-toggle>
-    <mat-button-toggle value="alle">Alle</mat-button-toggle>
-  </mat-button-toggle-group>
-
-  <div class="header-actions">
+<div class="page-search-and-actions">
+  <div class="page-actions">
     <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
       <mat-icon>add</mat-icon>
       Mangel melden
@@ -24,6 +13,16 @@
 </div>
 
 <div class="kat-filter">
+  <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
+    <mat-button-toggle value="aktiv">
+      Aktiv
+      @if (openCount() > 0) {
+        <span class="count-badge">{{ openCount() }}</span>
+      }
+    </mat-button-toggle>
+    <mat-button-toggle value="abgeschlossen">Abgeschlossen</mat-button-toggle>
+    <mat-button-toggle value="alle">Alle</mat-button-toggle>
+  </mat-button-toggle-group>
   <mat-chip-set>
     <mat-chip [highlighted]="kategorieFilter() === null" (click)="kategorieFilter.set(null)">Alle</mat-chip>
     @for (k of kategorien; track k) {
