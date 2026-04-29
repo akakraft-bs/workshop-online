@@ -100,6 +100,7 @@ public static class Program
         app.MapDokumenteEndpoints();
         app.MapProjektEndpoints();
         app.MapVereinZugangEndpoints();
+        app.MapAufgabeEndpoints();
 
         app.Run();
     }

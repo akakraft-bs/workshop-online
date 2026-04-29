@@ -1,0 +1,81 @@
+<h1 class="page-title">Aufgaben</h1>
+
+<div class="toolbar">
+  <mat-button-toggle-group [value]="statusFilter()" (change)="statusFilter.set($event.value)">
+    <mat-button-toggle value="offen">
+      Offen
+      @if (offenCount() > 0) {
+        <span class="count-badge">{{ offenCount() }}</span>
+      }
+    </mat-button-toggle>
+    <mat-button-toggle value="erledigt">Erledigt</mat-button-toggle>
+    <mat-button-toggle value="alle">Alle</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  @if (canEdit()) {
+    <button mat-flat-button color="primary" (click)="openCreate()" class="create-btn-desktop">
+      <mat-icon>add</mat-icon>
+      Neue Aufgabe
+    </button>
+    <button mat-mini-fab color="primary" (click)="openCreate()" class="create-btn-mobile">
+      <mat-icon>add</mat-icon>
+    </button>
+  }
+</div>
+
+@if (loading()) {
+  <div class="state-center"><mat-spinner diameter="48" /></div>
+} @else if (filtered().length === 0) {
+  <div class="state-center empty">
+    <mat-icon>task_alt</mat-icon>
+    <p>Keine Aufgaben in dieser Ansicht.</p>
+  </div>
+} @else {
+  <div class="aufgaben-list">
+    @for (aufgabe of filtered(); track aufgabe.id) {
+      <div class="aufgabe-card" [class.erledigt]="aufgabe.status === 'Erledigt'">
+
+        <div class="card-header">
+          <span class="status-chip status-{{ aufgabe.status.toLowerCase() }}">
+            <mat-icon class="chip-icon">{{ statusIcon(aufgabe.status) }}</mat-icon>
+            {{ aufgabe.status }}
+          </span>
+          @if (canEdit()) {
+            <div class="card-actions">
+              <button mat-icon-button matTooltip="Bearbeiten" (click)="openEdit(aufgabe)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Löschen" class="delete-btn"
+                      (click)="delete(aufgabe)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+
+        <h3 class="card-titel">{{ aufgabe.titel }}</h3>
+        <p class="card-beschreibung">{{ aufgabe.beschreibung }}</p>
+
+        @if (aufgabe.fotoUrl) {
+          <a [href]="aufgabe.fotoUrl" target="_blank" rel="noopener" class="foto-link">
+            <img [src]="aufgabe.fotoUrl" alt="Foto" class="foto-thumb">
+          </a>
+        }
+
+        <div class="card-footer">
+          @if (assignedLabel(aufgabe); as label) {
+            <span class="footer-item">
+              <mat-icon class="footer-icon">person</mat-icon>
+              {{ label }}
+            </span>
+          }
+          <span class="footer-item muted">
+            <mat-icon class="footer-icon">calendar_today</mat-icon>
+            {{ aufgabe.createdAt | date:'dd.MM.yyyy' }}
+          </span>
+        </div>
+
+      </div>
+    }
+  </div>
+}

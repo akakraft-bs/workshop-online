@@ -19,6 +19,12 @@ internal static class UserEndpoints
             Results.Ok(await userService.GetAllAsync()))
             .RequireAuthorization("AdminOnly");
 
+        app.MapGet("/users/assignable", async (IUserService userService) =>
+        {
+            var users = await userService.GetAllAsync();
+            return Results.Ok(users.Select(u => new { u.Id, Name = u.DisplayName ?? u.Name }));
+        }).RequireAuthorization("VorstandOrAdmin");
+
         app.MapPost("/users/{userId:guid}/roles/{role}", async (
             Guid userId, string role, IUserService userService) =>
         {

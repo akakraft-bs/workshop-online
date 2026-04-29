@@ -38,6 +38,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
   { label: 'Hallenbuch', icon: 'menu_book', route: '/hallenbuch' },
   { label: 'Verein', icon: 'groups', route: '/verein' },
   { label: 'Projekte', icon: 'engineering', route: '/projekte' },
+  { label: 'Aufgaben', icon: 'task_alt', route: '/aufgaben' },
   { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
   { label: 'Kalender-Einstellungen', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
   { label: 'Feedback', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },

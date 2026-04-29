@@ -89,6 +89,11 @@ export const routes: Routes = [
           import('./features/hallenbuch/hallenbuch-list.component').then(m => m.HallenbuchListComponent),
       },
       {
+        path: 'aufgaben',
+        loadComponent: () =>
+          import('./features/aufgaben/aufgaben-list.component').then(m => m.AufgabenListComponent),
+      },
+      {
         path: 'verein',
         loadComponent: () =>
           import('./features/verein/verein-shell.component').then(m => m.VereinShellComponent),

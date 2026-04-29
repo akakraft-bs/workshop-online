@@ -71,6 +71,7 @@ public static class DependencyInjection
         services.AddScoped<IDokumenteService, DokumenteService>();
         services.AddScoped<IProjektService, ProjektService>();
         services.AddScoped<IVereinZugangService, VereinZugangService>();
+        services.AddScoped<IAufgabeService, AufgabeService>();
 
         return services;
     }

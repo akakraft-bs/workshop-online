@@ -1,0 +1,56 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  min-width: 460px;
+
+  @media (max-width: 599px) {
+    min-width: unset;
+  }
+}
+
+.section-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 8px 0 4px;
+}
+
+.assign-radio {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.foto-section {
+  margin-bottom: 8px;
+}
+
+.foto-preview {
+  position: relative;
+  display: inline-block;
+
+  img {
+    max-height: 160px;
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--mat-sys-outline-variant);
+    display: block;
+  }
+}
+
+.foto-clear {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+
+  &:hover { background: rgba(0, 0, 0, 0.7); }
+}
+
+.erledigt-check {
+  margin-top: 4px;
+}

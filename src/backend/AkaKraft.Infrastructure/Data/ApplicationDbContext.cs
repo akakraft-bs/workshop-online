@@ -29,6 +29,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Dokument> Dokumente => Set<Dokument>();
     public DbSet<Projekt> Projekte => Set<Projekt>();
     public DbSet<VereinZugang> VereinZugaenge => Set<VereinZugang>();
+    public DbSet<Aufgabe> Aufgaben => Set<Aufgabe>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,5 +56,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new DokumentConfiguration());
         modelBuilder.ApplyConfiguration(new ProjektConfiguration());
         modelBuilder.ApplyConfiguration(new VereinZugangConfiguration());
+        modelBuilder.ApplyConfiguration(new AufgabeConfiguration());
     }
 }

@@ -1,0 +1,87 @@
+<h2 mat-dialog-title>{{ data ? 'Aufgabe bearbeiten' : 'Neue Aufgabe' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Überschrift</mat-label>
+      <input matInput formControlName="titel" placeholder="Kurze Beschreibung der Aufgabe">
+      @if (form.controls.titel.hasError('required') && form.controls.titel.touched) {
+        <mat-error>Überschrift ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Beschreibung</mat-label>
+      <textarea matInput formControlName="beschreibung" rows="5"
+        placeholder="Detaillierte Beschreibung der Aufgabe …"></textarea>
+      @if (form.controls.beschreibung.hasError('required') && form.controls.beschreibung.touched) {
+        <mat-error>Beschreibung ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Foto -->
+    <div class="foto-section">
+      @if (previewUrl() || keepFotoUrl()) {
+        <div class="foto-preview">
+          <img [src]="previewUrl() ?? keepFotoUrl()!" alt="Vorschau">
+          <button mat-icon-button type="button" class="foto-clear" (click)="clearImage()"
+                  matTooltip="Foto entfernen">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <button mat-stroked-button type="button" (click)="fileInput.click()">
+          <mat-icon>add_photo_alternate</mat-icon>
+          Foto hinzufügen (optional)
+        </button>
+      }
+      <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)">
+    </div>
+
+    <!-- Zuweisung -->
+    <div class="section-label">Zuweisung</div>
+    <mat-radio-group class="assign-radio" [value]="assignMode()"
+                     (change)="setAssignMode($event.value)">
+      <mat-radio-button value="none">Nicht zugewiesen</mat-radio-button>
+      <mat-radio-button value="member">Mitglied auswählen</mat-radio-button>
+      <mat-radio-button value="extern">Person ohne Konto</mat-radio-button>
+    </mat-radio-group>
+
+    @if (assignMode() === 'member') {
+      <mat-form-field appearance="outline">
+        <mat-label>Mitglied</mat-label>
+        <mat-select formControlName="assignedUserId">
+          @for (u of users(); track u.id) {
+            <mat-option [value]="u.id">{{ u.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (assignMode() === 'extern') {
+      <mat-form-field appearance="outline">
+        <mat-label>Name der Person</mat-label>
+        <input matInput formControlName="assignedName"
+               placeholder="z. B. Max Mustermann (Aufnahmebewerber)">
+      </mat-form-field>
+    }
+
+    <!-- Erledigt -->
+    <mat-checkbox formControlName="erledigt" class="erledigt-check">
+      Als erledigt markieren
+    </mat-checkbox>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()" [disabled]="saving()">Abbrechen</button>
+  <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">
+    @if (saving()) {
+      <mat-spinner diameter="18" />
+    } @else {
+      {{ data ? 'Speichern' : 'Anlegen' }}
+    }
+  </button>
+</mat-dialog-actions>
