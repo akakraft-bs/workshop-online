@@ -82,6 +82,83 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.ToTable("CalendarWriteRoles");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Dokument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<long?>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<Guid>("FolderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderId");
+
+                    b.ToTable("Dokumente");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.DokumentOrdner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DokumentOrdner");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a1a1a1a1-0000-0000-0000-000000000001"),
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Verein"
+                        },
+                        new
+                        {
+                            Id = new Guid("a1a1a1a1-0000-0000-0000-000000000002"),
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Richtlinien"
+                        },
+                        new
+                        {
+                            Id = new Guid("a1a1a1a1-0000-0000-0000-000000000003"),
+                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Anleitungen"
+                        });
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.FcmToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -238,6 +315,53 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.HasIndex("ResolvedByUserId");
 
                     b.ToTable("Maengel");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Projekt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ActualEndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ActualStartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)");
+
+                    b.Property<int>("DurationWeeks")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("PlannedStartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ProjektplanUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Projekte");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.RefreshToken", b =>
@@ -439,6 +563,10 @@ namespace AkaKraft.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
                     b.Property<string>("DisplayName")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
@@ -460,6 +588,10 @@ namespace AkaKraft.Infrastructure.Migrations
 
                     b.Property<bool>("NotifyVeranstaltungen")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.HasKey("UserId");
 
@@ -521,6 +653,76 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Verbrauchsmaterialien");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.VereinAmtsTraegerKontakt", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("VereinAmtsTraegerKontakte");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.VereinSchluesselhinterlegung", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VereinSchluesselhinterlegungen");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.VereinZugang", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Anbieter")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Zugangsdaten")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VereinZugaenge");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Werkzeug", b =>
@@ -664,6 +866,17 @@ namespace AkaKraft.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("CalendarConfig");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Dokument", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.DokumentOrdner", "Folder")
+                        .WithMany("Dokumente")
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Folder");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.FcmToken", b =>
@@ -834,6 +1047,11 @@ namespace AkaKraft.Infrastructure.Migrations
             modelBuilder.Entity("AkaKraft.Domain.Entities.CalendarConfig", b =>
                 {
                     b.Navigation("WriteRoles");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.DokumentOrdner", b =>
+                {
+                    b.Navigation("Dokumente");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Umfrage", b =>

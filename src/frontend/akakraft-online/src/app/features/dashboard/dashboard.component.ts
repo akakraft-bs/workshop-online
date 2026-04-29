@@ -70,6 +70,8 @@ export class DashboardComponent implements OnInit {
   private notifyVeranstaltungen = true;
   private notifyMindestbestand = true;
   private notifyUmfragen = true;
+  private loadedPhone: string | null = null;
+  private loadedAddress: string | null = null;
 
   /** All nav items the current user may access (role-filtered) */
   readonly availableItems = computed(() =>
@@ -119,6 +121,8 @@ export class DashboardComponent implements OnInit {
         this.notifyVeranstaltungen = prefs.notifyVeranstaltungen;
         this.notifyMindestbestand = prefs.notifyMindestbestand;
         this.notifyUmfragen = prefs.notifyUmfragen;
+        this.loadedPhone = prefs.phone;
+        this.loadedAddress = prefs.address;
       },
       error: () => { /* keep defaults */ },
     });
@@ -142,6 +146,8 @@ export class DashboardComponent implements OnInit {
     this.prefsService.updatePreferences({
       favoriteRoutes: routes,
       displayName: this.auth.currentUser()?.displayName ?? null,
+      phone: this.loadedPhone,
+      address: this.loadedAddress,
       notifyLeihruckgabe: this.notifyLeihruckgabe,
       notifyVeranstaltungen: this.notifyVeranstaltungen,
       notifyMindestbestand: this.notifyMindestbestand,

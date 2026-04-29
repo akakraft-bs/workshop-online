@@ -1,0 +1,87 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Projekt bearbeiten' : 'Neues Projekt' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" placeholder="z. B. Hallensanierung">
+      @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+        <mat-error>Name ist erforderlich</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Beschreibung (optional)</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+
+    <div class="row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Geplanter Start</mat-label>
+        <input matInput [matDatepicker]="pickerPlanned" formControlName="plannedStartDate">
+        <mat-datepicker-toggle matIconSuffix [for]="pickerPlanned" />
+        <mat-datepicker #pickerPlanned />
+        @if (form.controls.plannedStartDate.hasError('required') && form.controls.plannedStartDate.touched) {
+          <mat-error>Datum erforderlich</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Dauer (Wochen)</mat-label>
+        <input matInput type="number" formControlName="durationWeeks" min="1">
+        @if (form.controls.durationWeeks.invalid && form.controls.durationWeeks.touched) {
+          <mat-error>Mind. 1 Woche</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tatsächlicher Start (optional)</mat-label>
+      <input matInput [matDatepicker]="pickerActual" formControlName="actualStartDate">
+      <mat-datepicker-toggle matIconSuffix [for]="pickerActual" />
+      <mat-datepicker #pickerActual />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        @for (s of statusOptions; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Projektplan -->
+    <div class="plan-section">
+      <span class="plan-label">Projektplan (optional)</span>
+      @if (planUrl() || selectedFile()) {
+        <div class="plan-file">
+          <mat-icon>description</mat-icon>
+          @if (planUrl() && !selectedFile()) {
+            <a [href]="planUrl()!" target="_blank" rel="noopener">Projektplan ansehen</a>
+          } @else {
+            <span>{{ selectedFile()?.name }}</span>
+          }
+          <button mat-icon-button type="button" (click)="clearPlan()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <input #planInput type="file" (change)="onFileSelected($event)" hidden>
+        <button mat-stroked-button type="button" (click)="planInput.click()">
+          <mat-icon>upload_file</mat-icon>
+          Datei hochladen
+        </button>
+      }
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()" [disabled]="saving()">Abbrechen</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="saving()">
+    @if (saving()) { <mat-spinner diameter="18" /> } @else { {{ isEdit ? 'Speichern' : 'Anlegen' }} }
+  </button>
+</mat-dialog-actions>

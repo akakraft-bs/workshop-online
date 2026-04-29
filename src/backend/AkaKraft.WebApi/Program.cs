@@ -96,6 +96,10 @@ public static class Program
         app.MapFeedbackEndpoints();
         app.MapCalendarEndpoints();
         app.MapHallenbuchEndpoints();
+        app.MapVereinInfoEndpoints();
+        app.MapDokumenteEndpoints();
+        app.MapProjektEndpoints();
+        app.MapVereinZugangEndpoints();
 
         app.Run();
     }

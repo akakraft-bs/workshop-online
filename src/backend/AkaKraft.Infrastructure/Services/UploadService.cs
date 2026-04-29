@@ -8,23 +8,62 @@ namespace AkaKraft.Infrastructure.Services;
 
 public class UploadService(IMinioClient minio, IOptions<MinioOptions> opts) : IUploadService
 {
-    private static readonly HashSet<string> AllowedTypes =
+    private static readonly HashSet<string> AllowedImageTypes =
         ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
-    private const long MaxBytes = 5 * 1024 * 1024; // 5 MB
+    private static readonly HashSet<string> AllowedDocumentTypes =
+    [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "text/plain",
+        "image/jpeg", "image/png", "image/webp", "image/gif",
+    ];
+
+    private const long MaxImageBytes    = 5  * 1024 * 1024; //  5 MB
+    private const long MaxDocumentBytes = 50 * 1024 * 1024; // 50 MB
 
     public async Task<string> SaveAsync(FileUploadModel file)
     {
-        if (!AllowedTypes.Contains(file.ContentType))
+        if (!AllowedImageTypes.Contains(file.ContentType))
             throw new InvalidOperationException("Ungültiger Dateityp. Erlaubt: JPEG, PNG, WebP, GIF.");
 
-        if (file.Length > MaxBytes)
+        if (file.Length > MaxImageBytes)
             throw new InvalidOperationException("Datei zu groß. Maximal 5 MB erlaubt.");
 
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (string.IsNullOrEmpty(ext)) ext = ".jpg";
 
         var objectName = $"werkzeug/{Guid.NewGuid()}{ext}";
+        var bucket = opts.Value.BucketName;
+
+        await minio.PutObjectAsync(new PutObjectArgs()
+            .WithBucket(bucket)
+            .WithObject(objectName)
+            .WithStreamData(file.Content)
+            .WithObjectSize(file.Length)
+            .WithContentType(file.ContentType));
+
+        return $"{opts.Value.PublicBaseUrl}/{bucket}/{objectName}";
+    }
+
+    public async Task<string> SaveDocumentAsync(FileUploadModel file)
+    {
+        if (!AllowedDocumentTypes.Contains(file.ContentType))
+            throw new InvalidOperationException(
+                "Ungültiger Dateityp. Erlaubt: PDF, Word, Excel, PowerPoint, Text, Bilder.");
+
+        if (file.Length > MaxDocumentBytes)
+            throw new InvalidOperationException("Datei zu groß. Maximal 50 MB erlaubt.");
+
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (string.IsNullOrEmpty(ext)) ext = ".bin";
+
+        var objectName = $"dokumente/{Guid.NewGuid()}{ext}";
         var bucket = opts.Value.BucketName;
 
         await minio.PutObjectAsync(new PutObjectArgs()

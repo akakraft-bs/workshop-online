@@ -18,6 +18,20 @@
                 placeholder="z. B. dein Vorname oder Spitzname">
     </mat-form-field>
 
+    <mat-form-field appearance="outline">
+        <mat-label>Handynummer</mat-label>
+        <mat-icon matPrefix>phone</mat-icon>
+        <input matInput formControlName="phone" type="tel"
+                placeholder="z. B. +49 151 12345678">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Adresse</mat-label>
+        <mat-icon matPrefix>home</mat-icon>
+        <textarea matInput formControlName="address" rows="3"
+                placeholder="Straße Nr.&#10;PLZ Ort"></textarea>
+    </mat-form-field>
+
     <mat-divider class="section-divider" />
 
     <div class="section-header">

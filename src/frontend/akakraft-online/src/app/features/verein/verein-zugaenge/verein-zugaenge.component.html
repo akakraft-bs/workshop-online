@@ -1,0 +1,40 @@
+@if (loading()) {
+  <div class="loading-state"><mat-spinner diameter="48" /></div>
+} @else {
+  <div class="block-title-row">
+    <h2 class="block-title">Zugänge und Konten</h2>
+    @if (canEdit()) {
+      <button mat-stroked-button (click)="openCreate()">
+        <mat-icon>add</mat-icon>
+        Hinzufügen
+      </button>
+    }
+  </div>
+
+  @if (zugaenge().length === 0) {
+    <p class="empty-hint">Noch keine Zugänge hinterlegt.</p>
+  } @else {
+    <div class="entry-list">
+      @for (entry of zugaenge(); track entry.id) {
+        <div class="entry-row">
+          <div class="entry-main">
+            <span class="entry-anbieter">{{ entry.anbieter }}</span>
+            <pre class="entry-zugangsdaten">{{ entry.zugangsdaten }}</pre>
+          </div>
+          @if (canEdit()) {
+            <div class="entry-actions">
+              <button mat-icon-button matTooltip="Bearbeiten"
+                      (click)="openEdit(entry); $event.stopPropagation()">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Löschen" class="delete-btn"
+                      (click)="delete(entry); $event.stopPropagation()">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+}

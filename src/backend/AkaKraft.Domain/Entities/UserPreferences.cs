@@ -14,6 +14,9 @@ public class UserPreferences
     /// </summary>
     public string? DisplayName { get; set; }
 
+    public string? Phone { get; set; }
+    public string? Address { get; set; }
+
     /// <summary>
     /// Benachrichtigung wenn ein ausgeliehenes Werkzeug überfällig ist.
     /// </summary>

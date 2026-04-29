@@ -23,6 +23,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UmfrageOption> UmfrageOptions => Set<UmfrageOption>();
     public DbSet<UmfrageAntwort> UmfrageAntworten => Set<UmfrageAntwort>();
     public DbSet<HallenbuchEintrag> HallenbuchEintraege => Set<HallenbuchEintrag>();
+    public DbSet<VereinAmtsTraegerKontakt> VereinAmtsTraegerKontakte => Set<VereinAmtsTraegerKontakt>();
+    public DbSet<VereinSchluesselhinterlegung> VereinSchluesselhinterlegungen => Set<VereinSchluesselhinterlegung>();
+    public DbSet<DokumentOrdner> DokumentOrdner => Set<DokumentOrdner>();
+    public DbSet<Dokument> Dokumente => Set<Dokument>();
+    public DbSet<Projekt> Projekte => Set<Projekt>();
+    public DbSet<VereinZugang> VereinZugaenge => Set<VereinZugang>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,5 +49,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new UmfrageOptionConfiguration());
         modelBuilder.ApplyConfiguration(new UmfrageAntwortConfiguration());
         modelBuilder.ApplyConfiguration(new HallenbuchEintragConfiguration());
+        modelBuilder.ApplyConfiguration(new VereinAmtsTraegerKontaktConfiguration());
+        modelBuilder.ApplyConfiguration(new VereinSchluesselhinterlegungConfiguration());
+        modelBuilder.ApplyConfiguration(new DokumentOrdnerConfiguration());
+        modelBuilder.ApplyConfiguration(new DokumentConfiguration());
+        modelBuilder.ApplyConfiguration(new ProjektConfiguration());
+        modelBuilder.ApplyConfiguration(new VereinZugangConfiguration());
     }
 }

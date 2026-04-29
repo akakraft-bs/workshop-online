@@ -1,0 +1,74 @@
+<div class="page-search-and-actions">
+  <div class="page-actions">
+    @if (canEdit()) {
+      <button mat-flat-button color="primary" (click)="openCreateOrdner()" class="create-btn-desktop">
+        <mat-icon>create_new_folder</mat-icon>
+        Neuer Ordner
+      </button>
+      <button mat-mini-fab color="primary" (click)="openCreateOrdner()" class="create-btn-mobile">
+        <mat-icon>create_new_folder</mat-icon>
+      </button>
+    }
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading-state"><mat-spinner diameter="48" /></div>
+} @else if (ordner().length === 0) {
+  <div class="empty-state">
+    <mat-icon>folder_open</mat-icon>
+    <p>Keine Ordner vorhanden.</p>
+  </div>
+} @else {
+  <mat-accordion class="ordner-list" multi>
+    @for (o of ordner(); track o.id) {
+      <mat-expansion-panel class="ordner-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="panel-title">
+            <mat-icon class="folder-icon">folder</mat-icon>
+            {{ o.name }}
+            <span class="doc-count">{{ o.dokumente.length }}</span>
+          </mat-panel-title>
+          <mat-panel-description class="panel-actions" (click)="$event.stopPropagation()">
+            @if (canEdit()) {
+              <button mat-icon-button matTooltip="Dokument hochladen"
+                      (click)="openUpload(o)">
+                <mat-icon>upload_file</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Ordner löschen" class="delete-btn"
+                      (click)="deleteOrdner(o)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            }
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        @if (o.dokumente.length === 0) {
+          <p class="empty-folder">Noch keine Dokumente in diesem Ordner.</p>
+        } @else {
+          <div class="dok-list">
+            @for (dok of o.dokumente; track dok.id) {
+              <div class="dok-row">
+                <mat-icon class="dok-icon">description</mat-icon>
+                <a [href]="dok.fileUrl" target="_blank" rel="noopener" class="dok-name">
+                  {{ dok.fileName }}
+                </a>
+                <span class="dok-meta">
+                  {{ formatSize(dok.fileSizeBytes) }}
+                  · {{ dok.uploadedByName }}
+                  · {{ dok.uploadedAt | date:'dd.MM.yyyy' }}
+                </span>
+                @if (canEdit()) {
+                  <button mat-icon-button matTooltip="Löschen" class="delete-btn"
+                          (click)="deleteDokument(o, dok)">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+}

@@ -1,0 +1,42 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  min-width: 320px;
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plan-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.plan-label {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.plan-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+
+  a {
+    color: var(--mat-sys-primary);
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}

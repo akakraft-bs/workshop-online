@@ -21,6 +21,9 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
         var json = JsonSerializer.Serialize(dto.FavoriteRoutes ?? []);
         var displayName = string.IsNullOrWhiteSpace(dto.DisplayName) ? null : dto.DisplayName.Trim();
 
+        var phone   = string.IsNullOrWhiteSpace(dto.Phone)   ? null : dto.Phone.Trim();
+        var address = string.IsNullOrWhiteSpace(dto.Address) ? null : dto.Address.Trim();
+
         if (prefs is null)
         {
             prefs = new UserPreferences
@@ -28,6 +31,8 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
                 UserId = userId,
                 FavoriteRoutesJson = json,
                 DisplayName = displayName,
+                Phone = phone,
+                Address = address,
                 NotifyLeihruckgabe = dto.NotifyLeihruckgabe,
                 NotifyVeranstaltungen = dto.NotifyVeranstaltungen,
                 NotifyMindestbestand = dto.NotifyMindestbestand,
@@ -39,6 +44,8 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
         {
             prefs.FavoriteRoutesJson = json;
             prefs.DisplayName = displayName;
+            prefs.Phone = phone;
+            prefs.Address = address;
             prefs.NotifyLeihruckgabe = dto.NotifyLeihruckgabe;
             prefs.NotifyVeranstaltungen = dto.NotifyVeranstaltungen;
             prefs.NotifyMindestbestand = dto.NotifyMindestbestand;
@@ -52,7 +59,7 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
     private static UserPreferencesDto ToDto(UserPreferences? prefs)
     {
         if (prefs is null)
-            return new UserPreferencesDto([], null, true, true, true, true);
+            return new UserPreferencesDto([], null, null, null, true, true, true, true);
 
         try
         {
@@ -60,6 +67,8 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
             return new UserPreferencesDto(
                 routes,
                 prefs.DisplayName,
+                prefs.Phone,
+                prefs.Address,
                 prefs.NotifyLeihruckgabe,
                 prefs.NotifyVeranstaltungen,
                 prefs.NotifyMindestbestand,
@@ -67,7 +76,7 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
         }
         catch
         {
-            return new UserPreferencesDto([], null, true, true, true, true);
+            return new UserPreferencesDto([], null, null, null, true, true, true, true);
         }
     }
 }

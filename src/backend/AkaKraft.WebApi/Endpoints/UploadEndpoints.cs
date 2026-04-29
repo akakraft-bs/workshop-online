@@ -55,6 +55,36 @@ internal static class UploadEndpoints
         }).RequireAuthorization("AnyRole")
           .DisableAntiforgery();
 
+        app.MapPost("/uploads/dokument", async (IFormFile file, IUploadService uploadService) =>
+        {
+            try
+            {
+                var model = new FileUploadModel(file.OpenReadStream(), file.FileName, file.ContentType, file.Length);
+                var url = await uploadService.SaveDocumentAsync(model);
+                return Results.Ok(new { url });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        }).RequireAuthorization("VorstandOrAdmin")
+          .DisableAntiforgery();
+
+        app.MapPost("/uploads/projektplan", async (IFormFile file, IUploadService uploadService) =>
+        {
+            try
+            {
+                var model = new FileUploadModel(file.OpenReadStream(), file.FileName, file.ContentType, file.Length);
+                var url = await uploadService.SaveDocumentAsync(model);
+                return Results.Ok(new { url });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        }).RequireAuthorization("VorstandOrAdmin")
+          .DisableAntiforgery();
+
         return app;
     }
 }

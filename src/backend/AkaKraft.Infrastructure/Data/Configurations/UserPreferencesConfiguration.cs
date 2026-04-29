@@ -16,5 +16,11 @@ public class UserPreferencesConfiguration : IEntityTypeConfiguration<UserPrefere
 
         builder.Property(p => p.DisplayName)
             .HasMaxLength(64);
+
+        builder.Property(p => p.Phone)
+            .HasMaxLength(64);
+
+        builder.Property(p => p.Address)
+            .HasMaxLength(512);
     }
 }

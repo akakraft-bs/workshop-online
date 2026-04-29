@@ -47,6 +47,8 @@ export class ProfileDialogComponent implements OnInit {
 
   readonly form = this.fb.group({
     displayName: ['', [Validators.maxLength(64)]],
+    phone: ['', [Validators.maxLength(64)]],
+    address: ['', [Validators.maxLength(512)]],
     notifyLeihruckgabe: [true],
     notifyVeranstaltungen: [true],
     notifyMindestbestand: [true],
@@ -64,6 +66,8 @@ export class ProfileDialogComponent implements OnInit {
         this.loadedPrefs = prefs;
         this.form.patchValue({
           displayName: prefs.displayName ?? '',
+          phone: prefs.phone ?? '',
+          address: prefs.address ?? '',
           notifyLeihruckgabe: prefs.notifyLeihruckgabe,
           notifyVeranstaltungen: prefs.notifyVeranstaltungen,
           notifyMindestbestand: prefs.notifyMindestbestand,
@@ -93,11 +97,15 @@ export class ProfileDialogComponent implements OnInit {
     this.saving.set(true);
 
     const displayName = this.form.get('displayName')!.value?.trim() || null;
+    const phone = this.form.get('phone')!.value?.trim() || null;
+    const address = this.form.get('address')!.value?.trim() || null;
     const favoriteRoutes = this.loadedPrefs?.favoriteRoutes ?? [];
 
     this.prefsService.updatePreferences({
       favoriteRoutes,
       displayName,
+      phone,
+      address,
       notifyLeihruckgabe: this.form.get('notifyLeihruckgabe')!.value ?? true,
       notifyVeranstaltungen: this.form.get('notifyVeranstaltungen')!.value ?? true,
       notifyMindestbestand: this.form.get('notifyMindestbestand')!.value ?? true,

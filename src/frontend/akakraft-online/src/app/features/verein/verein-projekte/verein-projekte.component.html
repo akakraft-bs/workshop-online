@@ -1,0 +1,96 @@
+<div class="page-search-and-actions">
+  <div class="page-actions">
+    @if (canEdit()) {
+      <button mat-flat-button color="primary" (click)="openCreate()" class="create-btn-desktop">
+        <mat-icon>add</mat-icon>
+        Neues Projekt
+      </button>
+      <button mat-mini-fab color="primary" (click)="openCreate()" class="create-btn-mobile">
+        <mat-icon>add</mat-icon>
+      </button>
+    }
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading-state"><mat-spinner diameter="48" /></div>
+} @else if (items().length === 0) {
+  <div class="empty-state">
+    <mat-icon>construction</mat-icon>
+    <p>Noch keine Projekte vorhanden.</p>
+  </div>
+} @else {
+  <div class="projekt-list">
+    @for (projekt of items(); track projekt.id) {
+      <div class="projekt-card">
+
+        <div class="card-header">
+          <div class="title-row">
+            <h3 class="projekt-name">{{ projekt.name }}</h3>
+            <span class="status-chip status-{{ projekt.status.toLowerCase() }}">
+              <mat-icon class="status-icon">{{ statusIcon(projekt.status) }}</mat-icon>
+              {{ projekt.status }}
+            </span>
+          </div>
+          @if (canEdit()) {
+            <div class="card-actions">
+              <button mat-icon-button class="action-btn" matTooltip="Bearbeiten"
+                      (click)="openEdit(projekt)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn delete-btn" matTooltip="Löschen"
+                      (click)="delete(projekt)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+
+        @if (projekt.description) {
+          <p class="projekt-description">{{ projekt.description }}</p>
+        }
+
+        <div class="dates-row">
+          <div class="date-block">
+            <span class="date-label">Geplanter Start</span>
+            <span class="date-value">{{ projekt.plannedStartDate | date:'dd.MM.yyyy' }}</span>
+          </div>
+          @if (projekt.actualStartDate) {
+            <div class="date-block">
+              <span class="date-label">Tatsächlicher Start</span>
+              <span class="date-value">{{ projekt.actualStartDate | date:'dd.MM.yyyy' }}</span>
+            </div>
+          }
+          <div class="date-block">
+            <span class="date-label">Voraussichtliches Ende</span>
+            <span class="date-value">{{ projekt.expectedEndDate | date:'dd.MM.yyyy' }}</span>
+          </div>
+          @if (projekt.actualEndDate) {
+            <div class="date-block">
+              <span class="date-label">Tatsächliches Ende</span>
+              <span class="date-value">{{ projekt.actualEndDate | date:'dd.MM.yyyy' }}</span>
+            </div>
+          }
+          <div class="date-block">
+            <span class="date-label">Dauer</span>
+            <span class="date-value">{{ projekt.durationWeeks }} Wochen</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <span class="reporter">
+            <mat-icon class="footer-icon">person</mat-icon>
+            {{ projekt.createdByName }}
+          </span>
+          @if (projekt.projektplanUrl) {
+            <a [href]="projekt.projektplanUrl" target="_blank" rel="noopener" class="plan-link">
+              <mat-icon class="footer-icon">description</mat-icon>
+              Projektplan
+            </a>
+          }
+        </div>
+
+      </div>
+    }
+  </div>
+}

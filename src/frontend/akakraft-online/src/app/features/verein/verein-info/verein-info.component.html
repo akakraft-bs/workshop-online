@@ -1,0 +1,95 @@
+@if (loading()) {
+  <div class="loading-state"><mat-spinner diameter="48" /></div>
+} @else {
+
+  <!-- Amtsträger -->
+  <section class="info-block">
+    <h2 class="block-title">Amtsträger</h2>
+
+    @if (amtstraegerGroups().length === 0) {
+      <p class="empty-hint">Keine Amtsträger gefunden. Rollen werden in der Nutzerverwaltung vergeben.</p>
+    } @else {
+      @for (group of amtstraegerGroups(); track group.label) {
+        <div class="role-section">
+          <h3 class="role-header">{{ group.label }}</h3>
+          <div class="entry-list">
+            @for (entry of group.entries; track entry.userId) {
+              <div class="entry-row">
+                <div class="entry-main">
+                  <span class="entry-name">{{ entry.userName }}</span>
+                  <div class="entry-details">
+                    @if (entry.phone) {
+                      <span class="entry-detail">
+                        <mat-icon class="detail-icon" inline>phone</mat-icon>
+                        <a [href]="'tel:' + entry.phone">{{ entry.phone }}</a>
+                      </span>
+                    }
+                    @if (entry.address) {
+                      <span class="entry-detail">
+                        <mat-icon class="detail-icon" inline>home</mat-icon>
+                        {{ entry.address }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </section>
+
+  <!-- Weitere Schlüssel -->
+  <section class="info-block">
+    <div class="block-title-row">
+      <h2 class="block-title">Weitere Schlüssel</h2>
+      @if (canEdit()) {
+        <button mat-stroked-button (click)="openCreateSchluessel()">
+          <mat-icon>add</mat-icon>
+          Hinzufügen
+        </button>
+      }
+    </div>
+
+    @if (schluessel().length === 0) {
+      <p class="empty-hint">Noch keine Einträge hinterlegt.</p>
+    } @else {
+      <div class="role-section">
+        <div class="entry-list">
+          @for (entry of schluessel(); track entry.id) {
+            <div class="entry-row">
+              <div class="entry-main">
+                <span class="entry-name">{{ entry.name }}</span>
+                <div class="entry-details">
+                  @if (entry.phone) {
+                    <span class="entry-detail">
+                      <mat-icon class="detail-icon" inline>phone</mat-icon>
+                      <a [href]="'tel:' + entry.phone">{{ entry.phone }}</a>
+                    </span>
+                  }
+                  <span class="entry-detail">
+                    <mat-icon class="detail-icon" inline>home</mat-icon>
+                    {{ entry.address }}
+                  </span>
+                </div>
+              </div>
+              @if (canEdit()) {
+                <div class="entry-actions">
+                  <button mat-icon-button matTooltip="Bearbeiten"
+                          (click)="openEditSchluessel(entry); $event.stopPropagation()">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button matTooltip="Löschen" class="delete-btn"
+                          (click)="deleteSchluessel(entry); $event.stopPropagation()">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </section>
+}

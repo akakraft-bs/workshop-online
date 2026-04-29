@@ -89,6 +89,34 @@ export const routes: Routes = [
           import('./features/hallenbuch/hallenbuch-list.component').then(m => m.HallenbuchListComponent),
       },
       {
+        path: 'verein',
+        loadComponent: () =>
+          import('./features/verein/verein-shell.component').then(m => m.VereinShellComponent),
+        children: [
+          { path: '', redirectTo: 'info', pathMatch: 'full' },
+          {
+            path: 'info',
+            loadComponent: () =>
+              import('./features/verein/verein-info/verein-info.component').then(m => m.VereinInfoComponent),
+          },
+          {
+            path: 'dokumente',
+            loadComponent: () =>
+              import('./features/verein/verein-dokumente/verein-dokumente.component').then(m => m.VereinDokumenteComponent),
+          },
+          {
+            path: 'zugaenge',
+            loadComponent: () =>
+              import('./features/verein/verein-zugaenge/verein-zugaenge.component').then(m => m.VereinZugaengeComponent),
+          },
+        ],
+      },
+      {
+        path: 'projekte',
+        loadComponent: () =>
+          import('./features/verein/verein-projekte/verein-projekte.component').then(m => m.VereinProjekteComponent),
+      },
+      {
         path: 'admin/users',
         loadComponent: () =>
           import('./features/admin/users/user-list.component').then(m => m.UserListComponent),

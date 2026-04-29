@@ -5,6 +5,8 @@ import { ApiService } from '../api/api.service';
 export interface UserPreferences {
   favoriteRoutes: string[];
   displayName: string | null;
+  phone: string | null;
+  address: string | null;
   notifyLeihruckgabe: boolean;
   notifyVeranstaltungen: boolean;
   notifyMindestbestand: boolean;
@@ -14,6 +16,8 @@ export interface UserPreferences {
 export interface UpdateUserPreferences {
   favoriteRoutes: string[];
   displayName: string | null;
+  phone: string | null;
+  address: string | null;
   notifyLeihruckgabe: boolean;
   notifyVeranstaltungen: boolean;
   notifyMindestbestand: boolean;

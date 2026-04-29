@@ -1,0 +1,20 @@
+<h1 class="page-title">Verein</h1>
+
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" class="verein-tabs">
+  <a mat-tab-link routerLink="info" routerLinkActive #rlaInfo="routerLinkActive"
+     [active]="rlaInfo.isActive">
+    Info
+  </a>
+  <a mat-tab-link routerLink="dokumente" routerLinkActive #rlaDok="routerLinkActive"
+     [active]="rlaDok.isActive">
+    Dokumente
+  </a>
+  <a mat-tab-link routerLink="zugaenge" routerLinkActive #rlaZug="routerLinkActive"
+     [active]="rlaZug.isActive">
+    Zugänge und Konten
+  </a>
+
+</nav>
+<mat-tab-nav-panel #tabPanel>
+  <router-outlet />
+</mat-tab-nav-panel>
