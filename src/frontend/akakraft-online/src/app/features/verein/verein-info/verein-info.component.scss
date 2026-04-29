@@ -89,6 +89,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+
+  @media (max-width: 599px) {
+    flex-direction: column;
+    gap: 6px;
+  }
 }
 
 .entry-detail {
@@ -110,6 +115,14 @@
   width: 14px;
   height: 14px;
   flex-shrink: 0;
+}
+
+.entry-detail--address {
+  align-items: flex-start;
+}
+
+.address-text {
+  white-space: pre-wrap;
 }
 
 // ---- Actions (hidden, fade in on hover like Veranstaltungen) ----------------

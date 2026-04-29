@@ -25,9 +25,9 @@
                       </span>
                     }
                     @if (entry.address) {
-                      <span class="entry-detail">
+                      <span class="entry-detail entry-detail--address">
                         <mat-icon class="detail-icon" inline>home</mat-icon>
-                        {{ entry.address }}
+                        <span class="address-text">{{ entry.address }}</span>
                       </span>
                     }
                   </div>
@@ -68,9 +68,9 @@
                       <a [href]="'tel:' + entry.phone">{{ entry.phone }}</a>
                     </span>
                   }
-                  <span class="entry-detail">
+                  <span class="entry-detail entry-detail--address">
                     <mat-icon class="detail-icon" inline>home</mat-icon>
-                    {{ entry.address }}
+                    <span class="address-text">{{ entry.address }}</span>
                   </span>
                 </div>
               </div>
