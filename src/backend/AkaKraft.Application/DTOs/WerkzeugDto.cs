@@ -7,6 +7,7 @@ public record WerkzeugDto(
     string Category,
     string? ImageUrl,
     string? Dimensions,
+    string? StorageLocation,
     bool IsAvailable,
     Guid? BorrowedByUserId,
     string? BorrowedByName,

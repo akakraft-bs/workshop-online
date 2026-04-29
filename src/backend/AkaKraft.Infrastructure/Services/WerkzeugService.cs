@@ -20,6 +20,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
                 w.Category,
                 w.ImageUrl,
                 w.Dimensions,
+                w.StorageLocation,
                 w.IsAvailable,
                 w.BorrowedByUserId,
                 w.BorrowedBy != null
@@ -51,6 +52,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             Category = dto.Category,
             ImageUrl = dto.ImageUrl,
             Dimensions = dto.Dimensions,
+            StorageLocation = dto.StorageLocation,
             IsAvailable = true,
         };
 
@@ -60,7 +62,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         return new WerkzeugDto(
             werkzeug.Id, werkzeug.Name, werkzeug.Description,
             werkzeug.Category, werkzeug.ImageUrl, werkzeug.Dimensions,
-            werkzeug.IsAvailable, null, null, null, null, null);
+            werkzeug.StorageLocation, werkzeug.IsAvailable, null, null, null, null, null);
     }
 
     public async Task<WerkzeugDto?> UpdateAsync(Guid id, UpdateWerkzeugDto dto)
@@ -81,6 +83,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         werkzeug.Category = dto.Category;
         werkzeug.ImageUrl = dto.ImageUrl;
         werkzeug.Dimensions = dto.Dimensions;
+        werkzeug.StorageLocation = dto.StorageLocation;
 
         await db.SaveChangesAsync();
 
@@ -156,7 +159,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
 
     private WerkzeugDto ToDto(Werkzeug w) => new(
         w.Id, w.Name, w.Description, w.Category,
-        w.ImageUrl, w.Dimensions, w.IsAvailable,
+        w.ImageUrl, w.Dimensions, w.StorageLocation, w.IsAvailable,
         w.BorrowedByUserId, ResolveDisplayName(w),
         w.BorrowedAt, w.ExpectedReturnAt, w.ReturnedAt);
 }

@@ -45,7 +45,7 @@ export class WerkzeugListComponent implements OnInit {
   readonly viewMode      = signal<'card' | 'table'>(
     (localStorage.getItem(this.VIEW_MODE_KEY) as 'card' | 'table') ?? 'card'
   );
-  readonly tableColumns  = ['name', 'category', 'status', 'borrowedBy', 'expectedReturn'];
+  readonly tableColumns  = ['name', 'category', 'storageLocation', 'status', 'borrowedBy', 'expectedReturn'];
 
   readonly canManage    = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);

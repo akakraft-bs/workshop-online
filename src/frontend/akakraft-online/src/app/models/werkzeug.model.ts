@@ -5,6 +5,7 @@ export interface Werkzeug {
   category: string;
   imageUrl?: string;
   dimensions?: string;
+  storageLocation?: string;
   isAvailable: boolean;
   borrowedByUserId?: string;
   borrowedByName?: string;

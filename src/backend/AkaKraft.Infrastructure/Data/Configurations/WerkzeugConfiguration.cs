@@ -28,6 +28,9 @@ public class WerkzeugConfiguration : IEntityTypeConfiguration<Werkzeug>
         builder.Property(w => w.Dimensions)
             .HasMaxLength(256);
 
+        builder.Property(w => w.StorageLocation)
+            .HasMaxLength(256);
+
         builder.HasOne(w => w.BorrowedBy)
             .WithMany()
             .HasForeignKey(w => w.BorrowedByUserId)

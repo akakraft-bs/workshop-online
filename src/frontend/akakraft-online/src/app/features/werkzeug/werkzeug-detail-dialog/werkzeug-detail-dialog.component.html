@@ -40,6 +40,13 @@
     </div>
   }
 
+  @if (item().storageLocation) {
+    <div class="detail-row">
+      <mat-icon class="row-icon">place</mat-icon>
+      <span>{{ item().storageLocation }}</span>
+    </div>
+  }
+
   @if (!item().isAvailable) {
     <mat-divider />
     <div class="borrow-section">

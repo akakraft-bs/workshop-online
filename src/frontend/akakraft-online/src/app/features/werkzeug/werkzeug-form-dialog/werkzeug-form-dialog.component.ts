@@ -48,10 +48,11 @@ export class WerkzeugFormDialogComponent implements OnInit {
   filteredCategories$!: Observable<string[]>;
 
   readonly form = this.fb.nonNullable.group({
-    name:        [this.data.werkzeug?.name ?? '',        Validators.required],
-    description: [this.data.werkzeug?.description ?? '', Validators.required],
-    category:    [this.data.werkzeug?.category ?? '',    Validators.required],
-    dimensions:  [this.data.werkzeug?.dimensions ?? ''],
+    name:            [this.data.werkzeug?.name ?? '',            Validators.required],
+    description:     [this.data.werkzeug?.description ?? '',     Validators.required],
+    category:        [this.data.werkzeug?.category ?? '',        Validators.required],
+    dimensions:      [this.data.werkzeug?.dimensions ?? ''],
+    storageLocation: [this.data.werkzeug?.storageLocation ?? ''],
   });
 
   @HostListener('paste', ['$event'])
@@ -137,11 +138,12 @@ export class WerkzeugFormDialogComponent implements OnInit {
         const imageUrl = uploadResult?.url ?? existingImageUrl;
 
         const body = {
-          name:        value.name,
-          description: value.description,
-          category:    value.category,
+          name:            value.name,
+          description:     value.description,
+          category:        value.category,
           imageUrl,
-          dimensions:  value.dimensions || null,
+          dimensions:      value.dimensions || null,
+          storageLocation: value.storageLocation || null,
         };
 
         return this.isEdit

@@ -134,6 +134,11 @@
         <td mat-cell *matCellDef="let item">{{ item.category }}</td>
       </ng-container>
 
+      <ng-container matColumnDef="storageLocation">
+        <th mat-header-cell *matHeaderCellDef>Ablageort</th>
+        <td mat-cell *matCellDef="let item">{{ item.storageLocation ?? '–' }}</td>
+      </ng-container>
+
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let item">
