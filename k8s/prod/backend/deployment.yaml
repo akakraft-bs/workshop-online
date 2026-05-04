@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: akakraft-backend
-  namespace: akakraft
+  namespace: akakraft-prod
 spec:
   replicas: 1
   selector:
@@ -22,8 +22,6 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            # --- Datenbank ---
-            # K8s ersetzt $(VAR) innerhalb desselben env-Blocks
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -32,7 +30,6 @@ spec:
             - name: ConnectionStrings__DefaultConnection
               value: "Host=akakraft-db-rw;Port=5432;Database=akakraft;Username=akakraft;Password=$(DB_PASSWORD)"
 
-            # --- MinIO ---
             - name: Minio__Endpoint
               value: "akakraft-minio:9000"
             - name: Minio__AccessKey
@@ -46,11 +43,9 @@ spec:
               value: "akakraft"
             - name: Minio__UseSSL
               value: "false"
-            # Bilder werden über nginx unter /minio/ ausgeliefert
             - name: Minio__PublicBaseUrl
-              value: "https://beta-app.akakraft-bs.de/minio"
+              value: "https://app.akakraft-bs.de/minio"   # Produktionsdomain anpassen
 
-            # --- JWT ---
             - name: Authentication__Jwt__Key
               valueFrom:
                 secretKeyRef:
@@ -63,7 +58,6 @@ spec:
             - name: Authentication__Jwt__ExpiryMinutes
               value: "480"
 
-            # --- Google OAuth ---
             - name: Authentication__Google__ClientId
               valueFrom:
                 secretKeyRef:
@@ -75,14 +69,12 @@ spec:
                   name: akakraft-secrets
                   key: google-client-secret
 
-            # --- Google Calendar ---
             - name: GoogleCalendar__ServiceAccountJson
               valueFrom:
                 secretKeyRef:
                   name: google-calendar-secret
                   key: service-account-json
 
-            # --- E-Mail / SMTP ---
             - name: Email__SmtpHost
               valueFrom:
                 secretKeyRef:
@@ -119,29 +111,23 @@ spec:
                   name: akakraft-secrets
                   key: email-from-name
 
-            # --- Admin ---
             - name: Admin__Email
               valueFrom:
                 secretKeyRef:
                   name: akakraft-secrets
                   key: admin-email
 
-            # --- Firebase (Push-Notifications) ---
             - name: Firebase__AdminSdkJson
               valueFrom:
                 secretKeyRef:
                   name: akakraft-secrets
                   key: firebase-admin-json
 
-            # --- Frontend-URL (für OAuth-Callback-Redirect) ---
             - name: Frontend__BaseUrl
-              value: "https://beta-app.akakraft-bs.de/app"
+              value: "https://app.akakraft-bs.de/app"     # Produktionsdomain anpassen
 
-            # --- ASP.NET Core ---
             - name: ASPNETCORE_ENVIRONMENT
               value: "Production"
-            # Aktiviert ForwardedHeaders-Middleware für X-Forwarded-Proto/For
-            # (nötig da Traffic über NPM → Traefik → Pod läuft)
             - name: ASPNETCORE_FORWARDEDHEADERS_ENABLED
               value: "true"
 

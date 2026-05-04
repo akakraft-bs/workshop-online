@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-setup
+  namespace: akakraft
+spec:
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: setup
+          image: alpine:3.20
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              wget -q https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc
+              chmod +x /usr/local/bin/mc
+              mc alias set minio http://akakraft-minio:9000 minioadmin "$MINIO_ROOT_PASSWORD"
+              mc mb --ignore-existing minio/pg-backups
+              mc admin user info minio "$BACKUP_USER" 2>/dev/null || \
+                mc admin user add minio "$BACKUP_USER" "$BACKUP_PASSWORD"
+              mc admin policy attach minio readwrite --user "$BACKUP_USER" 2>/dev/null || true
+          env:
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: akakraft-secrets
+                  key: minio-secret-key
+            - name: BACKUP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cnpg-backup-secret
+                  key: ACCESS_KEY_ID
+            - name: BACKUP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cnpg-backup-secret
+                  key: ACCESS_KEY_SECRET

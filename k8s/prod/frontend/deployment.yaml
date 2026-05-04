@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akakraft-frontend
+  namespace: akakraft-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: akakraft-frontend
+  template:
+    metadata:
+      labels:
+        app: akakraft-frontend
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      containers:
+        - name: frontend
+          image: ghcr.io/akakraft-bs/akakraft-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: BACKEND_URL
+              value: "http://akakraft-backend:8080"
+            - name: MINIO_URL
+              value: "http://akakraft-minio:9000"
+          readinessProbe:
+            httpGet:
+              path: /app/
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"

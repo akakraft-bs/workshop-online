@@ -1,0 +1,12 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: akakraft-db-daily
+  namespace: akakraft
+spec:
+  # 6-Feld-Format: Sekunde Minute Stunde Tag Monat Wochentag
+  schedule: "0 0 2 * * *"   # täglich um 02:00 Uhr
+  backupOwnerReference: self
+  cluster:
+    name: akakraft-db
+  immediate: true            # erstes Backup direkt nach dem Deployment auslösen

@@ -1,0 +1,48 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: akakraft-db
+  namespace: akakraft
+spec:
+  instances: 1
+
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"
+
+  bootstrap:
+    initdb:
+      database: akakraft
+      owner: akakraft
+      secret:
+        name: akakraft-db-credentials   # type: kubernetes.io/basic-auth
+
+  storage:
+    storageClass: local-path
+    size: 5Gi
+
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://pg-backups/akakraft
+      endpointURL: http://akakraft-minio:9000
+      s3Credentials:
+        accessKeyId:
+          name: cnpg-backup-secret
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: cnpg-backup-secret
+          key: ACCESS_KEY_SECRET
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+    retentionPolicy: "14d"
+
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"

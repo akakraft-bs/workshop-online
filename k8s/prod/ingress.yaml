@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: akakraft-ingress
+  namespace: akakraft-prod
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+    - host: app.akakraft-bs.de   # Produktionsdomain anpassen falls abweichend
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: akakraft-frontend
+                port:
+                  number: 80
