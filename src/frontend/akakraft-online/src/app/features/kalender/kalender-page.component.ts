@@ -89,6 +89,7 @@ export class KalenderPageComponent implements OnInit {
   });
 
   readonly canWrite = computed(() => this.writableCalendarIds().length > 0);
+  readonly visibleConfigs = computed(() => this.configs().filter(c => c.isVisible));
 
   ngOnInit(): void {
     this.loadConfigs();
