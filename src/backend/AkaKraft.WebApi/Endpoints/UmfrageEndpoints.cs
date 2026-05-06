@@ -31,8 +31,7 @@ internal static class UmfrageEndpoints
             var created = await umfrageService.CreateAsync(userId, dto);
 
             var question = created.Question.Length > 70 ? created.Question[..67] + "…" : created.Question;
-            _ = pushService.SendToUsersWithPreferenceAsync(
-                p => p.NotifyUmfragen, "Neue Umfrage 📊", question, url: "/umfrage");
+            _ = pushService.SendToAllSubscribedAsync("Neue Umfrage 📊", question, url: "/umfrage");
 
             return Results.Created($"/umfrage/{created.Id}", created);
         }).RequireAuthorization("AnyRole");

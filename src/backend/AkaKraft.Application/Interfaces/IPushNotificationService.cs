@@ -8,12 +8,7 @@ public interface IPushNotificationService
     Task SendToUserAsync(Guid userId, string title, string body, string? url = null);
 
     /// <summary>
-    /// Sendet eine Push-Benachrichtigung an alle Nutzer mit der angegebenen Rolle,
-    /// bei denen die Einstellung aktiviert ist.
+    /// Sendet eine Push-Benachrichtigung an alle Nutzer mit aktivierten Push-Benachrichtigungen.
     /// </summary>
-    Task SendToUsersWithPreferenceAsync(
-        Func<Domain.Entities.UserPreferences, bool> preferenceSelector,
-        string title,
-        string body,
-        string? url = null);
+    Task SendToAllSubscribedAsync(string title, string body, string? url = null);
 }

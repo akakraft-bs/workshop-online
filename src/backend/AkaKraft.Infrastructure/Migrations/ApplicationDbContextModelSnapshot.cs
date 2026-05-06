@@ -623,18 +623,6 @@ namespace AkaKraft.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("[]");
 
-                    b.Property<bool>("NotifyLeihruckgabe")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("NotifyMindestbestand")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("NotifyUmfragen")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("NotifyVeranstaltungen")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Phone")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");

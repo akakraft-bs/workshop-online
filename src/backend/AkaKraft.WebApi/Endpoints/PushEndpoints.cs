@@ -60,7 +60,7 @@ internal static class PushEndpoints
             if (dto.UserId.HasValue)
                 await pushService.SendToUserAsync(dto.UserId.Value, dto.Title, dto.Body);
             else
-                await pushService.SendToUsersWithPreferenceAsync(_ => true, dto.Title, dto.Body);
+                await pushService.SendToAllSubscribedAsync(dto.Title, dto.Body);
 
             return Results.Ok();
         }).RequireAuthorization("AdminOnly");

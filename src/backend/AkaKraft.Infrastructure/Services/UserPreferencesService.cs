@@ -20,7 +20,6 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
 
         var json = JsonSerializer.Serialize(dto.FavoriteRoutes ?? []);
         var displayName = string.IsNullOrWhiteSpace(dto.DisplayName) ? null : dto.DisplayName.Trim();
-
         var phone   = string.IsNullOrWhiteSpace(dto.Phone)   ? null : dto.Phone.Trim();
         var address = string.IsNullOrWhiteSpace(dto.Address) ? null : dto.Address.Trim();
 
@@ -33,10 +32,6 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
                 DisplayName = displayName,
                 Phone = phone,
                 Address = address,
-                NotifyLeihruckgabe = dto.NotifyLeihruckgabe,
-                NotifyVeranstaltungen = dto.NotifyVeranstaltungen,
-                NotifyMindestbestand = dto.NotifyMindestbestand,
-                NotifyUmfragen = dto.NotifyUmfragen,
             };
             db.UserPreferences.Add(prefs);
         }
@@ -46,10 +41,6 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
             prefs.DisplayName = displayName;
             prefs.Phone = phone;
             prefs.Address = address;
-            prefs.NotifyLeihruckgabe = dto.NotifyLeihruckgabe;
-            prefs.NotifyVeranstaltungen = dto.NotifyVeranstaltungen;
-            prefs.NotifyMindestbestand = dto.NotifyMindestbestand;
-            prefs.NotifyUmfragen = dto.NotifyUmfragen;
         }
 
         await db.SaveChangesAsync();
@@ -59,24 +50,16 @@ public class UserPreferencesService(ApplicationDbContext db) : IUserPreferencesS
     private static UserPreferencesDto ToDto(UserPreferences? prefs)
     {
         if (prefs is null)
-            return new UserPreferencesDto([], null, null, null, true, true, true, true);
+            return new UserPreferencesDto([], null, null, null);
 
         try
         {
             var routes = JsonSerializer.Deserialize<List<string>>(prefs.FavoriteRoutesJson) ?? [];
-            return new UserPreferencesDto(
-                routes,
-                prefs.DisplayName,
-                prefs.Phone,
-                prefs.Address,
-                prefs.NotifyLeihruckgabe,
-                prefs.NotifyVeranstaltungen,
-                prefs.NotifyMindestbestand,
-                prefs.NotifyUmfragen);
+            return new UserPreferencesDto(routes, prefs.DisplayName, prefs.Phone, prefs.Address);
         }
         catch
         {
-            return new UserPreferencesDto([], null, null, null, true, true, true, true);
+            return new UserPreferencesDto([], null, null, null);
         }
     }
 }

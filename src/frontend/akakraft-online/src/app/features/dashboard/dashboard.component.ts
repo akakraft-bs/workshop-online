@@ -66,10 +66,6 @@ export class DashboardComponent implements OnInit {
   readonly editMode = signal(false);
   readonly savingPrefs = signal(false);
 
-  private notifyLeihruckgabe = true;
-  private notifyVeranstaltungen = true;
-  private notifyMindestbestand = true;
-  private notifyUmfragen = true;
   private loadedPhone: string | null = null;
   private loadedAddress: string | null = null;
 
@@ -117,10 +113,6 @@ export class DashboardComponent implements OnInit {
         if (prefs.favoriteRoutes.length > 0) {
           this.favoriteRoutes.set(prefs.favoriteRoutes);
         }
-        this.notifyLeihruckgabe = prefs.notifyLeihruckgabe;
-        this.notifyVeranstaltungen = prefs.notifyVeranstaltungen;
-        this.notifyMindestbestand = prefs.notifyMindestbestand;
-        this.notifyUmfragen = prefs.notifyUmfragen;
         this.loadedPhone = prefs.phone;
         this.loadedAddress = prefs.address;
       },
@@ -148,10 +140,6 @@ export class DashboardComponent implements OnInit {
       displayName: this.auth.currentUser()?.displayName ?? null,
       phone: this.loadedPhone,
       address: this.loadedAddress,
-      notifyLeihruckgabe: this.notifyLeihruckgabe,
-      notifyVeranstaltungen: this.notifyVeranstaltungen,
-      notifyMindestbestand: this.notifyMindestbestand,
-      notifyUmfragen: this.notifyUmfragen,
     }).subscribe({
       next: prefs => { this.favoriteRoutes.set(prefs.favoriteRoutes); this.savingPrefs.set(false); },
       error: () => this.savingPrefs.set(false),

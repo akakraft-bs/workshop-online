@@ -16,24 +16,4 @@ public class UserPreferences
 
     public string? Phone { get; set; }
     public string? Address { get; set; }
-
-    /// <summary>
-    /// Benachrichtigung wenn ein ausgeliehenes Werkzeug überfällig ist.
-    /// </summary>
-    public bool NotifyLeihruckgabe { get; set; } = true;
-
-    /// <summary>
-    /// Benachrichtigung bei neuen Veranstaltungen und einen Tag vorher.
-    /// </summary>
-    public bool NotifyVeranstaltungen { get; set; } = true;
-
-    /// <summary>
-    /// Benachrichtigung wenn ein Verbrauchsmittel den Mindestbestand unterschreitet.
-    /// </summary>
-    public bool NotifyMindestbestand { get; set; } = true;
-
-    /// <summary>
-    /// Benachrichtigung bei neuen Umfragen und eine Stunde vor Fristablauf.
-    /// </summary>
-    public bool NotifyUmfragen { get; set; } = true;
 }

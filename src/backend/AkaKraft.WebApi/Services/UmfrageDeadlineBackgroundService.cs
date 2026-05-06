@@ -74,8 +74,7 @@ public class UmfrageDeadlineBackgroundService(
         foreach (var u in upcoming)
         {
             var question = u.Question.Length > 60 ? u.Question[..57] + "…" : u.Question;
-            await push.SendToUsersWithPreferenceAsync(
-                p => p.NotifyUmfragen,
+            await push.SendToAllSubscribedAsync(
                 "Umfrage läuft bald ab ⏰",
                 $"Noch ~1 Stunde: {question}",
                 url: "/umfrage");

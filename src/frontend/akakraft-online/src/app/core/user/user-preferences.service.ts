@@ -7,10 +7,6 @@ export interface UserPreferences {
   displayName: string | null;
   phone: string | null;
   address: string | null;
-  notifyLeihruckgabe: boolean;
-  notifyVeranstaltungen: boolean;
-  notifyMindestbestand: boolean;
-  notifyUmfragen: boolean;
 }
 
 export interface UpdateUserPreferences {
@@ -18,10 +14,6 @@ export interface UpdateUserPreferences {
   displayName: string | null;
   phone: string | null;
   address: string | null;
-  notifyLeihruckgabe: boolean;
-  notifyVeranstaltungen: boolean;
-  notifyMindestbestand: boolean;
-  notifyUmfragen: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

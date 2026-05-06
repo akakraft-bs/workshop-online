@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,8 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
-import { Role } from '../../models/user.model';
-import { UserPreferences, UserPreferencesService } from '../../core/user/user-preferences.service';
+import { UserPreferencesService } from '../../core/user/user-preferences.service';
 import { PushNotificationService } from '../../core/push/push-notification.service';
 
 @Component({
@@ -23,7 +21,6 @@ import { PushNotificationService } from '../../core/push/push-notification.servi
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatSlideToggleModule,
     MatDividerModule,
     MatIconModule,
     MatTooltipModule,
@@ -40,25 +37,13 @@ export class ProfileDialogComponent implements OnInit {
 
   readonly saving = signal(false);
   readonly togglingPush = signal(false);
-  private loadedPrefs: UserPreferences | null = null;
-
-  readonly isHallenwart = () =>
-    this.auth.hasAnyRole([Role.Hallenwart, Role.Admin, Role.Chairman, Role.ViceChairman]);
+  private loadedPrefs: { favoriteRoutes: string[] } | null = null;
 
   readonly form = this.fb.group({
     displayName: ['', [Validators.maxLength(64)]],
     phone: ['', [Validators.maxLength(64)]],
     address: ['', [Validators.maxLength(512)]],
-    notifyLeihruckgabe: [true],
-    notifyVeranstaltungen: [true],
-    notifyMindestbestand: [true],
-    notifyUmfragen: [true],
   });
-
-  previewName(): string {
-    const v = this.form.get('displayName')!.value?.trim();
-    return v || this.auth.currentUser()?.name?.split(' ')[0] || 'Name';
-  }
 
   ngOnInit(): void {
     this.prefsService.getPreferences().subscribe({
@@ -68,10 +53,6 @@ export class ProfileDialogComponent implements OnInit {
           displayName: prefs.displayName ?? '',
           phone: prefs.phone ?? '',
           address: prefs.address ?? '',
-          notifyLeihruckgabe: prefs.notifyLeihruckgabe,
-          notifyVeranstaltungen: prefs.notifyVeranstaltungen,
-          notifyMindestbestand: prefs.notifyMindestbestand,
-          notifyUmfragen: prefs.notifyUmfragen,
         });
         this.form.markAsPristine();
       },
@@ -106,10 +87,6 @@ export class ProfileDialogComponent implements OnInit {
       displayName,
       phone,
       address,
-      notifyLeihruckgabe: this.form.get('notifyLeihruckgabe')!.value ?? true,
-      notifyVeranstaltungen: this.form.get('notifyVeranstaltungen')!.value ?? true,
-      notifyMindestbestand: this.form.get('notifyMindestbestand')!.value ?? true,
-      notifyUmfragen: this.form.get('notifyUmfragen')!.value ?? true,
     }).subscribe({
       next: () => { this.saving.set(false); this.auth.refreshCurrentUser(); this.dialogRef.close(true); },
       error: () => this.saving.set(false),

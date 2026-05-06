@@ -1,5 +1,4 @@
 using AkaKraft.Application.Interfaces;
-using AkaKraft.Domain.Entities;
 using AkaKraft.Infrastructure.Data;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
@@ -26,23 +25,9 @@ public class FcmPushNotificationService(
         await SendToTokensAsync(tokens, title, body, url);
     }
 
-    public async Task SendToUsersWithPreferenceAsync(
-        Func<UserPreferences, bool> preferenceSelector,
-        string title,
-        string body,
-        string? url = null)
+    public async Task SendToAllSubscribedAsync(string title, string body, string? url = null)
     {
-        // AsEnumerable erzwingt Client-seitige Auswertung der Func<>-Prädikat
-        var allPrefs = await db.UserPreferences.ToListAsync();
-        var userIds = allPrefs
-            .Where(preferenceSelector)
-            .Select(p => p.UserId)
-            .ToList();
-
-        if (userIds.Count == 0) return;
-
         var tokens = await db.FcmTokens
-            .Where(t => userIds.Contains(t.UserId))
             .Select(t => t.Token)
             .ToListAsync();
 
