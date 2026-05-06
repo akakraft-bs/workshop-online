@@ -25,7 +25,10 @@
           [routerLink]="item.route"
           routerLinkActive="active-link"
           (click)="isMobile() && sidenavRef().close()">
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <mat-icon matListItemIcon
+            [matBadge]="item.badge && item.badge() > 0 ? item.badge() : null"
+            matBadgeColor="warn"
+            matBadgeSize="medium">{{ item.icon }}</mat-icon>
           <span matListItemTitle>{{ item.label }}</span>
         </a>
       }

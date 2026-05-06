@@ -145,7 +145,10 @@
             <mat-card class="quick-link-card" appearance="outlined" [routerLink]="link.route">
               <mat-card-content>
                 <div class="card-icon">
-                  <mat-icon>{{ link.icon }}</mat-icon>
+                  <mat-icon
+                    [matBadge]="link.badge && link.badge() > 0 ? link.badge() : null"
+                    matBadgeColor="warn"
+                    matBadgeSize="medium">{{ link.icon }}</mat-icon>
                 </div>
                 <div class="card-text">
                   <strong>{{ link.label }}</strong>

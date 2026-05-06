@@ -10,7 +10,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatBadgeModule } from '@angular/material/badge';
+import { Signal } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
+import { BadgeService } from '../../core/badges/badge.service';
 import { Role } from '../../models/user.model';
 import { FeedbackDialogComponent } from '../../features/feedback/feedback-dialog/feedback-dialog.component';
 import { ProfileDialogComponent } from '../../features/profile/profile-dialog.component';
@@ -24,26 +27,8 @@ interface NavItem {
   icon: string;
   route: string;
   requiredRoles?: Role[];
+  badge?: () => number;
 }
-
-const ALL_NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-  { label: 'Hallenbelegung', icon: 'calendar_month', route: '/kalender' },
-  { label: 'Veranstaltungen', icon: 'celebration', route: '/veranstaltungen' },
-  { label: 'Werkzeug', icon: 'build', route: '/werkzeug' },
-  { label: 'Verbrauchsmaterial', icon: 'inventory_2', route: '/verbrauchsmaterial' },
-  { label: 'Mängelmelder', icon: 'report_problem', route: '/mangel' },
-  { label: 'Wunschliste', icon: 'playlist_add', route: '/wunsch' },
-  { label: 'Umfragen', icon: 'poll', route: '/umfrage' },
-  { label: 'Hallenbuch', icon: 'menu_book', route: '/hallenbuch' },
-  { label: 'Verein', icon: 'groups', route: '/verein' },
-  { label: 'Projekte', icon: 'engineering', route: '/projekte' },
-  { label: 'Aufgaben', icon: 'task_alt', route: '/aufgaben' },
-  { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
-  { label: 'Kalender-Einstellungen', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
-  { label: 'Feedback', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },
-  { label: 'Test-Benachrichtigung', icon: 'notifications_active', route: '/admin/push', requiredRoles: [Role.Admin] },
-];
 
 @Component({
   selector: 'app-main-layout',
@@ -51,6 +36,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     RouterOutlet, RouterLink, RouterLinkActive,
     MatSidenavModule, MatToolbarModule, MatIconModule,
     MatButtonModule, MatListModule, MatMenuModule, MatDividerModule, MatTooltipModule,
+    MatBadgeModule,
     IosInstallBannerComponent,
     AndroidInstallBannerComponent,
   ],
@@ -62,6 +48,7 @@ export class MainLayoutComponent implements OnInit {
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly dialog = inject(MatDialog);
   private readonly push = inject(PushNotificationService);
+  readonly badges = inject(BadgeService);
 
   readonly sidenavRef = viewChild.required<MatSidenav>('sidenav');
   readonly isMobile = signal(false);
@@ -70,8 +57,27 @@ export class MainLayoutComponent implements OnInit {
   logoFailed = false;
   readonly currentUser = this.auth.currentUser;
 
+  readonly allNavItems: NavItem[] = [
+    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+    { label: 'Hallenbelegung', icon: 'calendar_month', route: '/kalender' },
+    { label: 'Veranstaltungen', icon: 'celebration', route: '/veranstaltungen' },
+    { label: 'Werkzeug', icon: 'build', route: '/werkzeug' },
+    { label: 'Verbrauchsmaterial', icon: 'inventory_2', route: '/verbrauchsmaterial', badge: () => this.badges.lowStock() },
+    { label: 'Mängelmelder', icon: 'report_problem', route: '/mangel', badge: () => this.badges.openMaengel() },
+    { label: 'Wunschliste', icon: 'playlist_add', route: '/wunsch' },
+    { label: 'Umfragen', icon: 'poll', route: '/umfrage', badge: () => this.badges.pendingUmfragen() },
+    { label: 'Hallenbuch', icon: 'menu_book', route: '/hallenbuch' },
+    { label: 'Verein', icon: 'groups', route: '/verein' },
+    { label: 'Projekte', icon: 'engineering', route: '/projekte' },
+    { label: 'Aufgaben', icon: 'task_alt', route: '/aufgaben' },
+    { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
+    { label: 'Kalender-Einstellungen', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
+    { label: 'Feedback', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin], badge: () => this.badges.unseenFeedback() },
+    { label: 'Test-Benachrichtigung', icon: 'notifications_active', route: '/admin/push', requiredRoles: [Role.Admin] },
+  ];
+
   readonly navItems = computed(() =>
-    ALL_NAV_ITEMS.filter(item =>
+    this.allNavItems.filter(item =>
       !item.requiredRoles || this.auth.hasAnyRole(item.requiredRoles)
     )
   );
@@ -81,7 +87,8 @@ export class MainLayoutComponent implements OnInit {
       .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
       .subscribe(result => this.isMobile.set(result.matches));
 
-    // Push-Prompt nach kurzer Verzögerung zeigen damit die UI settled ist
+    this.badges.refresh();
+
     setTimeout(() => this.checkPushPrompt(), 1200);
   }
 

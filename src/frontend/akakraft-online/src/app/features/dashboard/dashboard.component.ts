@@ -6,10 +6,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatBadgeModule } from '@angular/material/badge';
 import { AuthService } from '../../core/auth/auth.service';
 import { ApiService } from '../../core/api/api.service';
 import { CalendarService } from '../../core/calendar/calendar.service';
 import { UserPreferencesService } from '../../core/user/user-preferences.service';
+import { BadgeService } from '../../core/badges/badge.service';
 import { CalendarEvent } from '../../models/calendar.model';
 import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
 import { Mangel } from '../../models/mangel.model';
@@ -22,22 +24,8 @@ export interface NavItem {
   icon: string;
   route: string;
   requiredRoles?: Role[];
+  badge?: () => number;
 }
-
-const ALL_QUICK_ITEMS: NavItem[] = [
-  { label: 'Hallenbelegung', description: 'Belegungskalender anzeigen', icon: 'calendar_month', route: '/kalender' },
-  { label: 'Veranstaltungen', description: 'Veranstaltungen planen und verwalten', icon: 'celebration', route: '/veranstaltungen' },
-  { label: 'Werkzeug', description: 'Werkzeug einsehen und ausleihen', icon: 'build', route: '/werkzeug' },
-  { label: 'Verbrauchsmaterial', description: 'Aktuellen Bestand einsehen', icon: 'inventory_2', route: '/verbrauchsmaterial' },
-  { label: 'Mängelmelder', description: 'Mängel melden und einsehen', icon: 'report_problem', route: '/mangel' },
-  { label: 'Wunschliste', description: 'Neuanschaffungen vorschlagen', icon: 'playlist_add', route: '/wunsch' },
-  { label: 'Umfragen', description: 'Umfragen erstellen und abstimmen', icon: 'poll', route: '/umfrage' },
-  { label: 'Hallenbuch', description: 'Hallenbuchzeiten eintragen und einsehen', icon: 'menu_book', route: '/hallenbuch' },
-  { label: 'Nutzerverwaltung', description: 'Nutzer und Rollen verwalten', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
-  { label: 'Kalender-Einstellungen', description: 'Kalender konfigurieren', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
-  { label: 'Feedback', description: 'Eingegangenes Feedback verwalten', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin] },
-  { label: 'Test-Benachrichtigung', description: 'Push-Benachrichtigung senden', icon: 'notifications_active', route: '/admin/push', requiredRoles: [Role.Admin] },
-];
 
 const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial'];
 
@@ -45,7 +33,7 @@ const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial'];
   selector: 'app-dashboard',
   imports: [
     RouterLink, MatCardModule, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, MatChipsModule, MatTooltipModule,
+    MatProgressSpinnerModule, MatChipsModule, MatTooltipModule, MatBadgeModule,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -55,6 +43,7 @@ export class DashboardComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly calendarService = inject(CalendarService);
   private readonly prefsService = inject(UserPreferencesService);
+  readonly badges = inject(BadgeService);
 
   readonly upcomingEvents = signal<CalendarEvent[]>([]);
   readonly loadingEvents = signal(true);
@@ -69,14 +58,27 @@ export class DashboardComponent implements OnInit {
   private loadedPhone: string | null = null;
   private loadedAddress: string | null = null;
 
-  /** All nav items the current user may access (role-filtered) */
+  readonly allQuickItems: NavItem[] = [
+    { label: 'Hallenbelegung', description: 'Belegungskalender anzeigen', icon: 'calendar_month', route: '/kalender' },
+    { label: 'Veranstaltungen', description: 'Veranstaltungen planen und verwalten', icon: 'celebration', route: '/veranstaltungen' },
+    { label: 'Werkzeug', description: 'Werkzeug einsehen und ausleihen', icon: 'build', route: '/werkzeug' },
+    { label: 'Verbrauchsmaterial', description: 'Aktuellen Bestand einsehen', icon: 'inventory_2', route: '/verbrauchsmaterial', badge: () => this.badges.lowStock() },
+    { label: 'Mängelmelder', description: 'Mängel melden und einsehen', icon: 'report_problem', route: '/mangel', badge: () => this.badges.openMaengel() },
+    { label: 'Wunschliste', description: 'Neuanschaffungen vorschlagen', icon: 'playlist_add', route: '/wunsch' },
+    { label: 'Umfragen', description: 'Umfragen erstellen und abstimmen', icon: 'poll', route: '/umfrage', badge: () => this.badges.pendingUmfragen() },
+    { label: 'Hallenbuch', description: 'Hallenbuchzeiten eintragen und einsehen', icon: 'menu_book', route: '/hallenbuch' },
+    { label: 'Nutzerverwaltung', description: 'Nutzer und Rollen verwalten', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
+    { label: 'Kalender-Einstellungen', description: 'Kalender konfigurieren', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
+    { label: 'Feedback', description: 'Eingegangenes Feedback verwalten', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin], badge: () => this.badges.unseenFeedback() },
+    { label: 'Test-Benachrichtigung', description: 'Push-Benachrichtigung senden', icon: 'notifications_active', route: '/admin/push', requiredRoles: [Role.Admin] },
+  ];
+
   readonly availableItems = computed(() =>
-    ALL_QUICK_ITEMS.filter(item =>
+    this.allQuickItems.filter(item =>
       !item.requiredRoles || this.auth.hasAnyRole(item.requiredRoles)
     )
   );
 
-  /** Items shown in the quick-access section */
   readonly quickLinks = computed(() =>
     this.availableItems().filter(item => this.favoriteRoutes().includes(item.route))
   );
@@ -91,21 +93,21 @@ export class DashboardComponent implements OnInit {
       next: items => this.lowStockItems.set(
         items.filter(v => v.minQuantity != null && v.quantity <= v.minQuantity)
       ),
-      error: () => { /* kein Fehler anzeigen, Dashboard bleibt funktionsfähig */ },
+      error: () => {},
     });
 
     this.api.get<Mangel[]>('/mangel').subscribe({
       next: items => this.openMaengel.set(
         items.filter(m => m.status === 'Offen' || m.status === 'Kenntnisgenommen')
       ),
-      error: () => { /* kein Fehler anzeigen */ },
+      error: () => {},
     });
 
     this.api.get<Umfrage[]>('/umfrage').subscribe({
       next: items => this.pendingUmfragen.set(
         items.filter(u => u.status === 'Offen' && u.currentUserOptionIds.length === 0)
       ),
-      error: () => { /* kein Fehler anzeigen */ },
+      error: () => {},
     });
 
     this.prefsService.getPreferences().subscribe({
@@ -116,7 +118,7 @@ export class DashboardComponent implements OnInit {
         this.loadedPhone = prefs.phone;
         this.loadedAddress = prefs.address;
       },
-      error: () => { /* keep defaults */ },
+      error: () => {},
     });
   }
 
