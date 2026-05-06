@@ -1,5 +1,8 @@
 using AkaKraft.Application.DTOs;
 using AkaKraft.Application.Interfaces;
+using AkaKraft.Domain.Enums;
+using AkaKraft.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace AkaKraft.WebApi.Endpoints;
 
@@ -7,7 +10,10 @@ internal static class FeedbackEndpoints
 {
     internal static void MapFeedbackEndpoints(this WebApplication app)
     {
-        app.MapPost("/feedback", async (CreateFeedbackDto dto, HttpContext ctx, IFeedbackService feedbackService) =>
+        app.MapPost("/feedback", async (
+            CreateFeedbackDto dto, HttpContext ctx,
+            IFeedbackService feedbackService, IPushNotificationService pushService,
+            ApplicationDbContext db) =>
         {
             if (!ctx.TryGetCurrentUserId(out var userId))
                 return Results.Unauthorized();
@@ -16,6 +22,13 @@ internal static class FeedbackEndpoints
                 return Results.BadRequest("Text muss zwischen 1 und 256 Zeichen lang sein.");
 
             var result = await feedbackService.CreateAsync(userId, dto);
+
+            var adminIds = await db.UserRoles
+                .Where(r => r.Role == Role.Admin)
+                .Select(r => r.UserId)
+                .ToListAsync();
+            _ = pushService.SendToUsersAsync(adminIds, "Neues Feedback 💬", dto.Text.Length > 80 ? dto.Text[..77] + "…" : dto.Text, url: "/admin/feedback");
+
             return Results.Created($"/admin/feedback/{result.Id}", result);
         }).RequireAuthorization("AnyRole");
 
