@@ -36,6 +36,21 @@ public class FcmPushNotificationService(
         await SendToTokensAsync(tokens, title, body, url);
     }
 
+    public async Task SendToUsersAsync(IEnumerable<Guid> userIds, string title, string body, string? url = null)
+    {
+        var ids = userIds.ToList();
+        if (ids.Count == 0) return;
+
+        var tokens = await db.FcmTokens
+            .Where(t => ids.Contains(t.UserId))
+            .Select(t => t.Token)
+            .ToListAsync();
+
+        if (tokens.Count == 0) return;
+
+        await SendToTokensAsync(tokens, title, body, url);
+    }
+
     private async Task SendToTokensAsync(List<string> tokens, string title, string body, string? url)
     {
         var messaging = FirebaseMessaging.GetMessaging(firebaseApp);

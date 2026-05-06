@@ -12,4 +12,7 @@ public class NoOpPushNotificationService : IPushNotificationService
 
     public Task SendToAllSubscribedAsync(string title, string body, string? url = null)
         => Task.CompletedTask;
+
+    public Task SendToUsersAsync(IEnumerable<Guid> userIds, string title, string body, string? url = null)
+        => Task.CompletedTask;
 }

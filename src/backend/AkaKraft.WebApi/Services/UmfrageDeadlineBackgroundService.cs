@@ -73,8 +73,21 @@ public class UmfrageDeadlineBackgroundService(
 
         foreach (var u in upcoming)
         {
+            var votedUserIds = await db.UmfrageAntworten
+                .Where(a => a.UmfrageId == u.Id)
+                .Select(a => a.UserId)
+                .Distinct()
+                .ToListAsync(ct);
+
+            var subscribedUserIds = await db.FcmTokens
+                .Where(t => !votedUserIds.Contains(t.UserId))
+                .Select(t => t.UserId)
+                .Distinct()
+                .ToListAsync(ct);
+
             var question = u.Question.Length > 60 ? u.Question[..57] + "…" : u.Question;
-            await push.SendToAllSubscribedAsync(
+            await push.SendToUsersAsync(
+                subscribedUserIds,
                 "Umfrage läuft bald ab ⏰",
                 $"Noch ~1 Stunde: {question}",
                 url: "/umfrage");
