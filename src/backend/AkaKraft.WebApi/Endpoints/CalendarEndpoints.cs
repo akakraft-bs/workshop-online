@@ -103,7 +103,8 @@ internal static class CalendarEndpoints
         app.MapPost("/calendar/events", async (
             CreateCalendarEventDto dto, HttpContext ctx,
             ICalendarService calendarService, ICalendarConfigService configService,
-            IUserService userService, IUserPreferencesService prefsService) =>
+            IUserService userService, IUserPreferencesService prefsService,
+            IPushNotificationService pushService) =>
         {
             if (!ctx.TryGetCurrentUserId(out var userId))
                 return Results.Unauthorized();
@@ -122,6 +123,17 @@ internal static class CalendarEndpoints
 
             var created = await calendarService.CreateEventAsync(
                 dto.CalendarId, config.Name, config.Color, dto, creatorName, user.Email);
+
+            if (config.CalendarType == nameof(CalendarType.Veranstaltungen))
+            {
+                var datePart = dto.IsAllDay
+                    ? dto.Start.ToString("dd.MM.yyyy")
+                    : dto.Start.ToString("dd.MM.yyyy, HH:mm") + " Uhr";
+                _ = pushService.SendToAllSubscribedAsync(
+                    "Neue Veranstaltung 📅",
+                    $"{dto.Title} · {datePart}",
+                    url: "/kalender");
+            }
 
             return Results.Created($"/calendar/events/{dto.CalendarId}/{created.Id}", created);
         }).RequireAuthorization("AnyRole");
