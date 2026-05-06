@@ -11,5 +11,6 @@ public enum Role
     Treasurer = 6,
     ViceChairman = 7,
     Chairman = 8,
-    Admin = 9
+    Admin = 9,
+    Moderator = 10
 }

@@ -11,6 +11,7 @@ public static class RoleGroups
         Role.Treasurer,
         Role.ViceChairman,
         Role.Chairman,
+        Role.Moderator,
     ];
 
     public static bool IsVorstand(this Role role) => Vorstand.Contains(role);

@@ -9,6 +9,7 @@ export enum Role {
   ViceChairman = 'ViceChairman',
   Chairman = 'Chairman',
   Admin = 'Admin',
+  Moderator = 'Moderator',
 }
 
 export const VORSTAND_ROLES: Role[] = [
@@ -19,6 +20,7 @@ export const VORSTAND_ROLES: Role[] = [
   Role.Treasurer,
   Role.ViceChairman,
   Role.Chairman,
+  Role.Moderator,
 ];
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -32,6 +34,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   [Role.ViceChairman]: '2. Vorsitzender',
   [Role.Chairman]: '1. Vorsitzender',
   [Role.Admin]: 'Administrator',
+  [Role.Moderator]: 'Moderator',
 };
 
 export interface User {
