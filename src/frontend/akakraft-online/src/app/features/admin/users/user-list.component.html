@@ -31,10 +31,15 @@
                 <small>{{ user.email }}</small>
               </div>
             </div>
-            <button mat-stroked-button color="primary" (click)="openEditDialog(user)">
-              <mat-icon>edit</mat-icon>
-              Rolle zuweisen
-            </button>
+            <div class="pending-actions">
+              <button mat-stroked-button color="primary" (click)="openEditDialog(user)">
+                <mat-icon>edit</mat-icon>
+                Rolle zuweisen
+              </button>
+              <button mat-icon-button color="warn" (click)="deleteUser(user)" matTooltip="Nutzer löschen">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
           </div>
         }
       </div>
@@ -90,6 +95,13 @@
             matTooltip="Rollen bearbeiten"
             aria-label="Rollen bearbeiten">
             <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn"
+            (click)="deleteUser(user)"
+            [disabled]="isSelf(user)"
+            matTooltip="{{ isSelf(user) ? 'Eigenes Konto kann nicht gelöscht werden' : 'Nutzer löschen' }}"
+            aria-label="Nutzer löschen">
+            <mat-icon>delete</mat-icon>
           </button>
         </td>
       </ng-container>

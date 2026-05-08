@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../../core/api/api.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { Role, ROLE_LABELS, User } from '../../../models/user.model';
 import {
   EditRolesDialogComponent,
@@ -26,6 +27,7 @@ import {
 })
 export class UserListComponent implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
 
@@ -74,6 +76,26 @@ export class UserListComponent implements OnInit {
         this.users.update(list => list.map(u => u.id === updated.id ? updated : u));
       }
     });
+  }
+
+  deleteUser(user: User): void {
+    const name = user.displayName || user.name;
+    if (!confirm(`Nutzer „${name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`)) return;
+
+    this.api.delete(`/users/${user.id}`).subscribe({
+      next: () => {
+        this.users.update(list => list.filter(u => u.id !== user.id));
+        this.snackBar.open(`${name} wurde gelöscht.`, 'OK', { duration: 3000 });
+      },
+      error: (err) => {
+        const msg = err?.error?.error ?? 'Fehler beim Löschen des Nutzers.';
+        this.snackBar.open(msg, 'OK', { duration: 5000 });
+      },
+    });
+  }
+
+  isSelf(user: User): boolean {
+    return user.id === this.auth.currentUser()?.id;
   }
 
   getDisplayedRoles(user: User): Role[] {

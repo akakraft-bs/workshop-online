@@ -117,6 +117,31 @@ public class UserService(ApplicationDbContext db) : IUserService
         return MapToDto(user, displayName);
     }
 
+    public async Task<(bool success, string? error)> DeleteAsync(Guid userId)
+    {
+        var user = await db.Users.FindAsync(userId);
+        if (user is null) return (false, "Nutzer nicht gefunden.");
+
+        // Cascade-Abhängigkeiten manuell entfernen
+        await db.FcmTokens.Where(t => t.UserId == userId).ExecuteDeleteAsync();
+        await db.RefreshTokens.Where(t => t.UserId == userId).ExecuteDeleteAsync();
+        await db.UserPreferences.Where(p => p.UserId == userId).ExecuteDeleteAsync();
+        await db.UmfrageAntworten.Where(a => a.UserId == userId).ExecuteDeleteAsync();
+        await db.WunschVotes.Where(v => v.UserId == userId).ExecuteDeleteAsync();
+        await db.UserRoles.Where(r => r.UserId == userId).ExecuteDeleteAsync();
+
+        try
+        {
+            db.Users.Remove(user);
+            await db.SaveChangesAsync();
+            return (true, null);
+        }
+        catch (Exception)
+        {
+            return (false, "Nutzer kann nicht gelöscht werden, da noch Inhalte (Mängel, Umfragen o. ä.) mit diesem Konto verknüpft sind.");
+        }
+    }
+
     public async Task<UserDto> CreateAsync(string googleId, string email, string name, string? pictureUrl)
     {
         var user = new User

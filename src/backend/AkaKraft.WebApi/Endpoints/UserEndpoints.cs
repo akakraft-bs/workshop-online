@@ -47,6 +47,18 @@ internal static class UserEndpoints
             return Results.Ok(user);
         }).RequireAuthorization("AdminOnly");
 
+        app.MapDelete("/users/{userId:guid}", async (
+            Guid userId, HttpContext ctx, IUserService userService) =>
+        {
+            var currentUserId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                             ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (Guid.TryParse(currentUserId, out var selfId) && selfId == userId)
+                return Results.BadRequest(new { error = "Du kannst dein eigenes Konto nicht löschen." });
+
+            var (success, error) = await userService.DeleteAsync(userId);
+            return success ? Results.NoContent() : Results.Conflict(new { error });
+        }).RequireAuthorization("AdminOnly");
+
         // -------------------------------------------------------------------------
         // User Preferences Endpoints
         // -------------------------------------------------------------------------

@@ -13,4 +13,5 @@ public interface IUserService
     Task<UserDto> CreateEmailUserAsync(string email, string name, string passwordHash, string confirmationToken, DateTime confirmationTokenExpiry, string? displayName);
     Task<UserDto> AssignRoleAsync(Guid userId, Role role);
     Task<UserDto> RemoveRoleAsync(Guid userId, Role role);
+    Task<(bool success, string? error)> DeleteAsync(Guid userId);
 }
