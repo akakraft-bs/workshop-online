@@ -2,9 +2,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AkaKraft.Application.DTOs;
 using AkaKraft.Application.Interfaces;
+using AkaKraft.Domain.Enums;
+using AkaKraft.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.EntityFrameworkCore;
 
 namespace AkaKraft.WebApi.Endpoints;
 
@@ -91,7 +94,9 @@ internal static class AuthEndpoints
         // -------------------------------------------------------------------------
 
         // Neuen Nutzer registrieren – sendet Bestätigungsmail
-        app.MapPost("/auth/register", async (RegisterRequest request, IAuthService authService, IConfiguration config) =>
+        app.MapPost("/auth/register", async (
+            RegisterRequest request, IAuthService authService, IConfiguration config,
+            IPushNotificationService pushService, ApplicationDbContext db) =>
         {
             if (string.IsNullOrWhiteSpace(request.Email)
                 || string.IsNullOrWhiteSpace(request.Password)
@@ -103,9 +108,20 @@ internal static class AuthEndpoints
 
             var frontendUrl = config["Frontend:BaseUrl"]!;
             var error = await authService.RegisterAsync(request, frontendUrl);
-            return error is null
-                ? Results.Ok(new { message = "Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse." })
-                : Results.Conflict(new { error });
+            if (error is not null)
+                return Results.Conflict(new { error });
+
+            var adminIds = await db.UserRoles
+                .Where(r => r.Role == Role.Admin)
+                .Select(r => r.UserId)
+                .ToListAsync();
+            _ = pushService.SendToUsersAsync(
+                adminIds,
+                "Neue Registrierung 👤",
+                $"{request.DisplayName} ({request.Email})",
+                url: "/admin/users");
+
+            return Results.Ok(new { message = "Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse." });
         });
 
         // E-Mail-Adresse per Token bestätigen
