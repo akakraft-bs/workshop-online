@@ -69,6 +69,12 @@
               {{ label }}
             </span>
           }
+          @if (aufgabe.createdByName) {
+            <span class="footer-item muted">
+              <mat-icon class="footer-icon">person_add</mat-icon>
+              {{ aufgabe.createdByName }}
+            </span>
+          }
           <span class="footer-item muted">
             <mat-icon class="footer-icon">calendar_today</mat-icon>
             {{ aufgabe.createdAt | date:'dd.MM.yyyy' }}
