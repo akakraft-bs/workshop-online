@@ -27,7 +27,7 @@ export interface NavItem {
   badge?: () => number;
 }
 
-const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial'];
+const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial', '/hallenbuch'];
 
 @Component({
   selector: 'app-dashboard',
