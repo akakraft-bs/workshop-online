@@ -8,7 +8,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
 import { CalendarService } from '../../core/calendar/calendar.service';
 import { CalendarConfig, CalendarEvent, PositionedEvent } from '../../models/calendar.model';
-import { Role } from '../../models/user.model';
 import {
   EventFormDialogComponent,
   EventFormDialogResult,
@@ -75,16 +74,14 @@ export class KalenderPageComponent implements OnInit {
   readonly writableCalendarIds = computed(() => {
     const user = this.auth.currentUser();
     if (!user) return [];
-    const userRoles = new Set(user.roles as string[]);
 
-    if (userRoles.has(Role.Admin) || userRoles.has(Role.Chairman) || userRoles.has(Role.ViceChairman)) {
+    if (this.auth.isAdmin() || this.auth.isVorstand()) {
       return this.configs().map(c => c.googleCalendarId);
     }
 
+    const userRoles = new Set(user.roles as string[]);
     return this.configs()
-      .filter(c => c.writeRoles.length === 0
-        ? false
-        : c.writeRoles.some(r => userRoles.has(r)))
+      .filter(c => c.writeRoles.length > 0 && c.writeRoles.some(r => userRoles.has(r)))
       .map(c => c.googleCalendarId);
   });
 

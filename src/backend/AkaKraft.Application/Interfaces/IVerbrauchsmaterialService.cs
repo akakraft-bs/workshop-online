@@ -9,5 +9,6 @@ public interface IVerbrauchsmaterialService
     Task<IEnumerable<string>> GetUnitsAsync();
     Task<VerbrauchsmaterialDto> CreateAsync(CreateVerbrauchsmaterialDto dto);
     Task<VerbrauchsmaterialDto?> UpdateAsync(Guid id, UpdateVerbrauchsmaterialDto dto);
+    Task<VerbrauchsmaterialDto?> AdjustQuantityAsync(Guid id, int delta);
     Task<bool> DeleteAsync(Guid id);
 }

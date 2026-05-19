@@ -30,3 +30,5 @@ public record UpdateVerbrauchsmaterialDto(
     int? MinQuantity,
     string? ImageUrl
 );
+
+public record AdjustQuantityDto(int Delta);

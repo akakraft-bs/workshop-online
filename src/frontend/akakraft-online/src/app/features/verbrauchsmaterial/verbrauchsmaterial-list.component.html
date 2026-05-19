@@ -89,7 +89,24 @@
       <ng-container matColumnDef="quantity">
         <th mat-header-cell *matHeaderCellDef>Bestand</th>
         <td mat-cell *matCellDef="let item">
-          {{ item.quantity }} {{ item.unit }}
+          @if (canManage()) {
+            <div class="quantity-stepper">
+              <button mat-icon-button class="qty-btn"
+                matTooltip="Bestand verringern"
+                [disabled]="item.quantity <= 0"
+                (click)="adjustQuantity(item, -1); $event.stopPropagation()">
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span class="qty-value">{{ item.quantity }} {{ item.unit }}</span>
+              <button mat-icon-button class="qty-btn"
+                matTooltip="Bestand erhöhen"
+                (click)="adjustQuantity(item, +1); $event.stopPropagation()">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          } @else {
+            {{ item.quantity }} {{ item.unit }}
+          }
           @if (item.minQuantity != null) {
             <small class="min-qty">(Min: {{ item.minQuantity }})</small>
           }

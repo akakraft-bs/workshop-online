@@ -118,6 +118,13 @@ export class VerbrauchsmaterialListComponent implements OnInit {
     });
   }
 
+  adjustQuantity(item: Verbrauchsmaterial, delta: number): void {
+    this.api.patch<Verbrauchsmaterial>(`/verbrauchsmaterial/${item.id}/quantity`, { delta }).subscribe({
+      next: updated => this.items.update(list => list.map(v => v.id === updated.id ? updated : v)),
+      error: () => this.snackBar.open('Bestand konnte nicht geändert werden.', 'OK', { duration: 3000 }),
+    });
+  }
+
   onSearch(event: Event): void {
     this.searchQuery.set((event.target as HTMLInputElement).value);
   }

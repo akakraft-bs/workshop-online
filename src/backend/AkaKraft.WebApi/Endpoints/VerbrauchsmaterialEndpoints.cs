@@ -35,6 +35,12 @@ internal static class VerbrauchsmaterialEndlpoints
             return updated is null ? Results.NotFound() : Results.Ok(updated);
         }).RequireAuthorization("VorstandOrAdmin");
 
+        app.MapPatch("/verbrauchsmaterial/{id:guid}/quantity", async (Guid id, AdjustQuantityDto dto, IVerbrauchsmaterialService verbrauchsmaterialService) =>
+        {
+            var updated = await verbrauchsmaterialService.AdjustQuantityAsync(id, dto.Delta);
+            return updated is null ? Results.NotFound() : Results.Ok(updated);
+        }).RequireAuthorization("VorstandOrAdmin");
+
         app.MapDelete("/verbrauchsmaterial/{id:guid}", async (Guid id, IVerbrauchsmaterialService verbrauchsmaterialService) =>
         {
             var deleted = await verbrauchsmaterialService.DeleteAsync(id);

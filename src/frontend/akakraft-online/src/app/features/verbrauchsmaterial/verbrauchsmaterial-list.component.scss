@@ -107,3 +107,26 @@ td.mat-mdc-cell {
   text-align: right;
   white-space: nowrap;
 }
+
+.quantity-stepper {
+  display: inline-flex;
+  align-items: center;
+
+  .qty-btn {
+    --mdc-icon-button-state-layer-size: 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+
+    .mat-icon {
+      font-size: 18px;
+      line-height: 18px;
+    }
+  }
+
+  .qty-value {
+    min-width: 2.5rem;
+    text-align: center;
+    font-size: 14px;
+  }
+}

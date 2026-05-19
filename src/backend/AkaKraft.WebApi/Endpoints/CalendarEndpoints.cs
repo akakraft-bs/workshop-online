@@ -174,9 +174,7 @@ internal static class CalendarEndpoints
             .Select(c => c.Value)
             .ToHashSet();
 
-        if (userRoles.Contains(Role.Admin.ToString()) ||
-            userRoles.Contains(Role.Chairman.ToString()) ||
-            userRoles.Contains(Role.ViceChairman.ToString()))
+        if (ctx.IsPrivileged())
             return true;
 
         var writeRoles = config.WriteRoles.ToList();
