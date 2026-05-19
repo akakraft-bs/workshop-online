@@ -43,7 +43,7 @@ export class MangelListComponent implements OnInit {
   readonly statusFilter = signal<StatusFilter>('aktiv');
   readonly kategorieFilter = signal<MangelKategorie | null>(null);
 
-  readonly canManage = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly canManage = computed(() => this.auth.isPrivileged());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
 
   readonly KATEGORIE_LABELS = MANGEL_KATEGORIE_LABELS;

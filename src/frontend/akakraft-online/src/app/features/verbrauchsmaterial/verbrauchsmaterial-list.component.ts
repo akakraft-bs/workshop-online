@@ -37,7 +37,7 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   readonly searchQuery = signal('');
   readonly selectedCategory = signal<string | null>(null);
 
-  readonly canManage = computed(() => this.auth.isVorstand() || this.auth.isAdmin());
+  readonly canManage = computed(() => this.auth.isPrivileged());
 
   readonly displayedColumns = computed(() =>
     this.canManage()

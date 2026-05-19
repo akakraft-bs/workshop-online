@@ -17,5 +17,6 @@ internal static class HttpContextExtensions
         ctx.User.Claims
             .Where(c => c.Type == ClaimTypes.Role)
             .Any(c => RoleGroups.Vorstand.Select(r => r.ToString()).Contains(c.Value)
-                   || c.Value == Role.Admin.ToString());
+                   || c.Value == Role.Admin.ToString()
+                   || c.Value == Role.Moderator.ToString());
 }

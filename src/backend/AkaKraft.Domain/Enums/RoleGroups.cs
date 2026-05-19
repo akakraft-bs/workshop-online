@@ -11,8 +11,10 @@ public static class RoleGroups
         Role.Treasurer,
         Role.ViceChairman,
         Role.Chairman,
-        Role.Moderator,
     ];
 
     public static bool IsVorstand(this Role role) => Vorstand.Contains(role);
+
+    public static bool CanManage(this Role role) =>
+        role == Role.Admin || role == Role.Moderator || Vorstand.Contains(role);
 }

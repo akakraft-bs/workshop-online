@@ -75,7 +75,7 @@ export class KalenderPageComponent implements OnInit {
     const user = this.auth.currentUser();
     if (!user) return [];
 
-    if (this.auth.isAdmin() || this.auth.isVorstand()) {
+    if (this.auth.isPrivileged()) {
       return this.configs().map(c => c.googleCalendarId);
     }
 

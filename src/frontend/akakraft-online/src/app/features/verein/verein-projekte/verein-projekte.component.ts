@@ -29,7 +29,7 @@ export class VereinProjekteComponent implements OnInit {
 
   readonly loading  = signal(true);
   readonly items    = signal<ProjektDto[]>([]);
-  readonly canEdit  = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly canEdit  = computed(() => this.auth.isPrivileged());
 
   ngOnInit(): void { this.load(); }
 

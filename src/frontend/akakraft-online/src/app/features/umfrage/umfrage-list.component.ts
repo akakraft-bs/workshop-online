@@ -50,7 +50,7 @@ export class UmfrageListComponent implements OnInit {
   readonly pendingVoteId = signal<string | null>(null);
 
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
-  readonly isPrivileged = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly isPrivileged = computed(() => this.auth.isPrivileged());
 
   readonly openCount = computed(() =>
     this.items().filter(u => u.status === 'Offen').length

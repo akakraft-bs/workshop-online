@@ -41,7 +41,7 @@ export class WerkzeugDetailDialogComponent {
   readonly showDeleteConfirm = signal(false);
   readonly deleting         = signal(false);
 
-  readonly canManage    = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly canManage    = computed(() => this.auth.isPrivileged());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
   readonly isMyBorrow   = computed(() =>
     !!this.currentUserId() && this.item().borrowedByUserId === this.currentUserId()

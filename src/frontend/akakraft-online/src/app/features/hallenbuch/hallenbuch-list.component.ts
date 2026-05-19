@@ -38,7 +38,7 @@ export class HallenbuchListComponent implements OnInit {
   readonly loading = signal(true);
 
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
-  readonly isPrivileged = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly isPrivileged = computed(() => this.auth.isPrivileged());
 
   canEdit(eintrag: HallenbuchEintrag): boolean {
     if (this.isPrivileged()) return true;

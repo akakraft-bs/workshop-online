@@ -20,7 +20,6 @@ export const VORSTAND_ROLES: Role[] = [
   Role.Treasurer,
   Role.ViceChairman,
   Role.Chairman,
-  Role.Moderator,
 ];
 
 export const ROLE_LABELS: Record<Role, string> = {

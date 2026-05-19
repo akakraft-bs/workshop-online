@@ -29,7 +29,7 @@ export class VereinInfoComponent implements OnInit {
   readonly loading      = signal(true);
   readonly amtstraeger  = signal<AmtsTraeger[]>([]);
   readonly schluessel   = signal<Schluesselhinterlegung[]>([]);
-  readonly canEdit      = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly canEdit      = computed(() => this.auth.isPrivileged());
 
   readonly amtstraegerGroups = computed(() => {
     const groups = new Map<string, { label: string; entries: AmtsTraeger[] }>();

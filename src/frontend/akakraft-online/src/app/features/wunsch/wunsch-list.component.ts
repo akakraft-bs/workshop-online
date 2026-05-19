@@ -39,13 +39,11 @@ export class WunschListComponent implements OnInit {
   readonly statusFilter = signal<StatusFilter>('offen');
   readonly pendingVoteId = signal<string | null>(null);
 
-  readonly canClose = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly canClose = computed(() => this.auth.isPrivileged());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
 
   canEdit(wunsch: Wunsch): boolean {
-    return wunsch.createdByUserId === this.currentUserId()
-      || this.auth.isAdmin()
-      || this.auth.isVorstand();
+    return wunsch.createdByUserId === this.currentUserId() || this.auth.isPrivileged();
   }
 
   readonly openCount = computed(() =>

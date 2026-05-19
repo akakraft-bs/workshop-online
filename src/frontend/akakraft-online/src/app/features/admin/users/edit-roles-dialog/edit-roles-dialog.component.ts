@@ -28,6 +28,10 @@ const ROLE_GROUPS: RoleGroup[] = [
     roles: VORSTAND_ROLES,
   },
   {
+    label: 'Moderation',
+    roles: [Role.Moderator],
+  },
+  {
     label: 'Administration',
     roles: [Role.Admin],
   },

@@ -19,6 +19,7 @@ export class AuthService {
   readonly roles = computed(() => this.currentUser()?.roles ?? []);
   readonly isAdmin = computed(() => this.roles().includes(Role.Admin));
   readonly isVorstand = computed(() => this.roles().some(r => VORSTAND_ROLES.includes(r)));
+  readonly isPrivileged = computed(() => this.isAdmin() || this.isVorstand() || this.roles().includes(Role.Moderator));
   readonly hasAccess = computed(() => this.roles().some(r => r !== Role.None));
 
   readonly initialized$: Promise<void>;

@@ -33,7 +33,7 @@ export class AufgabenListComponent implements OnInit {
   readonly loading      = signal(true);
   readonly items        = signal<Aufgabe[]>([]);
   readonly statusFilter = signal<StatusFilter>('offen');
-  readonly canEdit      = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly canEdit      = computed(() => this.auth.isPrivileged());
 
   readonly offenCount = computed(() =>
     this.items().filter(a => a.status !== 'Erledigt').length

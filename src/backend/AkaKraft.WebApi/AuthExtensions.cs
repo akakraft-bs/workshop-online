@@ -94,7 +94,7 @@ public static class AuthExtensions
                       .RequireAuthenticatedUser()
                       .RequireRole(Role.Admin.ToString()));
 
-            // Vorstand oder Admin (z. B. für Inventarverwaltung)
+            // Vorstand, Moderator oder Admin (z. B. für Inventarverwaltung)
             options.AddPolicy("VorstandOrAdmin", policy =>
                 policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                       .RequireAuthenticatedUser()
@@ -104,7 +104,8 @@ public static class AuthExtensions
                              .Any(c => RoleGroups.Vorstand
                                  .Select(r => r.ToString())
                                  .Contains(c.Value)
-                                 || c.Value == Role.Admin.ToString())));
+                                 || c.Value == Role.Admin.ToString()
+                                 || c.Value == Role.Moderator.ToString())));
         });
 
         return services;

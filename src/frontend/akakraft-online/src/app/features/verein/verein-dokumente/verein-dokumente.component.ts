@@ -30,7 +30,7 @@ export class VereinDokumenteComponent implements OnInit {
 
   readonly loading  = signal(true);
   readonly ordner   = signal<DokumentOrdnerDto[]>([]);
-  readonly canEdit  = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly canEdit  = computed(() => this.auth.isPrivileged());
 
   ngOnInit(): void { this.load(); }
 

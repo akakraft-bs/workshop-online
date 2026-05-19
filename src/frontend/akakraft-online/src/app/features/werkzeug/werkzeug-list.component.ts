@@ -47,7 +47,7 @@ export class WerkzeugListComponent implements OnInit {
   );
   readonly tableColumns  = ['name', 'category', 'storageLocation', 'status', 'borrowedBy', 'expectedReturn'];
 
-  readonly canManage    = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly canManage    = computed(() => this.auth.isPrivileged());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
 
   readonly categories = computed(() =>

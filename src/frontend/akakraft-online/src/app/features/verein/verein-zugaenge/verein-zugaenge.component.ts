@@ -24,7 +24,7 @@ export class VereinZugaengeComponent implements OnInit {
 
   readonly loading  = signal(true);
   readonly zugaenge = signal<VereinZugang[]>([]);
-  readonly canEdit  = computed(() => this.auth.isAdmin() || this.auth.isVorstand());
+  readonly canEdit  = computed(() => this.auth.isPrivileged());
 
   ngOnInit(): void { this.load(); }
 
