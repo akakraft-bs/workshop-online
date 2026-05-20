@@ -145,8 +145,8 @@ export class KalenderPageComponent implements OnInit {
       this.calendarService.createEvent({
         calendarId: result.calendarId,
         title: result.title,
-        start: result.start.toISOString(),
-        end: result.end.toISOString(),
+        start: serializeDate(result.start, result.isAllDay),
+        end: serializeDate(result.end, result.isAllDay),
         isAllDay: result.isAllDay,
         description: result.description,
         location: result.location,
@@ -169,8 +169,8 @@ export class KalenderPageComponent implements OnInit {
       if (!result) return;
       this.calendarService.updateEvent(event.calendarId, event.id, {
         title: result.title,
-        start: result.start.toISOString(),
-        end: result.end.toISOString(),
+        start: serializeDate(result.start, result.isAllDay),
+        end: serializeDate(result.end, result.isAllDay),
         isAllDay: result.isAllDay,
         description: result.description,
         location: result.location,
@@ -284,4 +284,11 @@ function formatDayLabel(d: Date): string {
 function formatDate(d: Date): string {
   const pad = (n: number) => n.toString().padStart(2, '0');
   return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+}
+
+function serializeDate(d: Date, isAllDay: boolean): string {
+  if (!isAllDay) return d.toISOString();
+  const p2 = (n: number) => String(n).padStart(2, '0');
+  const p3 = (n: number) => String(n).padStart(3, '0');
+  return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}.${p3(d.getMilliseconds())}`;
 }

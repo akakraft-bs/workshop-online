@@ -203,7 +203,8 @@ public class GoogleCalendarService : ICalendarService
         if (isAllDay)
         {
             ev.Start = new EventDateTime { Date = start.ToString("yyyy-MM-dd") };
-            ev.End = new EventDateTime { Date = end.ToString("yyyy-MM-dd") };
+            // Google Calendar end date is exclusive → +1 day
+            ev.End = new EventDateTime { Date = end.AddDays(1).ToString("yyyy-MM-dd") };
         }
         else
         {
@@ -221,7 +222,7 @@ public class GoogleCalendarService : ICalendarService
             : ev.Start?.DateTimeDateTimeOffset?.UtcDateTime;
 
         DateTime? end = isAllDay
-            ? DateTime.Parse(ev.End!.Date)
+            ? DateTime.Parse(ev.End!.Date).AddDays(-1)  // undo exclusive end
             : ev.End?.DateTimeDateTimeOffset?.UtcDateTime;
 
         // Prefer app-set creator; fall back to Google Calendar creator field

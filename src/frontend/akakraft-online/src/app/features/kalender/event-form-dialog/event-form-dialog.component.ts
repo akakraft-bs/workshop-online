@@ -242,7 +242,7 @@ export class EventFormDialogComponent implements OnInit {
       start = new Date(v.startDate!);
       start.setHours(0, 0, 0, 0);
       end = new Date(v.endDate!);
-      end.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
     } else {
       start = combineDateTime(v.startDate!, v.startTime || '00:00');
       end = combineDateTime(v.endDate!, v.endTime || '00:00');
