@@ -4,17 +4,21 @@ using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AkaKraft.Infrastructure.Services;
 
 public class FcmPushNotificationService(
-    ApplicationDbContext db,
+    IServiceScopeFactory scopeFactory,
     FirebaseApp firebaseApp,
     ILogger<FcmPushNotificationService> logger) : IPushNotificationService
 {
     public async Task SendToUserAsync(Guid userId, string title, string body, string? url = null)
     {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
         var tokens = await db.FcmTokens
             .Where(t => t.UserId == userId)
             .Select(t => t.Token)
@@ -22,24 +26,30 @@ public class FcmPushNotificationService(
 
         if (tokens.Count == 0) return;
 
-        await SendToTokensAsync(tokens, title, body, url);
+        await SendToTokensAsync(db, tokens, title, body, url);
     }
 
     public async Task SendToAllSubscribedAsync(string title, string body, string? url = null)
     {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
         var tokens = await db.FcmTokens
             .Select(t => t.Token)
             .ToListAsync();
 
         if (tokens.Count == 0) return;
 
-        await SendToTokensAsync(tokens, title, body, url);
+        await SendToTokensAsync(db, tokens, title, body, url);
     }
 
     public async Task SendToUsersAsync(IEnumerable<Guid> userIds, string title, string body, string? url = null)
     {
         var ids = userIds.ToList();
         if (ids.Count == 0) return;
+
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         var tokens = await db.FcmTokens
             .Where(t => ids.Contains(t.UserId))
@@ -48,10 +58,10 @@ public class FcmPushNotificationService(
 
         if (tokens.Count == 0) return;
 
-        await SendToTokensAsync(tokens, title, body, url);
+        await SendToTokensAsync(db, tokens, title, body, url);
     }
 
-    private async Task SendToTokensAsync(List<string> tokens, string title, string body, string? url)
+    private async Task SendToTokensAsync(ApplicationDbContext db, List<string> tokens, string title, string body, string? url)
     {
         var messaging = FirebaseMessaging.GetMessaging(firebaseApp);
 
@@ -62,6 +72,9 @@ public class FcmPushNotificationService(
             {
                 Tokens = batch.ToList(),
                 Notification = new Notification { Title = title, Body = body },
+                Data = url is not null
+                    ? new Dictionary<string, string> { ["url"] = url }
+                    : null,
                 Webpush = new WebpushConfig
                 {
                     Notification = new WebpushNotification
@@ -71,7 +84,7 @@ public class FcmPushNotificationService(
                         Icon = "/app/android-chrome-192x192.png",
                         Badge = "/app/favicon-32x32.png",
                     },
-                    FcmOptions = url is not null
+                    FcmOptions = url?.StartsWith("https://") == true
                         ? new WebpushFcmOptions { Link = url }
                         : null,
                 },
@@ -80,7 +93,7 @@ public class FcmPushNotificationService(
             try
             {
                 var response = await messaging.SendEachForMulticastAsync(message);
-                await CleanupInvalidTokensAsync(batch, response);
+                await CleanupInvalidTokensAsync(db, batch, response);
             }
             catch (Exception ex)
             {
@@ -90,6 +103,7 @@ public class FcmPushNotificationService(
     }
 
     private async Task CleanupInvalidTokensAsync(
+        ApplicationDbContext db,
         IReadOnlyList<string> sentTokens,
         BatchResponse response)
     {
