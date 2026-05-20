@@ -7,4 +7,5 @@ export interface Verbrauchsmaterial {
   quantity: number;
   minQuantity?: number;
   imageUrl?: string;
+  storageLocation?: string;
 }

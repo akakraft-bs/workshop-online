@@ -50,16 +50,27 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Bestand</mat-label>
-      <input matInput type="number" formControlName="quantity" min="0">
+      <input matInput type="number" formControlName="quantity" min="0" step="1">
       @if (form.controls.quantity.hasError('min')) {
         <mat-error>Mindestens 0</mat-error>
+      } @else if (form.controls.quantity.hasError('integer')) {
+        <mat-error>Nur ganze Zahlen erlaubt</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>Mindestbestand (optional)</mat-label>
-      <input matInput type="number" formControlName="minQuantity" min="0"
+      <input matInput type="number" formControlName="minQuantity" min="0" step="1"
         placeholder="Warnung unterhalb dieses Wertes">
+      @if (form.controls.minQuantity.hasError('integer')) {
+        <mat-error>Nur ganze Zahlen erlaubt</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Lagerort (optional)</mat-label>
+      <mat-icon matPrefix>place</mat-icon>
+      <input matInput formControlName="storageLocation" placeholder="z. B. Regal 3, Schrank B">
     </mat-form-field>
 
     <!-- Bildauswahl -->

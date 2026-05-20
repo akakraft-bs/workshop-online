@@ -8,7 +8,8 @@ public record VerbrauchsmaterialDto(
     string Unit,
     int Quantity,
     int? MinQuantity,
-    string? ImageUrl
+    string? ImageUrl,
+    string? StorageLocation
 );
 
 public record CreateVerbrauchsmaterialDto(
@@ -18,7 +19,8 @@ public record CreateVerbrauchsmaterialDto(
     string Unit,
     int Quantity,
     int? MinQuantity,
-    string? ImageUrl
+    string? ImageUrl,
+    string? StorageLocation
 );
 
 public record UpdateVerbrauchsmaterialDto(
@@ -28,7 +30,8 @@ public record UpdateVerbrauchsmaterialDto(
     string Unit,
     int Quantity,
     int? MinQuantity,
-    string? ImageUrl
+    string? ImageUrl,
+    string? StorageLocation
 );
 
 public record AdjustQuantityDto(int Delta);

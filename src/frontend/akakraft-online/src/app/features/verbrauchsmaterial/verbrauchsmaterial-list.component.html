@@ -76,6 +76,11 @@
         <td mat-cell *matCellDef="let item">
           <strong>{{ item.name }}</strong>
           <small class="description">{{ item.description }}</small>
+          @if (item.storageLocation) {
+            <small class="storage-location">
+              <mat-icon class="location-icon">place</mat-icon>{{ item.storageLocation }}
+            </small>
+          }
         </td>
       </ng-container>
 

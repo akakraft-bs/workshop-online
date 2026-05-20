@@ -1,5 +1,5 @@
 import { Component, HostListener, inject, signal, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -46,12 +46,13 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
   filteredUnits$!: Observable<string[]>;
 
   readonly form = this.fb.nonNullable.group({
-    name:        [this.data?.item?.name        ?? '', Validators.required],
-    description: [this.data?.item?.description ?? '', Validators.required],
-    category:    [this.data?.item?.category    ?? '', Validators.required],
-    unit:        [this.data?.item?.unit        ?? '', Validators.required],
-    quantity:    [this.data?.item?.quantity    ?? 0,  [Validators.required, Validators.min(0)]],
-    minQuantity: [this.data?.item?.minQuantity ?? null as number | null],
+    name:            [this.data?.item?.name            ?? '', Validators.required],
+    description:     [this.data?.item?.description     ?? '', Validators.required],
+    category:        [this.data?.item?.category        ?? '', Validators.required],
+    unit:            [this.data?.item?.unit            ?? '', Validators.required],
+    quantity:        [this.data?.item?.quantity        ?? 0,  [Validators.required, Validators.min(0), integerValidator]],
+    minQuantity:     [this.data?.item?.minQuantity     ?? null as number | null, integerValidator],
+    storageLocation: [this.data?.item?.storageLocation ?? null as string | null],
   });
 
   @HostListener('paste', ['$event'])
@@ -148,13 +149,14 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
         const imageUrl = uploadResult?.url ?? existingImageUrl;
 
         const body = {
-          name:        value.name,
-          description: value.description,
-          category:    value.category,
-          unit:        value.unit,
-          quantity:    value.quantity,
-          minQuantity: value.minQuantity ?? null,
+          name:            value.name,
+          description:     value.description,
+          category:        value.category,
+          unit:            value.unit,
+          quantity:        value.quantity,
+          minQuantity:     value.minQuantity ?? null,
           imageUrl,
+          storageLocation: value.storageLocation ?? null,
         };
 
         return this.isEdit
@@ -183,4 +185,10 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
     this.selectedFile.set(file);
     this.previewUrl.set(URL.createObjectURL(file));
   }
+}
+
+function integerValidator(control: AbstractControl): ValidationErrors | null {
+  const v = control.value;
+  if (v === null || v === undefined || v === '') return null;
+  return Number.isInteger(Number(v)) ? null : { integer: true };
 }

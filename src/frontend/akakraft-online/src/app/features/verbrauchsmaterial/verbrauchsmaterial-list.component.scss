@@ -65,6 +65,21 @@ td.mat-mdc-cell {
     color: var(--mat-sys-on-surface-variant);
   }
 
+  .storage-location {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 11px;
+    color: var(--mat-sys-on-surface-variant);
+    margin-top: 2px;
+
+    .location-icon {
+      font-size: 12px;
+      width: 12px;
+      height: 12px;
+    }
+  }
+
   .min-qty {
     display: block;
     font-size: 11px;

@@ -28,5 +28,8 @@ public class VerbrauchsmaterialConfiguration : IEntityTypeConfiguration<Verbrauc
 
         builder.Property(v => v.ImageUrl)
             .HasMaxLength(1024);
+
+        builder.Property(v => v.StorageLocation)
+            .HasMaxLength(256);
     }
 }
