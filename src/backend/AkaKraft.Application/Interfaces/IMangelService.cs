@@ -8,4 +8,5 @@ public interface IMangelService
     Task<MangelDto> CreateAsync(Guid userId, CreateMangelDto dto);
     Task<(MangelDto? Dto, bool Forbidden)> ZurueckziehenAsync(Guid id, Guid userId);
     Task<MangelDto?> UpdateStatusAsync(Guid id, Guid resolvedByUserId, UpdateMangelStatusDto dto);
+    Task<(MangelDto? Dto, bool Forbidden)> UpdateContentAsync(Guid id, Guid userId, bool isPrivileged, UpdateMangelContentDto dto);
 }

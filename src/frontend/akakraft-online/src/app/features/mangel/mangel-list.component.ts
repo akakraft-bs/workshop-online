@@ -46,6 +46,10 @@ export class MangelListComponent implements OnInit {
   readonly canManage = computed(() => this.auth.isPrivileged());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
 
+  canEditTitle(mangel: Mangel): boolean {
+    return mangel.createdByUserId === this.currentUserId() || this.canManage();
+  }
+
   readonly KATEGORIE_LABELS = MANGEL_KATEGORIE_LABELS;
   readonly STATUS_LABELS = MANGEL_STATUS_LABELS;
 
@@ -94,19 +98,18 @@ export class MangelListComponent implements OnInit {
   }
 
   openResolveDialog(mangel: Mangel): void {
-    const data: ResolveMangelDialogData = { mangel };
+    const data: ResolveMangelDialogData = {
+      mangel,
+      canEditContent: this.canEditTitle(mangel),
+      canChangeStatus: this.canManage(),
+    };
     this.dialog
-      .open(ResolveMangelDialogComponent, { data, width: '420px' })
+      .open(ResolveMangelDialogComponent, { data, width: '480px' })
       .afterClosed()
-      .subscribe((result: { status: MangelStatus; note: string | null } | undefined) => {
-        if (!result) return;
-        this.api.patch<Mangel>(`/mangel/${mangel.id}/status`, result).subscribe({
-          next: updated => {
-            this.items.update(list => list.map(m => m.id === updated.id ? updated : m));
-            this.snackBar.open('Status wurde aktualisiert.', 'OK', { duration: 3000 });
-          },
-          error: () => this.snackBar.open('Fehler beim Aktualisieren.', 'OK', { duration: 3000 }),
-        });
+      .subscribe((updated: Mangel | undefined) => {
+        if (!updated) return;
+        this.items.update(list => list.map(m => m.id === updated.id ? updated : m));
+        this.snackBar.open('Mangel wurde aktualisiert.', 'OK', { duration: 3000 });
       });
   }
 

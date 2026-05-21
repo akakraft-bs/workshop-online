@@ -64,6 +64,23 @@ internal static class MangelEndpoints
             return updated is null ? Results.NotFound() : Results.Ok(updated);
         }).RequireAuthorization("AnyRole");
 
+        app.MapPatch("/mangel/{id:guid}", async (
+            Guid id,
+            UpdateMangelContentDto dto,
+            HttpContext ctx,
+            IMangelService mangelService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return Results.Unauthorized();
+
+            var (result, forbidden) = await mangelService.UpdateContentAsync(id, parsedUserId, ctx.IsPrivileged(), dto);
+
+            if (forbidden) return Results.Forbid();
+            return result is null ? Results.NotFound() : Results.Ok(result);
+        }).RequireAuthorization("AnyRole");
+
         return app;
     }
 }

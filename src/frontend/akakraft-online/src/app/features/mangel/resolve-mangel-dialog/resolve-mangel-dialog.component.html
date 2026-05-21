@@ -1,27 +1,88 @@
 <h2 mat-dialog-title>Mangel bearbeiten</h2>
 
 <mat-dialog-content>
-  <p class="mangel-title">„{{ data.mangel.title }}"</p>
-
   <form [formGroup]="form">
-    <p class="field-label">Status setzen</p>
-    <mat-button-toggle-group formControlName="status" class="status-toggle">
-      @for (opt of statusOptions; track opt.value) {
-        <mat-button-toggle [value]="opt.value">{{ opt.label }}</mat-button-toggle>
-      }
-    </mat-button-toggle-group>
 
-    <mat-form-field appearance="outline" class="full-width note-field">
-      <mat-label>Anmerkung (optional)</mat-label>
-      <textarea matInput
-                formControlName="note"
-                rows="3"
-                placeholder="Kurze Erläuterung..."></textarea>
-    </mat-form-field>
+    @if (data.canEditContent) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Titel</mat-label>
+        <input matInput formControlName="title" placeholder="Kurze Beschreibung des Mangels">
+        @if (form.controls.title.hasError('required')) {
+          <mat-error>Pflichtfeld</mat-error>
+        }
+        @if (form.controls.title.hasError('maxlength')) {
+          <mat-error>Maximal 200 Zeichen</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Kategorie</mat-label>
+        <mat-select formControlName="kategorie">
+          @for (k of kategorien; track k) {
+            <mat-option [value]="k">{{ k }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Beschreibung</mat-label>
+        <textarea matInput formControlName="description" rows="4"
+          placeholder="Detaillierte Beschreibung des Mangels..."></textarea>
+        @if (form.controls.description.hasError('required')) {
+          <mat-error>Pflichtfeld</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="image-section">
+        <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+
+        @if (!previewUrl()) {
+          <button type="button" mat-stroked-button (click)="fileInput.click()">
+            <mat-icon>photo_camera</mat-icon>
+            Foto anhängen (optional)
+          </button>
+        } @else {
+          <div class="image-preview">
+            <img [src]="previewUrl()!" alt="Vorschau">
+            <button type="button" mat-icon-button class="clear-btn" (click)="clearImage()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <button type="button" mat-stroked-button (click)="fileInput.click()">
+            <mat-icon>swap_horiz</mat-icon>
+            Foto ersetzen
+          </button>
+        }
+      </div>
+    } @else {
+      <p class="mangel-title">„{{ data.mangel.title }}"</p>
+    }
+
+    @if (data.canChangeStatus) {
+      <p class="field-label">Status setzen</p>
+      <mat-button-toggle-group formControlName="status" class="status-toggle">
+        @for (opt of statusOptions; track opt.value) {
+          <mat-button-toggle [value]="opt.value">{{ opt.label }}</mat-button-toggle>
+        }
+      </mat-button-toggle-group>
+
+      <mat-form-field appearance="outline" class="full-width note-field">
+        <mat-label>Anmerkung (optional)</mat-label>
+        <textarea matInput formControlName="note" rows="3"
+          placeholder="Kurze Erläuterung..."></textarea>
+      </mat-form-field>
+    }
+
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Abbrechen</button>
-  <button mat-flat-button color="primary" (click)="submit()">Speichern</button>
+  <button mat-button (click)="cancel()" [disabled]="saving()">Abbrechen</button>
+  <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid || saving()">
+    @if (saving()) {
+      <mat-spinner diameter="20" />
+    } @else {
+      Speichern
+    }
+  </button>
 </mat-dialog-actions>

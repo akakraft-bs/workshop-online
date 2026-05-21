@@ -112,6 +112,35 @@ public class MangelService(ApplicationDbContext db) : IMangelService
             null, null, null, null), false);
     }
 
+    public async Task<(MangelDto? Dto, bool Forbidden)> UpdateContentAsync(Guid id, Guid userId, bool isPrivileged, UpdateMangelContentDto dto)
+    {
+        var mangel = await db.Maengel
+            .Include(m => m.CreatedBy)
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+        if (mangel is null)
+            return (null, false);
+
+        if (!isPrivileged && mangel.CreatedByUserId != userId)
+            return (null, true);
+
+        mangel.Title       = dto.Title;
+        mangel.Description = dto.Description;
+        mangel.Kategorie   = dto.Kategorie;
+        mangel.ImageUrl    = dto.ImageUrl;
+        await db.SaveChangesAsync();
+
+        var displayName = await db.UserPreferences
+            .Where(p => p.UserId == mangel.CreatedByUserId && p.DisplayName != null)
+            .Select(p => p.DisplayName!)
+            .FirstOrDefaultAsync() ?? mangel.CreatedBy.Name;
+
+        return (new MangelDto(
+            mangel.Id, mangel.Title, mangel.Description, mangel.Kategorie, mangel.Status,
+            mangel.CreatedByUserId, displayName, mangel.CreatedAt, mangel.ImageUrl,
+            mangel.ResolvedByUserId, null, mangel.ResolvedAt, mangel.Note), false);
+    }
+
     public async Task<MangelDto?> UpdateStatusAsync(Guid id, Guid resolvedByUserId, UpdateMangelStatusDto dto)
     {
         var mangel = await db.Maengel

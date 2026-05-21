@@ -24,3 +24,35 @@
 .note-field {
   margin-top: 4px;
 }
+
+.image-section {
+  margin-bottom: 16px;
+}
+
+.image-preview {
+  position: relative;
+  width: fit-content;
+  margin-bottom: 8px;
+
+  img {
+    max-height: 160px;
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--mat-sys-outline-variant);
+    display: block;
+    object-fit: cover;
+  }
+
+  .clear-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+
+    --mdc-icon-button-state-layer-size: 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+  }
+}

@@ -29,3 +29,10 @@ public record UpdateMangelStatusDto(
     MangelStatus Status,
     string? Note
 );
+
+public record UpdateMangelContentDto(
+    string Title,
+    string Description,
+    MangelKategorie Kategorie,
+    string? ImageUrl
+);

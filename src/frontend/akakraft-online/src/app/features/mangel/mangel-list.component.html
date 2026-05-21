@@ -66,9 +66,9 @@
                 <mat-icon>undo</mat-icon>
               </button>
             }
-            @if (canResolve(mangel)) {
+            @if (canResolve(mangel) || canEditTitle(mangel)) {
               <button mat-icon-button
-                      matTooltip="Status bearbeiten"
+                      matTooltip="Bearbeiten"
                       (click)="openResolveDialog(mangel)">
                 <mat-icon>edit</mat-icon>
               </button>
