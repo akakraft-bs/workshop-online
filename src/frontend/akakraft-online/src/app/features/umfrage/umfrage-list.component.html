@@ -129,6 +129,14 @@
                   [value]="votePercent(option, umfrage)"
                   [class.selected-bar]="isSelected(umfrage, option)" />
               }
+
+              @if (isPrivileged() && option.voters && option.voters.length > 0) {
+                <div class="voter-names" (click)="$event.stopPropagation()">
+                  @for (name of option.voters; track name) {
+                    <span class="voter-chip">{{ name }}</span>
+                  }
+                </div>
+              }
             </button>
           }
         </div>

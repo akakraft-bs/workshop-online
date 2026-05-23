@@ -269,6 +269,22 @@
   }
 }
 
+.voter-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 12px 8px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.voter-chip {
+  font-size: 11px;
+  color: var(--mat-sys-on-surface-variant);
+  background: var(--mat-sys-surface-variant);
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+
 // ---- Footer ---------------------------------------------------------------
 
 .card-footer {
