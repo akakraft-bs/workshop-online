@@ -51,11 +51,23 @@
     line-height: 1.5;
   }
 
+  .page-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
   .page-url {
     font-size: 12px;
     background: var(--mat-sys-surface-variant);
     padding: 2px 6px;
     border-radius: 4px;
+  }
+
+  .app-version-badge {
+    font-size: 11px;
+    color: var(--mat-sys-on-surface-variant);
+    font-variant-numeric: tabular-nums;
   }
 
   .actions-cell {

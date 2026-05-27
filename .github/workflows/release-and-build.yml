@@ -1,0 +1,159 @@
+name: Release & Build
+
+on:
+  push:
+    branches:
+      - main
+
+# Hinweis: Für den ersten Release muss einmalig manuell der Git-Tag v1.5.0
+# auf dem aktuellen HEAD erstellt und gepusht werden:
+#   git tag v1.5.0 && git push origin v1.5.0
+# Danach ermittelt semantic-release die nächste Version automatisch aus den
+# Conventional Commits (fix → Patch, feat → Minor, feat! → Major).
+
+permissions:
+  contents: write   # Git-Tags und GitHub-Releases erstellen
+  packages: write   # ghcr.io Images pushen
+  issues: write     # semantic-release: Release-Notes in Issues verlinken
+  pull-requests: write
+
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # 1. Release: Versionierung per Conventional Commits
+  # ---------------------------------------------------------------------------
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.semrel.outputs.new_release_version }}
+      published: ${{ steps.semrel.outputs.new_release_published }}
+      frontend_changed: ${{ steps.paths.outputs.frontend }}
+      backend_changed: ${{ steps.paths.outputs.backend }}
+
+    steps:
+      - name: Checkout (vollständige History für semantic-release)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Geänderte Pfade erkennen
+        id: paths
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only HEAD 2>/dev/null || true)
+          echo "$CHANGED"
+          if echo "$CHANGED" | grep -qE '^src/frontend/'; then
+            echo "frontend=true" >> $GITHUB_OUTPUT
+          else
+            echo "frontend=false" >> $GITHUB_OUTPUT
+          fi
+          if echo "$CHANGED" | grep -qE '^src/backend/'; then
+            echo "backend=true" >> $GITHUB_OUTPUT
+          else
+            echo "backend=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: semantic-release ausführen
+        id: semrel
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          extra_plugins: |
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # 2. Frontend-Image bauen und pushen
+  # ---------------------------------------------------------------------------
+  build-frontend:
+    name: Build Frontend
+    needs: release
+    runs-on: ubuntu-latest
+    # Bauen wenn: Frontend-Dateien geändert ODER neues Release veröffentlicht
+    if: needs.release.outputs.frontend_changed == 'true' || needs.release.outputs.published == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker Buildx einrichten
+        uses: docker/setup-buildx-action@v3
+
+      - name: Bei ghcr.io anmelden
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image-Tags ermitteln
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/akakraft-bs/akakraft-frontend
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ needs.release.outputs.version }},enable=${{ needs.release.outputs.published == 'true' }}
+            type=sha,prefix=,format=short
+
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: src/frontend/akakraft-online
+          file: src/frontend/akakraft-online/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_VERSION=${{ needs.release.outputs.version || 'dev' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ---------------------------------------------------------------------------
+  # 3. Backend-Image bauen und pushen
+  # ---------------------------------------------------------------------------
+  build-backend:
+    name: Build Backend
+    needs: release
+    runs-on: ubuntu-latest
+    # Bauen wenn: Backend-Dateien geändert ODER neues Release veröffentlicht
+    if: needs.release.outputs.backend_changed == 'true' || needs.release.outputs.published == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker Buildx einrichten
+        uses: docker/setup-buildx-action@v3
+
+      - name: Bei ghcr.io anmelden
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image-Tags ermitteln
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/akakraft-bs/akakraft-backend
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ needs.release.outputs.version }},enable=${{ needs.release.outputs.published == 'true' }}
+            type=sha,prefix=,format=short
+
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/backend/AkaKraft.WebApi/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_VERSION=${{ needs.release.outputs.version || 'dev' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

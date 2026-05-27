@@ -6,6 +6,7 @@ export interface Feedback {
   userName: string;
   text: string;
   pageUrl: string;
+  appVersion?: string | null;
   status: FeedbackStatus;
   createdAt: string;
 }

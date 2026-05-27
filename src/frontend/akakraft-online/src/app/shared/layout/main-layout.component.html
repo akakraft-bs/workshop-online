@@ -35,6 +35,10 @@
     </mat-nav-list>
 
     <div class="sidenav-footer">
+      @if (version()) {
+        <span class="app-version">v{{ version() }}</span>
+        <span>·</span>
+      }
       <a href="nutzungsbedingungen.html" target="_blank">Nutzungsbedingungen</a>
       <span>·</span>
       <a href="datenschutz.html" target="_blank">Datenschutz</a>

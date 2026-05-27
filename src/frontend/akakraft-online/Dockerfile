@@ -9,9 +9,14 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --ignore-scripts
 
-# Quellcode kopieren und Production-Build ausführen
-# (nutzt environment.prod.ts via fileReplacements in angular.json)
+# Quellcode kopieren
 COPY . .
+
+# Versionsnummer in public/version.json schreiben (wird durch CI übergeben)
+ARG BUILD_VERSION=dev
+RUN printf '{"version":"%s"}' "$BUILD_VERSION" > public/version.json
+
+# Production-Build ausführen
 RUN npm run build -- --configuration production
 
 # =============================================================================

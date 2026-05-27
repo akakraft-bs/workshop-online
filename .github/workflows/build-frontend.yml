@@ -1,16 +1,10 @@
-name: Build & Push Frontend
+name: Build Frontend (manuell)
+# Automatischer Build läuft jetzt über release-and-build.yml.
+# Diese Datei bleibt als manueller Fallback erhalten.
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "src/frontend/**"
-      - "src/frontend/akakraft-online/Dockerfile"
-      - "src/frontend/akakraft-online/nginx.default.conf.template"
-      - ".github/workflows/build-frontend.yml"
+  workflow_dispatch:
 
-# GITHUB_TOKEN darf Packages schreiben
 permissions:
   contents: read
   packages: write
@@ -39,9 +33,7 @@ jobs:
         with:
           images: ghcr.io/akakraft-bs/akakraft-frontend
           tags: |
-            # :latest bei Push auf main
             type=raw,value=latest,enable={{is_default_branch}}
-            # :<kurzem-SHA> für genaue Rückverfolgung
             type=sha,prefix=,format=short
 
       - name: Build & Push
@@ -52,6 +44,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Layer-Cache über GitHub Actions Cache (beschleunigt Folge-Builds)
           cache-from: type=gha
           cache-to: type=gha,mode=max

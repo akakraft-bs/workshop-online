@@ -52,7 +52,12 @@
         <ng-container matColumnDef="page">
           <th mat-header-cell *matHeaderCellDef>Seite</th>
           <td mat-cell *matCellDef="let fb">
-            <code class="page-url">{{ fb.pageUrl }}</code>
+            <div class="page-cell">
+              <code class="page-url">{{ fb.pageUrl }}</code>
+              @if (fb.appVersion) {
+                <span class="app-version-badge">v{{ fb.appVersion }}</span>
+              }
+            </div>
           </td>
         </ng-container>
 

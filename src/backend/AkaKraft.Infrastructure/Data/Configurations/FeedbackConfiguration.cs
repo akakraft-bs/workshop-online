@@ -18,6 +18,9 @@ public class FeedbackConfiguration : IEntityTypeConfiguration<Feedback>
             .IsRequired()
             .HasMaxLength(512);
 
+        builder.Property(f => f.AppVersion)
+            .HasMaxLength(32);
+
         builder.Property(f => f.Status)
             .IsRequired()
             .HasMaxLength(32)

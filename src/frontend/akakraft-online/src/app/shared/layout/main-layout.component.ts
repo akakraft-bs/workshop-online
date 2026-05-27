@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal, viewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { VersionService } from '../../core/version/version.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -49,6 +50,9 @@ export class MainLayoutComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly push = inject(PushNotificationService);
   readonly badges = inject(BadgeService);
+  readonly versionService = inject(VersionService);
+
+  readonly version = this.versionService.version;
 
   readonly sidenavRef = viewChild.required<MatSidenav>('sidenav');
   readonly isMobile = signal(false);

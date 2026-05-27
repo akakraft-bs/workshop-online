@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../core/api/api.service';
+import { VersionService } from '../../../core/version/version.service';
 import { Feedback } from '../../../models/feedback.model';
 
 @Component({
@@ -26,6 +27,7 @@ export class FeedbackDialogComponent {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialogRef = inject(MatDialogRef<FeedbackDialogComponent>);
+  private readonly versionService = inject(VersionService);
 
   readonly form = this.fb.group({
     text: ['', [Validators.required, Validators.maxLength(256)]],
@@ -43,6 +45,7 @@ export class FeedbackDialogComponent {
     const payload = {
       text: this.form.value.text!,
       pageUrl: this.router.url,
+      appVersion: this.versionService.version() || null,
     };
 
     this.api.post<Feedback>('/feedback', payload).subscribe({
