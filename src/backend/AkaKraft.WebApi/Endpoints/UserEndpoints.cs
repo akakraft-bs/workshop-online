@@ -92,7 +92,10 @@ internal static class UserEndpoints
                 ? await db.Feedbacks.CountAsync(f => f.Status == FeedbackStatus.New)
                 : 0;
 
-            return Results.Ok(new BadgesDto(pendingUmfragen, openMaengel, lowStock, unseenFeedback));
+            var openAufgaben = await db.Aufgaben
+                .CountAsync(a => a.Status != "Erledigt");
+
+            return Results.Ok(new BadgesDto(pendingUmfragen, openMaengel, lowStock, unseenFeedback, openAufgaben));
         }).RequireAuthorization("AnyRole");
 
         app.MapGet("/users/me/preferences", async (HttpContext ctx, IUserPreferencesService prefsService) =>

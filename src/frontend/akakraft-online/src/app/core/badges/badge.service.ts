@@ -6,6 +6,7 @@ interface Badges {
   openMaengel: number;
   lowStock: number;
   unseenFeedback: number;
+  openAufgaben: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +17,7 @@ export class BadgeService {
   readonly openMaengel = signal(0);
   readonly lowStock = signal(0);
   readonly unseenFeedback = signal(0);
+  readonly openAufgaben = signal(0);
 
   refresh(): void {
     this.api.get<Badges>('/users/me/badges').subscribe({
@@ -24,6 +26,7 @@ export class BadgeService {
         this.openMaengel.set(b.openMaengel);
         this.lowStock.set(b.lowStock);
         this.unseenFeedback.set(b.unseenFeedback);
+        this.openAufgaben.set(b.openAufgaben);
       },
     });
   }
