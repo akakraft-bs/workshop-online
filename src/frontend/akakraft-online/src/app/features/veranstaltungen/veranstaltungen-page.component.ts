@@ -1,4 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -34,11 +35,13 @@ export class VeranstaltungenPageComponent implements OnInit {
   private readonly calendarService = inject(CalendarService);
   private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(false);
   readonly configs = signal<CalendarConfig[]>([]);
   readonly events = signal<CalendarEvent[]>([]);
   readonly showPast = signal(false);
+  readonly highlightedEventId = signal<string | null>(null);
 
   readonly writableCalendarIds = computed(() => {
     const user = this.auth.currentUser();
@@ -97,6 +100,10 @@ export class VeranstaltungenPageComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    const eventId = this.route.snapshot.queryParamMap.get('event');
+    if (eventId) {
+      this.highlightedEventId.set(eventId);
+    }
     this.loadConfigs();
   }
 
@@ -119,9 +126,26 @@ export class VeranstaltungenPageComponent implements OnInit {
       next: events => {
         this.events.set(events);
         this.loading.set(false);
+        this.scrollToHighlighted();
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  private scrollToHighlighted(): void {
+    const id = this.highlightedEventId();
+    if (!id) return;
+
+    // If the event is in a past month group, reveal past events first
+    const group = this.monthGroups().find(g => g.events.some(e => e.id === id));
+    if (group?.isPast) {
+      this.showPast.set(true);
+    }
+
+    setTimeout(() => {
+      document.getElementById('event-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => this.highlightedEventId.set(null), 3000);
+    }, 100);
   }
 
   openCreateDialog(): void {

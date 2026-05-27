@@ -41,13 +41,15 @@
     } @else {
       <div class="events-list">
         @for (event of upcomingEvents(); track event.id) {
-          <div class="event-item">
+          <a class="event-item event-item-link"
+             routerLink="/veranstaltungen"
+             [queryParams]="{event: event.id}">
             <span class="event-dot" [style.background]="event.calendarColor"></span>
             <div class="event-info">
               <span class="event-title">{{ event.title }}</span>
               <span class="event-date">{{ formatEventDate(event) }}</span>
             </div>
-          </div>
+          </a>
         }
       </div>
     }

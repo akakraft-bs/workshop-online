@@ -44,7 +44,7 @@
           <div class="title-row">
             <p class="umfrage-question">{{ umfrage.question }}</p>
             @if (umfrage.linkedEventTitle) {
-              <a class="linked-event-chip" routerLink="/veranstaltungen" matTooltip="Zur Veranstaltung">
+              <a class="linked-event-chip" routerLink="/veranstaltungen" [queryParams]="{event: umfrage.linkedEventId}" matTooltip="Zur Veranstaltung">
                 <mat-icon class="linked-event-icon">event</mat-icon>
                 {{ formatLinkedEvent(umfrage) }}
               </a>

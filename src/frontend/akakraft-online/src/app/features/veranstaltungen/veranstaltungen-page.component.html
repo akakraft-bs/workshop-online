@@ -54,7 +54,11 @@
         <h2 class="month-header">{{ group.label }}</h2>
         <div class="event-list">
           @for (event of group.events; track event.id) {
-            <div class="event-row" [class.can-edit]="canEditEvent(event)" (click)="canEditEvent(event) && openEditDialog(event)">
+            <div class="event-row"
+                 [id]="'event-' + event.id"
+                 [class.can-edit]="canEditEvent(event)"
+                 [class.highlighted]="highlightedEventId() === event.id"
+                 (click)="canEditEvent(event) && openEditDialog(event)">
               <span class="event-color-dot" [style.background]="event.calendarColor"></span>
 
               <div class="event-main">

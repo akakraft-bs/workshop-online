@@ -95,6 +95,10 @@
   background: var(--mat-sys-surface);
   transition: background 0.15s;
 
+  &.highlighted {
+    animation: highlight-fade 3s ease forwards;
+  }
+
   &.can-edit {
     cursor: pointer;
 
@@ -176,6 +180,12 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+@keyframes highlight-fade {
+  0%   { background: color-mix(in srgb, var(--mat-sys-primary) 18%, transparent); }
+  60%  { background: color-mix(in srgb, var(--mat-sys-primary) 18%, transparent); }
+  100% { background: var(--mat-sys-surface); }
 }
 
 // ---- Actions ----------------------------------------------------------------
