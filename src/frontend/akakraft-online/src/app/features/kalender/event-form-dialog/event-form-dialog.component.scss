@@ -1,0 +1,62 @@
+.event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 340px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-checkbox {
+  margin-bottom: 8px;
+}
+
+.cal-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.date-time-row {
+  display: flex;
+  gap: 8px;
+
+  .date-field { flex: 1 1 60%; }
+  .time-field { flex: 1 1 40%; }
+}
+
+.conflict-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, #ed6c02 12%, transparent);
+  border: 1px solid color-mix(in srgb, #ed6c02 40%, transparent);
+  margin-top: 4px;
+}
+
+.conflict-icon {
+  color: #ed6c02;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.conflict-text {
+  font-size: 13px;
+  line-height: 1.5;
+
+  strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+}
+
+.conflict-item {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  padding-left: 4px;
+}

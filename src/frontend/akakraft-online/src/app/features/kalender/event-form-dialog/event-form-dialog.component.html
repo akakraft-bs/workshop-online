@@ -1,0 +1,97 @@
+<h2 mat-dialog-title>{{ data.event ? 'Termin bearbeiten' : 'Neuer Termin' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="event-form">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Kalender</mat-label>
+      <mat-select formControlName="calendarId">
+        @for (cfg of writableConfigs; track cfg.googleCalendarId) {
+          <mat-option [value]="cfg.googleCalendarId">
+            <span class="cal-dot" [style.background]="cfg.color"></span>
+            {{ cfg.name }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Titel</mat-label>
+      <input matInput formControlName="title" placeholder="Titel eingeben">
+    </mat-form-field>
+
+    <mat-checkbox formControlName="isAllDay">Ganztägig</mat-checkbox>
+
+    @if (!form.get('isAllDay')!.value) {
+      <div class="date-time-row">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Beginn</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+          <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Uhrzeit</mat-label>
+          <input matInput type="time" formControlName="startTime">
+        </mat-form-field>
+      </div>
+
+      <div class="date-time-row">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Ende</mat-label>
+          <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+          <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Uhrzeit</mat-label>
+          <input matInput type="time" formControlName="endTime">
+        </mat-form-field>
+      </div>
+    } @else {
+      <mat-form-field appearance="outline">
+        <mat-label>Datum (Beginn)</mat-label>
+        <input matInput [matDatepicker]="allDayStartPicker" formControlName="startDate">
+        <mat-datepicker-toggle matIconSuffix [for]="allDayStartPicker"></mat-datepicker-toggle>
+        <mat-datepicker #allDayStartPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Datum (Ende)</mat-label>
+        <input matInput [matDatepicker]="allDayEndPicker" formControlName="endDate">
+        <mat-datepicker-toggle matIconSuffix [for]="allDayEndPicker"></mat-datepicker-toggle>
+        <mat-datepicker #allDayEndPicker></mat-datepicker>
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Beschreibung (optional)</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Ort (optional)</mat-label>
+      <input matInput formControlName="location">
+    </mat-form-field>
+
+    @if (conflicts().length > 0) {
+      <div class="conflict-warning">
+        <mat-icon class="conflict-icon">warning</mat-icon>
+        <div class="conflict-text">
+          <strong>Überschneidung mit {{ conflicts().length === 1 ? 'einem vorhandenen Termin' : conflicts().length + ' vorhandenen Terminen' }}:</strong>
+          @for (ev of conflicts(); track ev.id) {
+            <div class="conflict-item">{{ ev.title }}</div>
+          }
+        </div>
+      </div>
+    }
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+  <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">
+    {{ data.event ? 'Speichern' : 'Erstellen' }}
+  </button>
+</mat-dialog-actions>

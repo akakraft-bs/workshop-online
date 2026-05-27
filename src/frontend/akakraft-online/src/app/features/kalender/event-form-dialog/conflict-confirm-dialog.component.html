@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>Überschneidung bestätigen</h2>
+
+<mat-dialog-content>
+  <p>Im gewählten Zeitraum {{ data.length === 1 ? 'ist bereits ein Termin' : 'sind bereits ' + data.length + ' Termine' }} vorhanden:</p>
+  <ul class="conflict-list">
+    @for (ev of data; track ev.id) {
+      <li>{{ ev.title }}</li>
+    }
+  </ul>
+  <p>Möchtest du den Termin trotzdem anlegen?</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="false">Abbrechen</button>
+  <button mat-flat-button color="warn" [mat-dialog-close]="true">Trotzdem erstellen</button>
+</mat-dialog-actions>

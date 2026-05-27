@@ -137,7 +137,7 @@ export class KalenderPageComponent implements OnInit {
     const ref = this.dialog.open(EventFormDialogComponent, {
       width: '480px',
       maxWidth: '95vw',
-      data: { configs, writableCalendarIds: writableIds, defaultStart },
+      data: { configs, writableCalendarIds: writableIds, defaultStart, existingEvents: this.events() },
     });
 
     ref.afterClosed().subscribe((result?: EventFormDialogResult) => {
@@ -162,7 +162,7 @@ export class KalenderPageComponent implements OnInit {
     const ref = this.dialog.open(EventFormDialogComponent, {
       width: '480px',
       maxWidth: '95vw',
-      data: { event, configs, writableCalendarIds: writableIds },
+      data: { event, configs, writableCalendarIds: writableIds, existingEvents: this.events() },
     });
 
     ref.afterClosed().subscribe((result?: EventFormDialogResult) => {
