@@ -65,29 +65,29 @@ public class FcmPushNotificationService(
     {
         var messaging = FirebaseMessaging.GetMessaging(firebaseApp);
 
+        // Relative URLs mit /app/-Prefix versehen
+        var normalizedUrl = url is not null && url.StartsWith('/') && !url.StartsWith("/app/")
+            ? "/app" + url
+            : url;
+
         // FCM erlaubt max. 500 Tokens pro Batch
         foreach (var batch in tokens.Chunk(500))
         {
+            // Data-only: kein Notification-Objekt, damit der Browser die Benachrichtigung
+            // nicht automatisch zeigt UND der Service Worker sie nicht nochmal anzeigt.
+            // onBackgroundMessage im SW übernimmt die Darstellung genau einmal.
+            var data = new Dictionary<string, string>
+            {
+                ["title"] = title,
+                ["body"] = body,
+            };
+            if (normalizedUrl is not null)
+                data["url"] = normalizedUrl;
+
             var message = new MulticastMessage
             {
                 Tokens = batch.ToList(),
-                Notification = new Notification { Title = title, Body = body },
-                Data = url is not null
-                    ? new Dictionary<string, string> { ["url"] = url }
-                    : null,
-                Webpush = new WebpushConfig
-                {
-                    Notification = new WebpushNotification
-                    {
-                        Title = title,
-                        Body = body,
-                        Icon = "/app/android-chrome-192x192.png",
-                        Badge = "/app/favicon-32x32.png",
-                    },
-                    FcmOptions = url?.StartsWith("https://") == true
-                        ? new WebpushFcmOptions { Link = url }
-                        : null,
-                },
+                Data = data,
             };
 
             try

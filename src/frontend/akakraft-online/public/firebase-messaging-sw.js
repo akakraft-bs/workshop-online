@@ -1,7 +1,3 @@
-// Firebase Cloud Messaging Service Worker
-// Dieser Service Worker läuft im Hintergrund und empfängt Push-Benachrichtigungen,
-// auch wenn die App nicht geöffnet ist.
-
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -16,15 +12,18 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Hintergrund-Nachrichten (App ist nicht im Vordergrund)
+// Hintergrund-Nachrichten (App ist nicht im Vordergrund).
+// Die Nachricht ist data-only (kein notification-Objekt), daher zeigt der Browser
+// sie nicht automatisch – wir zeigen sie hier genau einmal.
 messaging.onBackgroundMessage(payload => {
-  const { title, body, icon } = payload.notification ?? {};
+  const title = payload.data?.title ?? 'AkaKraft';
+  const body  = payload.data?.body  ?? '';
 
-  self.registration.showNotification(title ?? 'AkaKraft', {
-    body: body ?? '',
-    icon: icon ?? '/app/android-chrome-192x192.png',
+  self.registration.showNotification(title, {
+    body,
+    icon:  '/app/android-chrome-192x192.png',
     badge: '/app/favicon-32x32.png',
-    data: payload.data,
+    data:  { url: payload.data?.url },
   });
 });
 
