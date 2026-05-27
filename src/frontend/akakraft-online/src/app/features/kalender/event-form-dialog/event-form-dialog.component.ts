@@ -18,6 +18,8 @@ export interface EventFormDialogData {
   writableCalendarIds: string[];
   /** Existing events used to detect time conflicts (optional). */
   existingEvents?: CalendarEvent[];
+  /** Show the optional URL field (e.g. for Veranstaltungen, not Hallenbelegung). */
+  showUrlField?: boolean;
 }
 
 export interface EventFormDialogResult {

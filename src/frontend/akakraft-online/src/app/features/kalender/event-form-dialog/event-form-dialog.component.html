@@ -74,11 +74,13 @@
       <input matInput formControlName="location">
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Link zur Veranstaltungsseite (optional)</mat-label>
-      <input matInput formControlName="url" type="url" placeholder="https://…">
-      <mat-icon matPrefix>link</mat-icon>
-    </mat-form-field>
+    @if (data.showUrlField) {
+      <mat-form-field appearance="outline">
+        <mat-label>Link zur Veranstaltungsseite (optional)</mat-label>
+        <input matInput formControlName="url" type="url" placeholder="https://…">
+        <mat-icon matPrefix>link</mat-icon>
+      </mat-form-field>
+    }
 
     @if (conflicts().length > 0) {
       <div class="conflict-warning">

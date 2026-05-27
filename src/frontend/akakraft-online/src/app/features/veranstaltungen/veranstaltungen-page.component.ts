@@ -158,6 +158,7 @@ export class VeranstaltungenPageComponent implements OnInit {
       data: {
         configs: this.configs(),
         writableCalendarIds: writableIds,
+        showUrlField: true,
       },
     });
 
@@ -187,6 +188,7 @@ export class VeranstaltungenPageComponent implements OnInit {
         event,
         configs: this.configs(),
         writableCalendarIds: writableIds,
+        showUrlField: true,
       },
     });
 
