@@ -42,6 +42,25 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             .OrderBy(c => c)
             .ToListAsync();
 
+    public async Task<IEnumerable<string>> GetStorageLocationsAsync()
+    {
+        var werkzeugLocations = await db.Werkzeuge
+            .Where(w => w.StorageLocation != null && w.StorageLocation != "")
+            .Select(w => w.StorageLocation!)
+            .ToListAsync();
+
+        var verbrauchsLocations = await db.Verbrauchsmaterialien
+            .Where(v => v.StorageLocation != null && v.StorageLocation != "")
+            .Select(v => v.StorageLocation!)
+            .ToListAsync();
+
+        return werkzeugLocations
+            .Concat(verbrauchsLocations)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(l => l)
+            .ToList();
+    }
+
     public async Task<WerkzeugDto> CreateAsync(CreateWerkzeugDto dto)
     {
         var werkzeug = new Werkzeug

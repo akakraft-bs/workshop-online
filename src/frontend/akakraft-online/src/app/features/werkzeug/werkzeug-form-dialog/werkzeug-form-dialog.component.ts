@@ -45,7 +45,9 @@ export class WerkzeugFormDialogComponent implements OnInit {
   readonly previewUrl = signal<string | null>(this.data.werkzeug?.imageUrl ?? null);
 
   allCategories: string[] = [];
+  allStorageLocations: string[] = [];
   filteredCategories$!: Observable<string[]>;
+  filteredStorageLocations$!: Observable<string[]>;
 
   readonly form = this.fb.nonNullable.group({
     name:            [this.data.werkzeug?.name ?? '',            Validators.required],
@@ -72,12 +74,23 @@ export class WerkzeugFormDialogComponent implements OnInit {
     this.api.get<string[]>('/werkzeug/categories').subscribe(cats => {
       this.allCategories = cats;
     });
+    this.api.get<string[]>('/storage-locations').subscribe(locs => {
+      this.allStorageLocations = locs;
+    });
 
     this.filteredCategories$ = this.form.controls.category.valueChanges.pipe(
       startWith(this.form.controls.category.value),
       map(value => {
         const filter = value.toLowerCase();
         return this.allCategories.filter(c => c.toLowerCase().includes(filter));
+      }),
+    );
+
+    this.filteredStorageLocations$ = this.form.controls.storageLocation.valueChanges.pipe(
+      startWith(this.form.controls.storageLocation.value),
+      map(value => {
+        const filter = (value ?? '').toLowerCase();
+        return this.allStorageLocations.filter(l => l.toLowerCase().includes(filter));
       }),
     );
   }

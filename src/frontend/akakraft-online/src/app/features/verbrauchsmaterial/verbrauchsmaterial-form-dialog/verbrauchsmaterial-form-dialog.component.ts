@@ -42,8 +42,10 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
 
   allCategories: string[] = [];
   allUnits: string[] = [];
+  allStorageLocations: string[] = [];
   filteredCategories$!: Observable<string[]>;
   filteredUnits$!: Observable<string[]>;
+  filteredStorageLocations$!: Observable<string[]>;
 
   readonly form = this.fb.nonNullable.group({
     name:            [this.data?.item?.name            ?? '', Validators.required],
@@ -75,6 +77,9 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
     this.api.get<string[]>('/verbrauchsmaterial/units').subscribe(units => {
       this.allUnits = units;
     });
+    this.api.get<string[]>('/storage-locations').subscribe(locs => {
+      this.allStorageLocations = locs;
+    });
 
     this.filteredCategories$ = this.form.controls.category.valueChanges.pipe(
       startWith(this.form.controls.category.value),
@@ -89,6 +94,14 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
       map(value => {
         const filter = value.toLowerCase();
         return this.allUnits.filter(u => u.toLowerCase().includes(filter));
+      }),
+    );
+
+    this.filteredStorageLocations$ = this.form.controls.storageLocation.valueChanges.pipe(
+      startWith(this.form.controls.storageLocation.value),
+      map(value => {
+        const filter = (value ?? '').toLowerCase();
+        return this.allStorageLocations.filter(l => l.toLowerCase().includes(filter));
       }),
     );
   }

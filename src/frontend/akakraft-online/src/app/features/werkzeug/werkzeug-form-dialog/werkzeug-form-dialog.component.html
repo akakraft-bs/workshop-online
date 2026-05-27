@@ -83,7 +83,13 @@
     <mat-form-field appearance="outline">
       <mat-label>Ablageort (optional)</mat-label>
       <mat-icon matPrefix>place</mat-icon>
-      <input matInput formControlName="storageLocation" placeholder="z. B. Regal A3, Schrank 2">
+      <input matInput formControlName="storageLocation" placeholder="z. B. Regal A3, Schrank 2"
+        [matAutocomplete]="storageLocationAuto">
+      <mat-autocomplete #storageLocationAuto="matAutocomplete">
+        @for (loc of filteredStorageLocations$ | async; track loc) {
+          <mat-option [value]="loc">{{ loc }}</mat-option>
+        }
+      </mat-autocomplete>
     </mat-form-field>
 
   </form>

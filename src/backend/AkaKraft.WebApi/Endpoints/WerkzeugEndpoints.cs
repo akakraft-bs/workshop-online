@@ -23,6 +23,10 @@ internal static class WerkzeugEndpoints
             Results.Ok(await werkzeugService.GetCategoriesAsync()))
             .RequireAuthorization("AnyRole");
 
+        app.MapGet("/storage-locations", async (IWerkzeugService werkzeugService) =>
+            Results.Ok(await werkzeugService.GetStorageLocationsAsync()))
+            .RequireAuthorization("AnyRole");
+
         app.MapPost("/werkzeug", async (CreateWerkzeugDto dto, IWerkzeugService werkzeugService) =>
         {
             var created = await werkzeugService.CreateAsync(dto);

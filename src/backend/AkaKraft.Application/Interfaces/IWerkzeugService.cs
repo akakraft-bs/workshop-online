@@ -6,6 +6,7 @@ public interface IWerkzeugService
 {
     Task<IEnumerable<WerkzeugDto>> GetAllAsync();
     Task<IEnumerable<string>> GetCategoriesAsync();
+    Task<IEnumerable<string>> GetStorageLocationsAsync();
     Task<WerkzeugDto> CreateAsync(CreateWerkzeugDto dto);
     Task<WerkzeugDto?> UpdateAsync(Guid id, UpdateWerkzeugDto dto);
     Task<bool> DeleteAsync(Guid id);
