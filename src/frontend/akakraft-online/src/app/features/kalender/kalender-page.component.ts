@@ -60,7 +60,7 @@ export class KalenderPageComponent implements OnInit {
         label: formatDayLabel(date),
         isToday: isToday(date),
         allDayEvents: dayEvs.filter(e => e.isAllDay),
-        events: dayEvs.filter(e => !e.isAllDay).map(e => toPositionedEvent(e, i)),
+        events: layoutDayEvents(dayEvs.filter(e => !e.isAllDay).map(e => toPositionedEvent(e, i))),
       };
     });
   });
@@ -196,9 +196,12 @@ export class KalenderPageComponent implements OnInit {
   }
 
   eventStyle(ev: PositionedEvent): Record<string, string> {
+    const colW = 100 / ev.colCount;
     return {
       top: `${ev.topPx}px`,
       height: `${Math.max(ev.heightPx, 24)}px`,
+      left: `calc(${ev.colIndex * colW}% + 2px)`,
+      width: `calc(${colW}% - 4px)`,
       'background-color': ev.event.calendarColor,
     };
   }
@@ -272,7 +275,43 @@ function toPositionedEvent(event: CalendarEvent, dayIndex: number): PositionedEv
     dayIndex,
     topPx: (startMinutes / 60) * PX_PER_HOUR,
     heightPx: (durationMinutes / 60) * PX_PER_HOUR,
+    colIndex: 0,
+    colCount: 1,
   };
+}
+
+function layoutDayEvents(events: PositionedEvent[]): PositionedEvent[] {
+  if (events.length <= 1) return events;
+
+  // Sort by start time, then by duration descending (longer events get earlier columns)
+  const sorted = [...events].sort((a, b) =>
+    a.topPx !== b.topPx ? a.topPx - b.topPx : b.heightPx - a.heightPx
+  );
+
+  // Greedy interval-graph colouring: assign each event the lowest column
+  // whose last event already ended before this one starts.
+  const columnEnds: number[] = [];
+  const colIndices: number[] = [];
+
+  for (const ev of sorted) {
+    const col = columnEnds.findIndex(end => end <= ev.topPx);
+    const assigned = col === -1 ? columnEnds.length : col;
+    columnEnds[assigned] = ev.topPx + ev.heightPx;
+    colIndices.push(assigned);
+  }
+
+  // Determine colCount for each event: the highest column index used by any
+  // event that overlaps with this one, plus one.
+  return sorted.map((ev, i) => {
+    const evEnd = ev.topPx + ev.heightPx;
+    let maxCol = colIndices[i];
+    for (let j = 0; j < sorted.length; j++) {
+      if (sorted[j].topPx < evEnd && ev.topPx < sorted[j].topPx + sorted[j].heightPx) {
+        maxCol = Math.max(maxCol, colIndices[j]);
+      }
+    }
+    return { ...ev, colIndex: colIndices[i], colCount: maxCol + 1 };
+  });
 }
 
 function formatDayLabel(d: Date): string {

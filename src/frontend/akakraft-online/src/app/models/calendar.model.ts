@@ -75,4 +75,6 @@ export interface PositionedEvent {
   dayIndex: number;     // 0-6 für den Tag in der aktuellen Woche
   topPx: number;        // Pixelabstand von oben (für normale Events)
   heightPx: number;     // Höhe in Pixel
+  colIndex: number;     // Spaltenindex innerhalb gleichzeitiger Events (0-basiert)
+  colCount: number;     // Gesamtanzahl der Spalten in der Überlappungsgruppe
 }
