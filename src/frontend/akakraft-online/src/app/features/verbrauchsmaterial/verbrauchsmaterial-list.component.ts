@@ -52,11 +52,13 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   readonly filteredItems = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     const cat = this.selectedCategory();
-    return this.items().filter(v => {
-      if (cat && v.category !== cat) return false;
-      if (!q) return true;
-      return v.name.toLowerCase().includes(q) || v.category.toLowerCase().includes(q);
-    });
+    return this.items()
+      .filter(v => {
+        if (cat && v.category !== cat) return false;
+        if (!q) return true;
+        return v.name.toLowerCase().includes(q) || v.category.toLowerCase().includes(q);
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, 'de'));
   });
 
   ngOnInit(): void {

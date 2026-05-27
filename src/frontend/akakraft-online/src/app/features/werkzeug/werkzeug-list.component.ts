@@ -59,16 +59,18 @@ export class WerkzeugListComponent implements OnInit {
     const onlyBorrowed = this.showOnlyBorrowed();
     const cat         = this.selectedCategory();
 
-    return this.items().filter(w => {
-      if (onlyBorrowed && w.isAvailable) return false;
-      if (cat && w.category !== cat) return false;
-      if (!q) return true;
-      return (
-        w.name.toLowerCase().includes(q) ||
-        w.description.toLowerCase().includes(q) ||
-        w.category.toLowerCase().includes(q)
-      );
-    });
+    return this.items()
+      .filter(w => {
+        if (onlyBorrowed && w.isAvailable) return false;
+        if (cat && w.category !== cat) return false;
+        if (!q) return true;
+        return (
+          w.name.toLowerCase().includes(q) ||
+          w.description.toLowerCase().includes(q) ||
+          w.category.toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, 'de'));
   });
 
   readonly borrowedCount = computed(() => this.items().filter(w => !w.isAvailable).length);
