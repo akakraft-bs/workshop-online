@@ -41,5 +41,27 @@ public class MangelConfiguration : IEntityTypeConfiguration<Mangel>
             .WithMany()
             .HasForeignKey(m => m.ResolvedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(m => m.Anmerkungen)
+            .WithOne(a => a.Mangel)
+            .HasForeignKey(a => a.MangelId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class MangelAnmerkungConfiguration : IEntityTypeConfiguration<MangelAnmerkung>
+{
+    public void Configure(EntityTypeBuilder<MangelAnmerkung> builder)
+    {
+        builder.HasKey(a => a.Id);
+
+        builder.Property(a => a.Text)
+            .IsRequired()
+            .HasMaxLength(2000);
+
+        builder.HasOne(a => a.CreatedBy)
+            .WithMany()
+            .HasForeignKey(a => a.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

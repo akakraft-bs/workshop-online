@@ -1,6 +1,15 @@
 export type MangelKategorie = 'Halle' | 'Werkzeug' | 'Sonstiges';
 export type MangelStatus = 'Offen' | 'Kenntnisgenommen' | 'Behoben' | 'Abgelehnt' | 'Zurueckgezogen';
 
+export interface MangelAnmerkung {
+  id: string;
+  text: string;
+  createdByUserId: string;
+  createdByName: string;
+  createdAt: string;
+  updatedAt?: string | null;
+}
+
 export interface Mangel {
   id: string;
   title: string;
@@ -15,6 +24,7 @@ export interface Mangel {
   resolvedByName?: string;
   resolvedAt?: string;
   note?: string;
+  anmerkungen: MangelAnmerkung[];
 }
 
 export const MANGEL_KATEGORIE_LABELS: Record<MangelKategorie, string> = {

@@ -111,6 +111,79 @@
             }
           </div>
         }
+
+        <!-- Anmerkungen -->
+        @if (mangel.anmerkungen.length > 0 || true) {
+          <div class="anmerkungen-section">
+            @if (mangel.anmerkungen.length > 0) {
+              <div class="anmerkungen-list">
+                @for (a of mangel.anmerkungen; track a.id) {
+                  <div class="anmerkung-item">
+                    <div class="anmerkung-meta">
+                      <span class="anmerkung-author">{{ a.createdByName }}</span>
+                      <span class="anmerkung-date">
+                        {{ a.createdAt | date:'dd.MM.yy, HH:mm' }}
+                        @if (a.updatedAt) { <span class="edited-hint">(bearb.)</span> }
+                      </span>
+                      @if (isOwnAnmerkung(a) || canManage()) {
+                        <div class="anmerkung-actions">
+                          @if (isOwnAnmerkung(a) && !isEditing(a)) {
+                            <button mat-icon-button class="anmerkung-btn"
+                                    matTooltip="Bearbeiten"
+                                    (click)="startEdit(mangel, a)">
+                              <mat-icon>edit</mat-icon>
+                            </button>
+                          }
+                          <button mat-icon-button class="anmerkung-btn anmerkung-btn-delete"
+                                  matTooltip="Löschen"
+                                  (click)="deleteComment(mangel, a)">
+                            <mat-icon>delete_outline</mat-icon>
+                          </button>
+                        </div>
+                      }
+                    </div>
+
+                    @if (isEditing(a)) {
+                      <div class="anmerkung-edit">
+                        <textarea class="anmerkung-textarea"
+                                  [ngModel]="editing()!.text"
+                                  (ngModelChange)="setEditText($event)"
+                                  rows="2"
+                                  cdkTextareaAutosize></textarea>
+                        <div class="anmerkung-edit-actions">
+                          <button mat-button (click)="cancelEdit()">Abbrechen</button>
+                          <button mat-flat-button color="primary"
+                                  [disabled]="!editing()!.text.trim()"
+                                  (click)="saveEdit(mangel)">Speichern</button>
+                        </div>
+                      </div>
+                    } @else {
+                      <p class="anmerkung-text">{{ a.text }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="anmerkung-input-row">
+              <textarea class="anmerkung-textarea"
+                        [ngModel]="getDraft(mangel.id)"
+                        (ngModelChange)="setDraft(mangel.id, $event)"
+                        placeholder="Anmerkung hinzufügen …"
+                        rows="1"
+                        cdkTextareaAutosize
+                        (keydown.control.enter)="addComment(mangel)"
+                        (keydown.meta.enter)="addComment(mangel)"></textarea>
+              <button mat-icon-button color="primary"
+                      [disabled]="!getDraft(mangel.id).trim()"
+                      matTooltip="Absenden (Strg+Enter)"
+                      (click)="addComment(mangel)">
+                <mat-icon>send</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+
       </div>
     }
   </div>

@@ -81,6 +81,62 @@ internal static class MangelEndpoints
             return result is null ? Results.NotFound() : Results.Ok(result);
         }).RequireAuthorization("AnyRole");
 
+        // ---- Anmerkungen ----
+
+        app.MapPost("/mangel/{id:guid}/anmerkungen", async (
+            Guid id,
+            CreateMangelAnmerkungDto dto,
+            HttpContext ctx,
+            IMangelService mangelService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return Results.Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(dto.Text))
+                return Results.BadRequest("Text darf nicht leer sein.");
+
+            var result = await mangelService.AddAnmerkungAsync(id, parsedUserId, dto);
+            return result is null ? Results.NotFound() : Results.Created($"/mangel/{id}/anmerkungen/{result.Id}", result);
+        }).RequireAuthorization("AnyRole");
+
+        app.MapPut("/mangel/{id:guid}/anmerkungen/{anmerkungId:guid}", async (
+            Guid id,
+            Guid anmerkungId,
+            UpdateMangelAnmerkungDto dto,
+            HttpContext ctx,
+            IMangelService mangelService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return Results.Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(dto.Text))
+                return Results.BadRequest("Text darf nicht leer sein.");
+
+            var (result, forbidden) = await mangelService.UpdateAnmerkungAsync(id, anmerkungId, parsedUserId, ctx.IsPrivileged(), dto);
+            if (forbidden) return Results.Forbid();
+            return result is null ? Results.NotFound() : Results.Ok(result);
+        }).RequireAuthorization("AnyRole");
+
+        app.MapDelete("/mangel/{id:guid}/anmerkungen/{anmerkungId:guid}", async (
+            Guid id,
+            Guid anmerkungId,
+            HttpContext ctx,
+            IMangelService mangelService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return Results.Unauthorized();
+
+            var (success, forbidden) = await mangelService.DeleteAnmerkungAsync(id, anmerkungId, parsedUserId, ctx.IsPrivileged());
+            if (forbidden) return Results.Forbid();
+            return success ? Results.NoContent() : Results.NotFound();
+        }).RequireAuthorization("AnyRole");
+
         return app;
     }
 }

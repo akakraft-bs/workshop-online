@@ -17,6 +17,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
     public DbSet<FcmToken> FcmTokens => Set<FcmToken>();
     public DbSet<Mangel> Maengel => Set<Mangel>();
+    public DbSet<MangelAnmerkung> MangelAnmerkungen => Set<MangelAnmerkung>();
     public DbSet<Wunsch> Wuensche => Set<Wunsch>();
     public DbSet<WunschVote> WunschVotes => Set<WunschVote>();
     public DbSet<Umfrage> Umfragen => Set<Umfrage>();
@@ -44,6 +45,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new UserPreferencesConfiguration());
         modelBuilder.ApplyConfiguration(new FcmTokenConfiguration());
         modelBuilder.ApplyConfiguration(new MangelConfiguration());
+        modelBuilder.ApplyConfiguration(new MangelAnmerkungConfiguration());
         modelBuilder.ApplyConfiguration(new WunschConfiguration());
         modelBuilder.ApplyConfiguration(new WunschVoteConfiguration());
         modelBuilder.ApplyConfiguration(new UmfrageConfiguration());

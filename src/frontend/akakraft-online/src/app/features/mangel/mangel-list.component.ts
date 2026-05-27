@@ -1,9 +1,13 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
@@ -11,7 +15,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ApiService } from '../../core/api/api.service';
 import { AuthService } from '../../core/auth/auth.service';
 import {
-  Mangel, MangelKategorie, MangelStatus,
+  Mangel, MangelAnmerkung, MangelKategorie, MangelStatus,
   MANGEL_KATEGORIE_LABELS, MANGEL_STATUS_LABELS,
 } from '../../models/mangel.model';
 import { CreateMangelDialogComponent } from './create-mangel-dialog/create-mangel-dialog.component';
@@ -26,7 +30,10 @@ type StatusFilter = 'aktiv' | 'abgeschlossen' | 'alle';
   selector: 'app-mangel-list',
   imports: [
     DatePipe,
+    FormsModule,
+    TextFieldModule,
     MatButtonModule, MatButtonToggleModule, MatChipsModule,
+    MatFormFieldModule, MatInputModule,
     MatIconModule, MatProgressSpinnerModule, MatTooltipModule,
   ],
   templateUrl: './mangel-list.component.html',
@@ -45,6 +52,10 @@ export class MangelListComponent implements OnInit {
 
   readonly canManage = computed(() => this.auth.isPrivileged());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
+
+  // Anmerkungen state
+  readonly commentDrafts = signal<Record<string, string>>({});
+  readonly editing = signal<{ anmerkungId: string; mangelId: string; text: string } | null>(null);
 
   canEditTitle(mangel: Mangel): boolean {
     return mangel.createdByUserId === this.currentUserId() || this.canManage();
@@ -160,5 +171,80 @@ export class MangelListComponent implements OnInit {
       case 'Werkzeug': return 'build';
       case 'Sonstiges': return 'help_outline';
     }
+  }
+
+  // ---- Anmerkungen -------------------------------------------------------
+
+  getDraft(mangelId: string): string {
+    return this.commentDrafts()[mangelId] ?? '';
+  }
+
+  setDraft(mangelId: string, text: string): void {
+    this.commentDrafts.update(d => ({ ...d, [mangelId]: text }));
+  }
+
+  addComment(mangel: Mangel): void {
+    const text = this.getDraft(mangel.id).trim();
+    if (!text) return;
+    this.api.post<MangelAnmerkung>(`/mangel/${mangel.id}/anmerkungen`, { text }).subscribe({
+      next: created => {
+        this.items.update(list => list.map(m =>
+          m.id === mangel.id ? { ...m, anmerkungen: [...m.anmerkungen, created] } : m
+        ));
+        this.setDraft(mangel.id, '');
+      },
+      error: () => this.snackBar.open('Anmerkung konnte nicht gespeichert werden.', 'OK', { duration: 3000 }),
+    });
+  }
+
+  startEdit(mangel: Mangel, a: MangelAnmerkung): void {
+    this.editing.set({ anmerkungId: a.id, mangelId: mangel.id, text: a.text });
+  }
+
+  cancelEdit(): void {
+    this.editing.set(null);
+  }
+
+  setEditText(text: string): void {
+    const e = this.editing();
+    if (e) this.editing.set({ ...e, text });
+  }
+
+  saveEdit(mangel: Mangel): void {
+    const e = this.editing();
+    if (!e || !e.text.trim()) return;
+    this.api.put<MangelAnmerkung>(`/mangel/${mangel.id}/anmerkungen/${e.anmerkungId}`, { text: e.text.trim() }).subscribe({
+      next: updated => {
+        this.items.update(list => list.map(m =>
+          m.id === mangel.id
+            ? { ...m, anmerkungen: m.anmerkungen.map(a => a.id === updated.id ? updated : a) }
+            : m
+        ));
+        this.editing.set(null);
+      },
+      error: () => this.snackBar.open('Bearbeitung fehlgeschlagen.', 'OK', { duration: 3000 }),
+    });
+  }
+
+  deleteComment(mangel: Mangel, a: MangelAnmerkung): void {
+    if (!confirm('Anmerkung löschen?')) return;
+    this.api.delete<void>(`/mangel/${mangel.id}/anmerkungen/${a.id}`).subscribe({
+      next: () => {
+        this.items.update(list => list.map(m =>
+          m.id === mangel.id
+            ? { ...m, anmerkungen: m.anmerkungen.filter(x => x.id !== a.id) }
+            : m
+        ));
+      },
+      error: () => this.snackBar.open('Löschen fehlgeschlagen.', 'OK', { duration: 3000 }),
+    });
+  }
+
+  isOwnAnmerkung(a: MangelAnmerkung): boolean {
+    return a.createdByUserId === this.currentUserId();
+  }
+
+  isEditing(a: MangelAnmerkung): boolean {
+    return this.editing()?.anmerkungId === a.id;
   }
 }

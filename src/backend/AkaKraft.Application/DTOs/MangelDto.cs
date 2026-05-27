@@ -2,6 +2,18 @@ using AkaKraft.Domain.Enums;
 
 namespace AkaKraft.Application.DTOs;
 
+public record MangelAnmerkungDto(
+    Guid Id,
+    string Text,
+    Guid CreatedByUserId,
+    string CreatedByName,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt
+);
+
+public record CreateMangelAnmerkungDto(string Text);
+public record UpdateMangelAnmerkungDto(string Text);
+
 public record MangelDto(
     Guid Id,
     string Title,
@@ -15,7 +27,8 @@ public record MangelDto(
     Guid? ResolvedByUserId,
     string? ResolvedByName,
     DateTime? ResolvedAt,
-    string? Note
+    string? Note,
+    List<MangelAnmerkungDto> Anmerkungen
 );
 
 public record CreateMangelDto(

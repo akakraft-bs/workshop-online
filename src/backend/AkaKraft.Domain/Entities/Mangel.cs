@@ -20,4 +20,6 @@ public class Mangel
     public User? ResolvedBy { get; set; }
     public DateTime? ResolvedAt { get; set; }
     public string? Note { get; set; }
+
+    public ICollection<MangelAnmerkung> Anmerkungen { get; set; } = [];
 }

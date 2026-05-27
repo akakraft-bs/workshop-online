@@ -215,3 +215,123 @@
   font-size: 12px;
   color: var(--mat-sys-on-surface-variant);
 }
+
+// ---- Anmerkungen -----------------------------------------------------------
+
+.anmerkungen-section {
+  margin-top: 12px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.anmerkungen-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.anmerkung-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.anmerkung-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.anmerkung-author {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+}
+
+.anmerkung-date {
+  font-size: 11px;
+  color: var(--mat-sys-on-surface-variant);
+  flex: 1;
+}
+
+.edited-hint {
+  font-style: italic;
+}
+
+.anmerkung-actions {
+  display: flex;
+  gap: 0;
+  margin-left: auto;
+}
+
+.anmerkung-btn {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &.anmerkung-btn-delete:hover {
+    color: var(--mat-sys-error);
+  }
+}
+
+.anmerkung-text {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+  white-space: pre-wrap;
+  padding-left: 2px;
+}
+
+.anmerkung-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.anmerkung-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.anmerkung-input-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.anmerkung-textarea {
+  flex: 1;
+  resize: none;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--mat-sys-surface-container-lowest, transparent);
+  color: var(--mat-sys-on-surface);
+  outline: none;
+  transition: border-color 0.15s;
+  line-height: 1.4;
+  min-height: 34px;
+
+  &:focus {
+    border-color: var(--mat-sys-primary);
+  }
+
+  &::placeholder {
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.7;
+  }
+}

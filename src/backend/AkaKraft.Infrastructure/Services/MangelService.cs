@@ -11,32 +11,16 @@ public class MangelService(ApplicationDbContext db) : IMangelService
 {
     public async Task<IEnumerable<MangelDto>> GetAllAsync()
     {
-        return await db.Maengel
+        var maengel = await db.Maengel
             .Include(m => m.CreatedBy)
             .Include(m => m.ResolvedBy)
+            .Include(m => m.Anmerkungen.OrderBy(a => a.CreatedAt))
+                .ThenInclude(a => a.CreatedBy)
             .OrderByDescending(m => m.CreatedAt)
-            .Select(m => new MangelDto(
-                m.Id,
-                m.Title,
-                m.Description,
-                m.Kategorie,
-                m.Status,
-                m.CreatedByUserId,
-                db.UserPreferences
-                    .Where(p => p.UserId == m.CreatedByUserId && p.DisplayName != null)
-                    .Select(p => p.DisplayName!)
-                    .FirstOrDefault() ?? m.CreatedBy.Name,
-                m.CreatedAt,
-                m.ImageUrl,
-                m.ResolvedByUserId,
-                m.ResolvedByUserId == null ? null :
-                    db.UserPreferences
-                        .Where(p => p.UserId == m.ResolvedByUserId && p.DisplayName != null)
-                        .Select(p => p.DisplayName!)
-                        .FirstOrDefault() ?? m.ResolvedBy!.Name,
-                m.ResolvedAt,
-                m.Note))
             .ToListAsync();
+
+        var prefs = await LoadPrefsAsync();
+        return maengel.Select(m => BuildDto(m, prefs));
     }
 
     public async Task<MangelDto> CreateAsync(Guid userId, CreateMangelDto dto)
@@ -55,133 +39,155 @@ public class MangelService(ApplicationDbContext db) : IMangelService
 
         db.Maengel.Add(mangel);
         await db.SaveChangesAsync();
-
         await db.Entry(mangel).Reference(m => m.CreatedBy).LoadAsync();
 
-        var displayName = await db.UserPreferences
-            .Where(p => p.UserId == userId && p.DisplayName != null)
-            .Select(p => p.DisplayName!)
-            .FirstOrDefaultAsync() ?? mangel.CreatedBy.Name;
-
-        return new MangelDto(
-            mangel.Id,
-            mangel.Title,
-            mangel.Description,
-            mangel.Kategorie,
-            mangel.Status,
-            mangel.CreatedByUserId,
-            displayName,
-            mangel.CreatedAt,
-            mangel.ImageUrl,
-            null, null, null, null);
+        var prefs = await LoadPrefsAsync();
+        return BuildDto(mangel, prefs);
     }
 
     public async Task<(MangelDto? Dto, bool Forbidden)> ZurueckziehenAsync(Guid id, Guid userId)
     {
-        var mangel = await db.Maengel
-            .Include(m => m.CreatedBy)
-            .FirstOrDefaultAsync(m => m.Id == id);
-
-        if (mangel is null)
-            return (null, false);
-
-        if (mangel.CreatedByUserId != userId)
-            return (null, true);
-
-        if (mangel.Status != MangelStatus.Offen)
-            return (null, false);
+        var mangel = await LoadMangelAsync(id);
+        if (mangel is null) return (null, false);
+        if (mangel.CreatedByUserId != userId) return (null, true);
+        if (mangel.Status != MangelStatus.Offen) return (null, false);
 
         mangel.Status = MangelStatus.Zurueckgezogen;
         await db.SaveChangesAsync();
 
-        var displayName = await db.UserPreferences
-            .Where(p => p.UserId == mangel.CreatedByUserId && p.DisplayName != null)
-            .Select(p => p.DisplayName!)
-            .FirstOrDefaultAsync() ?? mangel.CreatedBy.Name;
-
-        return (new MangelDto(
-            mangel.Id,
-            mangel.Title,
-            mangel.Description,
-            mangel.Kategorie,
-            mangel.Status,
-            mangel.CreatedByUserId,
-            displayName,
-            mangel.CreatedAt,
-            mangel.ImageUrl,
-            null, null, null, null), false);
+        var prefs = await LoadPrefsAsync();
+        return (BuildDto(mangel, prefs), false);
     }
 
-    public async Task<(MangelDto? Dto, bool Forbidden)> UpdateContentAsync(Guid id, Guid userId, bool isPrivileged, UpdateMangelContentDto dto)
+    public async Task<(MangelDto? Dto, bool Forbidden)> UpdateContentAsync(
+        Guid id, Guid userId, bool isPrivileged, UpdateMangelContentDto dto)
     {
-        var mangel = await db.Maengel
-            .Include(m => m.CreatedBy)
-            .FirstOrDefaultAsync(m => m.Id == id);
+        var mangel = await LoadMangelAsync(id);
+        if (mangel is null) return (null, false);
+        if (!isPrivileged && mangel.CreatedByUserId != userId) return (null, true);
 
-        if (mangel is null)
-            return (null, false);
-
-        if (!isPrivileged && mangel.CreatedByUserId != userId)
-            return (null, true);
-
-        mangel.Title       = dto.Title;
+        mangel.Title = dto.Title;
         mangel.Description = dto.Description;
-        mangel.Kategorie   = dto.Kategorie;
-        mangel.ImageUrl    = dto.ImageUrl;
+        mangel.Kategorie = dto.Kategorie;
+        mangel.ImageUrl = dto.ImageUrl;
         await db.SaveChangesAsync();
 
-        var displayName = await db.UserPreferences
-            .Where(p => p.UserId == mangel.CreatedByUserId && p.DisplayName != null)
-            .Select(p => p.DisplayName!)
-            .FirstOrDefaultAsync() ?? mangel.CreatedBy.Name;
-
-        return (new MangelDto(
-            mangel.Id, mangel.Title, mangel.Description, mangel.Kategorie, mangel.Status,
-            mangel.CreatedByUserId, displayName, mangel.CreatedAt, mangel.ImageUrl,
-            mangel.ResolvedByUserId, null, mangel.ResolvedAt, mangel.Note), false);
+        var prefs = await LoadPrefsAsync();
+        return (BuildDto(mangel, prefs), false);
     }
 
     public async Task<MangelDto?> UpdateStatusAsync(Guid id, Guid resolvedByUserId, UpdateMangelStatusDto dto)
     {
-        var mangel = await db.Maengel
-            .Include(m => m.CreatedBy)
-            .FirstOrDefaultAsync(m => m.Id == id);
-
-        if (mangel is null)
-            return null;
+        var mangel = await LoadMangelAsync(id);
+        if (mangel is null) return null;
 
         mangel.Status = dto.Status;
         mangel.Note = dto.Note;
         mangel.ResolvedByUserId = resolvedByUserId;
         mangel.ResolvedAt = DateTime.UtcNow;
-
         await db.SaveChangesAsync();
 
         await db.Entry(mangel).Reference(m => m.ResolvedBy).LoadAsync();
 
-        var createdByDisplayName = await db.UserPreferences
-            .Where(p => p.UserId == mangel.CreatedByUserId && p.DisplayName != null)
-            .Select(p => p.DisplayName!)
-            .FirstOrDefaultAsync() ?? mangel.CreatedBy.Name;
+        var prefs = await LoadPrefsAsync();
+        return BuildDto(mangel, prefs);
+    }
 
-        var resolvedByDisplayName = await db.UserPreferences
-            .Where(p => p.UserId == resolvedByUserId && p.DisplayName != null)
-            .Select(p => p.DisplayName!)
-            .FirstOrDefaultAsync() ?? mangel.ResolvedBy!.Name;
+    // ---- Anmerkungen --------------------------------------------------------
+
+    public async Task<MangelAnmerkungDto?> AddAnmerkungAsync(
+        Guid mangelId, Guid userId, CreateMangelAnmerkungDto dto)
+    {
+        if (!await db.Maengel.AnyAsync(m => m.Id == mangelId))
+            return null;
+
+        var anmerkung = new MangelAnmerkung
+        {
+            Id = Guid.NewGuid(),
+            MangelId = mangelId,
+            Text = dto.Text,
+            CreatedByUserId = userId,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        db.MangelAnmerkungen.Add(anmerkung);
+        await db.SaveChangesAsync();
+        await db.Entry(anmerkung).Reference(a => a.CreatedBy).LoadAsync();
+
+        var prefs = await LoadPrefsAsync();
+        return BuildAnmerkungDto(anmerkung, prefs);
+    }
+
+    public async Task<(MangelAnmerkungDto? Dto, bool Forbidden)> UpdateAnmerkungAsync(
+        Guid mangelId, Guid anmerkungId, Guid userId, bool isPrivileged, UpdateMangelAnmerkungDto dto)
+    {
+        var anmerkung = await db.MangelAnmerkungen
+            .Include(a => a.CreatedBy)
+            .FirstOrDefaultAsync(a => a.Id == anmerkungId && a.MangelId == mangelId);
+
+        if (anmerkung is null) return (null, false);
+        if (!isPrivileged && anmerkung.CreatedByUserId != userId) return (null, true);
+
+        anmerkung.Text = dto.Text;
+        anmerkung.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        var prefs = await LoadPrefsAsync();
+        return (BuildAnmerkungDto(anmerkung, prefs), false);
+    }
+
+    public async Task<(bool Success, bool Forbidden)> DeleteAnmerkungAsync(
+        Guid mangelId, Guid anmerkungId, Guid userId, bool isPrivileged)
+    {
+        var anmerkung = await db.MangelAnmerkungen
+            .FirstOrDefaultAsync(a => a.Id == anmerkungId && a.MangelId == mangelId);
+
+        if (anmerkung is null) return (false, false);
+        if (!isPrivileged && anmerkung.CreatedByUserId != userId) return (false, true);
+
+        db.MangelAnmerkungen.Remove(anmerkung);
+        await db.SaveChangesAsync();
+        return (true, false);
+    }
+
+    // ---- Helpers ------------------------------------------------------------
+
+    private async Task<Mangel?> LoadMangelAsync(Guid id) =>
+        await db.Maengel
+            .Include(m => m.CreatedBy)
+            .Include(m => m.ResolvedBy)
+            .Include(m => m.Anmerkungen.OrderBy(a => a.CreatedAt))
+                .ThenInclude(a => a.CreatedBy)
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+    private async Task<Dictionary<Guid, string>> LoadPrefsAsync() =>
+        await db.UserPreferences
+            .Where(p => p.DisplayName != null)
+            .ToDictionaryAsync(p => p.UserId, p => p.DisplayName!);
+
+    private static string DisplayName(Guid uid, User user, Dictionary<Guid, string> prefs) =>
+        prefs.TryGetValue(uid, out var name) ? name : user.Name;
+
+    private static MangelAnmerkungDto BuildAnmerkungDto(
+        MangelAnmerkung a, Dictionary<Guid, string> prefs) =>
+        new(a.Id, a.Text, a.CreatedByUserId,
+            DisplayName(a.CreatedByUserId, a.CreatedBy, prefs),
+            a.CreatedAt, a.UpdatedAt);
+
+    private static MangelDto BuildDto(Mangel m, Dictionary<Guid, string> prefs)
+    {
+        var anmerkungen = m.Anmerkungen
+            .OrderBy(a => a.CreatedAt)
+            .Select(a => BuildAnmerkungDto(a, prefs))
+            .ToList();
 
         return new MangelDto(
-            mangel.Id,
-            mangel.Title,
-            mangel.Description,
-            mangel.Kategorie,
-            mangel.Status,
-            mangel.CreatedByUserId,
-            createdByDisplayName,
-            mangel.CreatedAt,
-            mangel.ImageUrl,
-            mangel.ResolvedByUserId,
-            resolvedByDisplayName,
-            mangel.ResolvedAt,
-            mangel.Note);
+            m.Id, m.Title, m.Description, m.Kategorie, m.Status,
+            m.CreatedByUserId, DisplayName(m.CreatedByUserId, m.CreatedBy, prefs),
+            m.CreatedAt, m.ImageUrl,
+            m.ResolvedByUserId,
+            m.ResolvedByUserId.HasValue && m.ResolvedBy is not null
+                ? DisplayName(m.ResolvedByUserId.Value, m.ResolvedBy, prefs) : null,
+            m.ResolvedAt, m.Note, anmerkungen);
     }
 }
