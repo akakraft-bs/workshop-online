@@ -30,12 +30,12 @@
   </div>
 
   <!-- Legende -->
-  @if (visibleConfigs().length > 0) {
+  @if (legendEntries().length > 0) {
     <div class="kalender-legend">
-      @for (cfg of visibleConfigs(); track cfg.googleCalendarId) {
+      @for (entry of legendEntries(); track entry.name) {
         <span class="legend-item">
-          <span class="legend-dot" [style.background]="cfg.color"></span>
-          {{ cfg.name }}
+          <span class="legend-dot" [style.background]="entry.color"></span>
+          {{ entry.name }}
         </span>
       }
     </div>

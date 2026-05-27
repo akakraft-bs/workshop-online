@@ -86,7 +86,18 @@ export class KalenderPageComponent implements OnInit {
   });
 
   readonly canWrite = computed(() => this.writableCalendarIds().length > 0);
+
   readonly visibleConfigs = computed(() => this.configs().filter(c => c.isVisible));
+
+  readonly legendEntries = computed(() => {
+    const seen = new Map<string, { name: string; color: string }>();
+    for (const ev of this.events()) {
+      if (!seen.has(ev.calendarId)) {
+        seen.set(ev.calendarId, { name: ev.calendarName, color: ev.calendarColor });
+      }
+    }
+    return [...seen.values()];
+  });
 
   ngOnInit(): void {
     this.loadConfigs();
