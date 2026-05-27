@@ -41,7 +41,8 @@ public record CalendarEventDto(
     string? CreatorName,
     string? CreatorEmail,
     string? Description,
-    string? Location
+    string? Location,
+    string? Url
 );
 
 public record CreateCalendarEventDto(
@@ -51,7 +52,8 @@ public record CreateCalendarEventDto(
     DateTime End,
     bool IsAllDay,
     string? Description,
-    string? Location
+    string? Location,
+    string? Url
 );
 
 public record UpdateCalendarEventDto(
@@ -60,5 +62,6 @@ public record UpdateCalendarEventDto(
     DateTime End,
     bool IsAllDay,
     string? Description,
-    string? Location
+    string? Location,
+    string? Url
 );

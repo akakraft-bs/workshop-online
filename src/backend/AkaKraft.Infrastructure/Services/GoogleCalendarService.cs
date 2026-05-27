@@ -13,6 +13,7 @@ public class GoogleCalendarService : ICalendarService
 {
     private const string AppCreatorNameKey = "appCreatorName";
     private const string AppCreatorEmailKey = "appCreatorEmail";
+    private const string AppEventUrlKey = "appEventUrl";
 
     private readonly CalendarService? _calendarService;
     private readonly ILogger<GoogleCalendarService> _logger;
@@ -87,7 +88,7 @@ public class GoogleCalendarService : ICalendarService
         if (_calendarService is null)
             throw new InvalidOperationException("Google Calendar Service ist nicht konfiguriert.");
 
-        var googleEvent = BuildGoogleEvent(dto.Title, dto.Start, dto.End, dto.IsAllDay, dto.Description, dto.Location, creatorName, creatorEmail);
+        var googleEvent = BuildGoogleEvent(dto.Title, dto.Start, dto.End, dto.IsAllDay, dto.Description, dto.Location, dto.Url, creatorName, creatorEmail);
         var request = _calendarService.Events.Insert(googleEvent, calendarId);
         var created = await request.ExecuteAsync();
 
@@ -108,6 +109,12 @@ public class GoogleCalendarService : ICalendarService
         existing.Summary = dto.Title;
         existing.Description = dto.Description;
         existing.Location = dto.Location;
+        existing.ExtendedProperties ??= new Event.ExtendedPropertiesData();
+        existing.ExtendedProperties.Shared ??= new Dictionary<string, string>();
+        if (dto.Url is not null)
+            existing.ExtendedProperties.Shared[AppEventUrlKey] = dto.Url;
+        else
+            existing.ExtendedProperties.Shared.Remove(AppEventUrlKey);
         SetEventTime(existing, dto.Start, dto.End, dto.IsAllDay);
 
         var updated = await _calendarService.Events.Update(existing, calendarId, eventId).ExecuteAsync();
@@ -177,21 +184,22 @@ public class GoogleCalendarService : ICalendarService
 
     private static Event BuildGoogleEvent(
         string title, DateTime start, DateTime end, bool isAllDay,
-        string? description, string? location, string creatorName, string creatorEmail)
+        string? description, string? location, string? url, string creatorName, string creatorEmail)
     {
+        var shared = new Dictionary<string, string>
+        {
+            { AppCreatorNameKey, creatorName },
+            { AppCreatorEmailKey, creatorEmail }
+        };
+        if (!string.IsNullOrWhiteSpace(url))
+            shared[AppEventUrlKey] = url;
+
         var ev = new Event
         {
             Summary = title,
             Description = description,
             Location = location,
-            ExtendedProperties = new Event.ExtendedPropertiesData
-            {
-                Shared = new Dictionary<string, string>
-                {
-                    { AppCreatorNameKey, creatorName },
-                    { AppCreatorEmailKey, creatorEmail }
-                }
-            }
+            ExtendedProperties = new Event.ExtendedPropertiesData { Shared = shared }
         };
 
         SetEventTime(ev, start, end, isAllDay);
@@ -229,10 +237,12 @@ public class GoogleCalendarService : ICalendarService
         string? creatorName = null;
         string? creatorEmail = null;
 
+        string? eventUrl = null;
         if (ev.ExtendedProperties?.Shared is { } shared)
         {
             shared.TryGetValue(AppCreatorNameKey, out creatorName);
             shared.TryGetValue(AppCreatorEmailKey, out creatorEmail);
+            shared.TryGetValue(AppEventUrlKey, out eventUrl);
         }
 
         creatorName ??= ev.Creator?.DisplayName;
@@ -250,7 +260,8 @@ public class GoogleCalendarService : ICalendarService
             creatorName,
             creatorEmail,
             ev.Description,
-            ev.Location
+            ev.Location,
+            eventUrl
         );
     }
 }

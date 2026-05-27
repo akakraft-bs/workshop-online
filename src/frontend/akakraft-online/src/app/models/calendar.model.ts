@@ -39,6 +39,7 @@ export interface CalendarEvent {
   creatorEmail?: string;
   description?: string;
   location?: string;
+  url?: string;
 }
 
 export interface CreateCalendarEventRequest {
@@ -49,6 +50,7 @@ export interface CreateCalendarEventRequest {
   isAllDay: boolean;
   description?: string;
   location?: string;
+  url?: string;
 }
 
 export interface UpdateCalendarEventRequest {
@@ -58,6 +60,7 @@ export interface UpdateCalendarEventRequest {
   isAllDay: boolean;
   description?: string;
   location?: string;
+  url?: string;
 }
 
 export interface UpdateCalendarConfigRequest {

@@ -161,6 +161,7 @@ export class KalenderPageComponent implements OnInit {
         isAllDay: result.isAllDay,
         description: result.description,
         location: result.location,
+        url: result.url,
       }).subscribe(() => this.loadEvents());
     });
   }
@@ -185,6 +186,7 @@ export class KalenderPageComponent implements OnInit {
         isAllDay: result.isAllDay,
         description: result.description,
         location: result.location,
+        url: result.url,
       }).subscribe(() => this.loadEvents());
     });
   }

@@ -171,6 +171,7 @@ export class VeranstaltungenPageComponent implements OnInit {
         isAllDay: result.isAllDay,
         description: result.description,
         location: result.location,
+        url: result.url,
       }).subscribe(() => this.loadEvents());
     });
   }
@@ -198,6 +199,7 @@ export class VeranstaltungenPageComponent implements OnInit {
         isAllDay: result.isAllDay,
         description: result.description,
         location: result.location,
+        url: result.url,
       }).subscribe(() => this.loadEvents());
     });
   }

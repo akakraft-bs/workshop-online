@@ -28,6 +28,7 @@ export interface EventFormDialogResult {
   isAllDay: boolean;
   description?: string;
   location?: string;
+  url?: string;
 }
 
 @Component({
@@ -68,6 +69,7 @@ export class EventFormDialogComponent implements OnInit {
     endTime: [''],
     description: [''],
     location: [''],
+    url: [''],
   });
 
   ngOnInit(): void {
@@ -87,6 +89,7 @@ export class EventFormDialogComponent implements OnInit {
         endTime: toTimeString(end),
         description: ev.description ?? '',
         location: ev.location ?? '',
+        url: ev.url ?? '',
       });
     } else {
       const start = this.data.defaultStart ?? roundToNextHour(new Date());
@@ -205,6 +208,7 @@ export class EventFormDialogComponent implements OnInit {
       isAllDay,
       description: v.description || undefined,
       location: v.location || undefined,
+      url: v.url || undefined,
     } satisfies EventFormDialogResult);
   }
 }

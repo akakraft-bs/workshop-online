@@ -79,6 +79,13 @@
                 @if (event.description) {
                   <p class="event-description">{{ event.description }}</p>
                 }
+                @if (event.url) {
+                  <a class="event-url" [href]="event.url" target="_blank" rel="noopener noreferrer"
+                     (click)="$event.stopPropagation()">
+                    <mat-icon inline>open_in_new</mat-icon>
+                    {{ event.url }}
+                  </a>
+                }
               </div>
 
               @if (canEditEvent(event)) {
