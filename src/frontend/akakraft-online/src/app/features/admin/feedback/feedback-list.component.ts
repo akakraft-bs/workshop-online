@@ -27,18 +27,19 @@ export class AdminFeedbackListComponent implements OnInit {
 
   readonly feedbacks = signal<Feedback[]>([]);
   readonly loading = signal(true);
-  readonly filterStatus = signal<FeedbackStatus | 'all'>('all');
+  readonly filterStatus = signal<FeedbackStatus | 'open'>('open');
 
   readonly displayedColumns = ['createdAt', 'user', 'page', 'text', 'status', 'actions'];
 
   readonly filtered = computed(() => {
     const all = this.feedbacks();
     const f = this.filterStatus();
-    return f === 'all' ? all : all.filter(fb => fb.status === f);
+    if (f === 'open') return all.filter(fb => fb.status !== 'Done');
+    return all.filter(fb => fb.status === f);
   });
 
   readonly counts = computed(() => ({
-    all: this.feedbacks().length,
+    open: this.feedbacks().filter(f => f.status !== 'Done').length,
     New: this.feedbacks().filter(f => f.status === 'New').length,
     Read: this.feedbacks().filter(f => f.status === 'Read').length,
     Done: this.feedbacks().filter(f => f.status === 'Done').length,

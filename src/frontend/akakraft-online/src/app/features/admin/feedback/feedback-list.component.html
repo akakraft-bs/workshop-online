@@ -10,7 +10,7 @@
     [value]="filterStatus()"
     (change)="filterStatus.set($event.value)"
     class="filter-group">
-    <mat-button-toggle value="all">Alle ({{ counts().all }})</mat-button-toggle>
+    <mat-button-toggle value="open">Offen ({{ counts().open }})</mat-button-toggle>
     <mat-button-toggle value="New">
       <mat-icon class="status-icon new">fiber_new</mat-icon>
       Neu ({{ counts().New }})
