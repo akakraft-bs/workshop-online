@@ -93,6 +93,14 @@
   flex-basis: 100%;
 }
 
+.umfrage-description {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+  flex-basis: 100%;
+  white-space: pre-line;
+}
+
 .status-chip {
   display: inline-flex;
   align-items: center;

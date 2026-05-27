@@ -50,6 +50,7 @@ export class CreateUmfrageDialogComponent implements OnInit {
 
   readonly form = this.fb.group({
     question: ['', [Validators.required, Validators.maxLength(500)]],
+    description: ['', Validators.maxLength(2000)],
     isMultipleChoice: [false],
     resultsVisible: [true],
     revealAfterClose: [false],
@@ -79,6 +80,7 @@ export class CreateUmfrageDialogComponent implements OnInit {
     if (u) {
       this.form.patchValue({
         question: u.question,
+        description: u.description ?? '',
         isMultipleChoice: u.isMultipleChoice,
         resultsVisible: u.resultsVisible,
         revealAfterClose: u.revealAfterClose,
@@ -176,6 +178,7 @@ export class CreateUmfrageDialogComponent implements OnInit {
     if (this.isEdit) {
       const result: UpdateUmfrageDto = {
         question: v.question!,
+        description: v.description || null,
         options: rawOptions.map(o => ({ id: o.id ?? null, text: o.text })),
         isMultipleChoice: v.isMultipleChoice!,
         resultsVisible: v.resultsVisible!,
@@ -190,6 +193,7 @@ export class CreateUmfrageDialogComponent implements OnInit {
     } else {
       const result: CreateUmfrageDto = {
         question: v.question!,
+        description: v.description || null,
         options: rawOptions.map(o => o.text),
         isMultipleChoice: v.isMultipleChoice!,
         resultsVisible: v.resultsVisible!,

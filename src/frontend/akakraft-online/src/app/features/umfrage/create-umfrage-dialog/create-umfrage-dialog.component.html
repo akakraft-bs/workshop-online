@@ -16,6 +16,16 @@
       }
     </mat-form-field>
 
+    <mat-form-field appearance="outline">
+      <mat-label>Beschreibung (optional)</mat-label>
+      <textarea matInput formControlName="description" rows="3"
+                placeholder="Zusätzliche Informationen zur Umfrage …"
+                cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
+      @if (form.get('description')?.hasError('maxlength')) {
+        <mat-error>Maximal 2000 Zeichen.</mat-error>
+      }
+    </mat-form-field>
+
     <!-- Options -->
     <div class="options-section">
       <div class="options-label">Antwortmöglichkeiten</div>

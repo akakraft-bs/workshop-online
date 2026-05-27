@@ -14,6 +14,7 @@ public record UmfrageOptionDto(
 public record UmfrageDto(
     Guid Id,
     string Question,
+    string? Description,
     bool IsMultipleChoice,
     bool ResultsVisible,
     bool RevealAfterClose,
@@ -37,6 +38,7 @@ public record UmfrageDto(
 
 public record CreateUmfrageDto(
     string Question,
+    string? Description,
     List<string> Options,
     bool IsMultipleChoice,
     bool ResultsVisible,
@@ -49,6 +51,7 @@ public record CreateUmfrageDto(
 
 public record UpdateUmfrageDto(
     string Question,
+    string? Description,
     List<UpdateUmfrageOptionDto> Options,
     bool IsMultipleChoice,
     bool ResultsVisible,

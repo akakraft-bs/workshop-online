@@ -42,6 +42,9 @@ public class Umfrage
     /// <summary>Denormalized start date of the linked event (UTC).</summary>
     public DateTime? LinkedEventStart { get; set; }
 
+    /// <summary>Optional description shown below the question.</summary>
+    public string? Description { get; set; }
+
     public ICollection<UmfrageOption> Options { get; set; } = [];
     public ICollection<UmfrageAntwort> Antworten { get; set; } = [];
 }

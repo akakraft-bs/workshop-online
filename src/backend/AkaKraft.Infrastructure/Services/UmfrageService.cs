@@ -34,6 +34,7 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
         {
             Id = Guid.NewGuid(),
             Question = dto.Question,
+            Description = dto.Description,
             IsMultipleChoice = dto.IsMultipleChoice,
             ResultsVisible = dto.ResultsVisible,
             RevealAfterClose = dto.RevealAfterClose,
@@ -87,6 +88,7 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
             return (null, true);
 
         umfrage.Question = dto.Question;
+        umfrage.Description = dto.Description;
         umfrage.IsMultipleChoice = dto.IsMultipleChoice;
         umfrage.ResultsVisible = dto.ResultsVisible;
         umfrage.RevealAfterClose = dto.RevealAfterClose;
@@ -294,6 +296,7 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
         return new UmfrageDto(
             umfrage.Id,
             umfrage.Question,
+            umfrage.Description,
             umfrage.IsMultipleChoice,
             umfrage.ResultsVisible,
             umfrage.RevealAfterClose,

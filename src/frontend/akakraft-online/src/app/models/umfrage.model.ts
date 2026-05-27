@@ -13,6 +13,7 @@ export interface UmfrageOption {
 export interface Umfrage {
   id: string;
   question: string;
+  description?: string | null;
   isMultipleChoice: boolean;
   resultsVisible: boolean;
   revealAfterClose: boolean;
@@ -37,6 +38,7 @@ export interface Umfrage {
 
 export interface CreateUmfrageDto {
   question: string;
+  description?: string | null;
   options: string[];
   isMultipleChoice: boolean;
   resultsVisible: boolean;
@@ -55,6 +57,7 @@ export interface UpdateUmfrageOptionDto {
 
 export interface UpdateUmfrageDto {
   question: string;
+  description?: string | null;
   options: UpdateUmfrageOptionDto[];
   isMultipleChoice: boolean;
   resultsVisible: boolean;
