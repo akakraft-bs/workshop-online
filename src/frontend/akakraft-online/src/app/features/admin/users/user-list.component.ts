@@ -10,7 +10,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../../core/api/api.service';
 import { AuthService } from '../../../core/auth/auth.service';
-import { Role, ROLE_LABELS, User } from '../../../models/user.model';
+import { Role, ROLE_LABELS, VORSTAND_ROLES, User } from '../../../models/user.model';
 import {
   EditRolesDialogComponent,
   EditRolesDialogData,
@@ -36,12 +36,20 @@ export class UserListComponent implements OnInit {
   readonly roleLabels = ROLE_LABELS;
   readonly displayedColumns = ['name', 'email', 'roles', 'actions'];
 
+  readonly sortedUsers = computed(() =>
+    [...this.users()].sort((a, b) => {
+      const nameA = (a.displayName || a.name).toLowerCase();
+      const nameB = (b.displayName || b.name).toLowerCase();
+      return nameA.localeCompare(nameB, 'de');
+    })
+  );
+
   readonly pendingUsers = computed(() =>
-    this.users().filter(u => u.roles.length === 0 || u.roles.every(r => r === Role.None))
+    this.sortedUsers().filter(u => u.roles.length === 0 || u.roles.every(r => r === Role.None))
   );
 
   readonly activeUsers = computed(() =>
-    this.users().filter(u => u.roles.some(r => r !== Role.None))
+    this.sortedUsers().filter(u => u.roles.some(r => r !== Role.None))
   );
 
   ngOnInit(): void {
@@ -99,10 +107,20 @@ export class UserListComponent implements OnInit {
   }
 
   getDisplayedRoles(user: User): Role[] {
-    return user.roles.filter(r => r !== Role.None);
+    return user.roles
+      .filter(r => r !== Role.None)
+      .sort((a, b) => ROLE_SORT_ORDER.indexOf(a) - ROLE_SORT_ORDER.indexOf(b));
   }
 
   isPending(user: User): boolean {
     return user.roles.length === 0 || user.roles.every(r => r === Role.None);
   }
 }
+
+// Mitglied → Vorstand-Rollen → Moderator → Admin
+const ROLE_SORT_ORDER: Role[] = [
+  Role.Member,
+  ...VORSTAND_ROLES,
+  Role.Moderator,
+  Role.Admin,
+];
