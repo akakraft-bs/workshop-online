@@ -29,7 +29,11 @@ public record UmfrageDto(
     /// <summary>IDs of options the current user has selected.</summary>
     List<Guid> CurrentUserOptionIds,
     /// <summary>Total number of participants who have answered (regardless of visibility).</summary>
-    int ParticipantCount);
+    int ParticipantCount,
+    string? LinkedEventId,
+    string? LinkedCalendarId,
+    string? LinkedEventTitle,
+    DateTime? LinkedEventStart);
 
 public record CreateUmfrageDto(
     string Question,
@@ -37,7 +41,11 @@ public record CreateUmfrageDto(
     bool IsMultipleChoice,
     bool ResultsVisible,
     bool RevealAfterClose,
-    DateTime? Deadline);
+    DateTime? Deadline,
+    string? LinkedEventId,
+    string? LinkedCalendarId,
+    string? LinkedEventTitle,
+    DateTime? LinkedEventStart);
 
 public record UpdateUmfrageDto(
     string Question,
@@ -45,7 +53,11 @@ public record UpdateUmfrageDto(
     bool IsMultipleChoice,
     bool ResultsVisible,
     bool RevealAfterClose,
-    DateTime? Deadline);
+    DateTime? Deadline,
+    string? LinkedEventId,
+    string? LinkedCalendarId,
+    string? LinkedEventTitle,
+    DateTime? LinkedEventStart);
 
 public record UpdateUmfrageOptionDto(
     Guid? Id,   // null = new option

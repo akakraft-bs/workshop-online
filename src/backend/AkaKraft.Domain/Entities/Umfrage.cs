@@ -33,6 +33,15 @@ public class Umfrage
     public User? ClosedBy { get; set; }
     public DateTime? ClosedAt { get; set; }
 
+    /// <summary>Google Calendar event ID of the linked Veranstaltung.</summary>
+    public string? LinkedEventId { get; set; }
+    /// <summary>Google Calendar ID of the linked Veranstaltung.</summary>
+    public string? LinkedCalendarId { get; set; }
+    /// <summary>Denormalized title of the linked event for display.</summary>
+    public string? LinkedEventTitle { get; set; }
+    /// <summary>Denormalized start date of the linked event (UTC).</summary>
+    public DateTime? LinkedEventStart { get; set; }
+
     public ICollection<UmfrageOption> Options { get; set; } = [];
     public ICollection<UmfrageAntwort> Antworten { get; set; } = [];
 }

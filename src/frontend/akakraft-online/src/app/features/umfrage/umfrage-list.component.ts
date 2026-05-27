@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,6 +29,7 @@ type StatusFilter = 'offen' | 'geschlossen' | 'alle';
   selector: 'app-umfrage-list',
   imports: [
     DatePipe,
+    RouterLink,
     MatButtonModule,
     MatButtonToggleModule,
     MatIconModule,
@@ -210,5 +212,13 @@ export class UmfrageListComponent implements OnInit {
         this.pendingVoteId.set(null);
       },
     });
+  }
+
+  formatLinkedEvent(umfrage: Umfrage): string {
+    if (!umfrage.linkedEventTitle) return '';
+    if (!umfrage.linkedEventStart) return umfrage.linkedEventTitle;
+    const d = new Date(umfrage.linkedEventStart);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}. – ${umfrage.linkedEventTitle}`;
   }
 }

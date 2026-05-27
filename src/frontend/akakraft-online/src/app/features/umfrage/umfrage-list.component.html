@@ -43,6 +43,12 @@
         <div class="card-header">
           <div class="title-row">
             <p class="umfrage-question">{{ umfrage.question }}</p>
+            @if (umfrage.linkedEventTitle) {
+              <a class="linked-event-chip" routerLink="/veranstaltungen" matTooltip="Zur Veranstaltung">
+                <mat-icon class="linked-event-icon">event</mat-icon>
+                {{ formatLinkedEvent(umfrage) }}
+              </a>
+            }
             @if (umfrage.status === 'Geschlossen') {
               <span class="status-chip status-closed">
                 <mat-icon class="status-icon">lock</mat-icon>

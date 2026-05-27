@@ -19,6 +19,10 @@ public class UmfrageConfiguration : IEntityTypeConfiguration<Umfrage>
             .IsRequired()
             .HasConversion<string>();
 
+        builder.Property(u => u.LinkedEventId).HasMaxLength(256);
+        builder.Property(u => u.LinkedCalendarId).HasMaxLength(256);
+        builder.Property(u => u.LinkedEventTitle).HasMaxLength(500);
+
         builder.HasOne(u => u.CreatedBy)
             .WithMany()
             .HasForeignKey(u => u.CreatedByUserId)

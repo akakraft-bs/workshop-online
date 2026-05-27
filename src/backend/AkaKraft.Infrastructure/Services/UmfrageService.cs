@@ -41,6 +41,10 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
             Status = UmfrageStatus.Offen,
             CreatedByUserId = userId,
             CreatedAt = DateTime.UtcNow,
+            LinkedEventId = dto.LinkedEventId,
+            LinkedCalendarId = dto.LinkedCalendarId,
+            LinkedEventTitle = dto.LinkedEventTitle,
+            LinkedEventStart = dto.LinkedEventStart?.ToUniversalTime(),
         };
 
         for (int i = 0; i < dto.Options.Count; i++)
@@ -87,6 +91,10 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
         umfrage.ResultsVisible = dto.ResultsVisible;
         umfrage.RevealAfterClose = dto.RevealAfterClose;
         umfrage.Deadline = dto.Deadline?.ToUniversalTime();
+        umfrage.LinkedEventId = dto.LinkedEventId;
+        umfrage.LinkedCalendarId = dto.LinkedCalendarId;
+        umfrage.LinkedEventTitle = dto.LinkedEventTitle;
+        umfrage.LinkedEventStart = dto.LinkedEventStart?.ToUniversalTime();
 
         // Update options: keep existing (by Id), add new, remove absent
         var existingOptions = umfrage.Options.ToDictionary(o => o.Id);
@@ -299,6 +307,10 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
             umfrage.ClosedAt,
             options,
             currentUserOptionIds,
-            participantCount);
+            participantCount,
+            umfrage.LinkedEventId,
+            umfrage.LinkedCalendarId,
+            umfrage.LinkedEventTitle,
+            umfrage.LinkedEventStart);
     }
 }

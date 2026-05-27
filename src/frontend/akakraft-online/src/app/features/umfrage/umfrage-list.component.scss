@@ -115,6 +115,31 @@
   height: 14px;
 }
 
+.linked-event-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px 2px 5px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: color-mix(in srgb, var(--mat-sys-tertiary) 15%, transparent);
+  color: var(--mat-sys-tertiary);
+  flex-basis: 100%;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-tertiary) 25%, transparent);
+  }
+}
+
+.linked-event-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
 .badge-multi,
 .badge-hidden {
   display: inline-flex;

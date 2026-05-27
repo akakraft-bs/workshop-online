@@ -44,6 +44,21 @@
       </button>
     </div>
 
+    <!-- Veranstaltungsverknüpfung -->
+    <mat-form-field appearance="outline">
+      <mat-label>Mit Veranstaltung verknüpfen (optional)</mat-label>
+      <mat-select formControlName="linkedEventId">
+        <mat-option [value]="null">— Keine Verknüpfung —</mat-option>
+        @if (eventsLoading()) {
+          <mat-option disabled>Wird geladen …</mat-option>
+        }
+        @for (event of veranstaltungen(); track event.id) {
+          <mat-option [value]="event.id">{{ formatEventLabel(event) }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matPrefix>event</mat-icon>
+    </mat-form-field>
+
     <div class="toggles-section">
       <div class="toggle-row">
         <mat-slide-toggle formControlName="isMultipleChoice">

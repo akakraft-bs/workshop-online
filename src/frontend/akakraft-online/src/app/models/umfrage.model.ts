@@ -29,6 +29,10 @@ export interface Umfrage {
   currentUserOptionIds: string[];
   /** Total number of distinct users who answered. */
   participantCount: number;
+  linkedEventId?: string | null;
+  linkedCalendarId?: string | null;
+  linkedEventTitle?: string | null;
+  linkedEventStart?: string | null;
 }
 
 export interface CreateUmfrageDto {
@@ -38,6 +42,10 @@ export interface CreateUmfrageDto {
   resultsVisible: boolean;
   revealAfterClose: boolean;
   deadline?: string | null;
+  linkedEventId?: string | null;
+  linkedCalendarId?: string | null;
+  linkedEventTitle?: string | null;
+  linkedEventStart?: string | null;
 }
 
 export interface UpdateUmfrageOptionDto {
@@ -52,6 +60,10 @@ export interface UpdateUmfrageDto {
   resultsVisible: boolean;
   revealAfterClose: boolean;
   deadline?: string | null;
+  linkedEventId?: string | null;
+  linkedCalendarId?: string | null;
+  linkedEventTitle?: string | null;
+  linkedEventStart?: string | null;
 }
 
 export interface VoteUmfrageDto {
