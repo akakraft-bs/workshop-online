@@ -47,6 +47,10 @@
   }
 
   <!-- Alle Nutzer -->
+  <div class="section-header">
+    <span class="section-title">Alle Nutzer</span>
+    <span class="user-count">{{ users().length }} {{ users().length === 1 ? 'Nutzer' : 'Nutzer' }}</span>
+  </div>
   <div class="table-container mat-elevation-z1">
     <table mat-table [dataSource]="users()">
 
