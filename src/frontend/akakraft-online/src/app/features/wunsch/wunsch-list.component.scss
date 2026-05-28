@@ -89,15 +89,26 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
-    color: var(--mat-sys-on-surface-variant);
   }
 
-  &.active-up mat-icon {
-    color: var(--mat-sys-primary);
+  &.vote-btn--up mat-icon {
+    color: #4caf50;
+    opacity: 0.55;
   }
 
-  &.active-down mat-icon {
+  &.vote-btn--up.active-up mat-icon,
+  &.vote-btn--up:not([disabled]):hover mat-icon {
+    opacity: 1;
+  }
+
+  &.vote-btn--down mat-icon {
     color: var(--mat-sys-error);
+    opacity: 0.55;
+  }
+
+  &.vote-btn--down.active-down mat-icon,
+  &.vote-btn--down:not([disabled]):hover mat-icon {
+    opacity: 1;
   }
 }
 
@@ -216,6 +227,22 @@
   width: 14px;
   height: 14px;
   flex-shrink: 0;
+}
+
+.price-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mat-sys-primary);
+  margin-bottom: 10px;
+
+  .price-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
 }
 
 .card-footer {

@@ -30,6 +30,8 @@ public class WunschService(ApplicationDbContext db) : IWunschService
             w.Title,
             w.Description,
             w.Link,
+            w.PriceMin,
+            w.PriceMax,
             w.Status,
             w.CreatedByUserId,
             DisplayName(w.CreatedByUserId, w.CreatedBy.Name),
@@ -51,6 +53,8 @@ public class WunschService(ApplicationDbContext db) : IWunschService
             Title = dto.Title,
             Description = dto.Description,
             Link = dto.Link,
+            PriceMin = dto.PriceMin,
+            PriceMax = dto.PriceMax,
             Status = WunschStatus.Offen,
             CreatedByUserId = userId,
             CreatedAt = DateTime.UtcNow,
@@ -81,6 +85,8 @@ public class WunschService(ApplicationDbContext db) : IWunschService
             wunsch.Title,
             wunsch.Description,
             wunsch.Link,
+            wunsch.PriceMin,
+            wunsch.PriceMax,
             wunsch.Status,
             wunsch.CreatedByUserId,
             displayName,
@@ -160,6 +166,8 @@ public class WunschService(ApplicationDbContext db) : IWunschService
             wunsch.Title,
             wunsch.Description,
             wunsch.Link,
+            wunsch.PriceMin,
+            wunsch.PriceMax,
             wunsch.Status,
             wunsch.CreatedByUserId,
             DisplayName(wunsch.CreatedByUserId, wunsch.CreatedBy.Name),
@@ -190,6 +198,8 @@ public class WunschService(ApplicationDbContext db) : IWunschService
         wunsch.Title = dto.Title;
         wunsch.Description = dto.Description;
         wunsch.Link = dto.Link;
+        wunsch.PriceMin = dto.PriceMin;
+        wunsch.PriceMax = dto.PriceMax;
         await db.SaveChangesAsync();
 
         var userPrefs = await db.UserPreferences
@@ -206,6 +216,8 @@ public class WunschService(ApplicationDbContext db) : IWunschService
             wunsch.Title,
             wunsch.Description,
             wunsch.Link,
+            wunsch.PriceMin,
+            wunsch.PriceMax,
             wunsch.Status,
             wunsch.CreatedByUserId,
             DisplayName(wunsch.CreatedByUserId, wunsch.CreatedBy.Name),
@@ -246,6 +258,8 @@ public class WunschService(ApplicationDbContext db) : IWunschService
             wunsch.Title,
             wunsch.Description,
             wunsch.Link,
+            wunsch.PriceMin,
+            wunsch.PriceMax,
             wunsch.Status,
             wunsch.CreatedByUserId,
             DisplayName(wunsch.CreatedByUserId, wunsch.CreatedBy.Name),
