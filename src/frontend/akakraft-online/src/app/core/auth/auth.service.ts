@@ -2,7 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { catchError, EMPTY, firstValueFrom, Observable, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, firstValueFrom, map, Observable, shareReplay, tap, throwError } from 'rxjs';
 import { Role, User, VORSTAND_ROLES } from '../../models/user.model';
 import { environment } from '../../../environments/environment';
 
@@ -23,6 +23,7 @@ export class AuthService {
   readonly hasAccess = computed(() => this.roles().some(r => r !== Role.None));
 
   readonly initialized$: Promise<void>;
+  private refreshInProgress$: Observable<string> | null = null;
 
   constructor() {
     this.initialized$ = this.tryRestoreSession();
@@ -122,23 +123,26 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  /** Versucht per Refresh-Token (httpOnly-Cookie) ein neues JWT zu holen. */
+  /** Versucht per Refresh-Token (httpOnly-Cookie) ein neues JWT zu holen.
+   *  Alle gleichzeitigen Aufrufe teilen sich denselben HTTP-Call (shareReplay),
+   *  damit der Refresh-Token nicht durch parallele Requests doppelt verbraucht wird. */
   refresh(): Observable<string> {
-    return new Observable(observer => {
-      this.http.post<{ token: string }>(
-        `${environment.apiUrl}/auth/refresh`, {}, { withCredentials: true }
-      ).pipe(
-        tap(res => localStorage.setItem(this.TOKEN_KEY, res.token)),
-        catchError((err: HttpErrorResponse) => {
-          this.clearSession();
-          this.router.navigate(['/login']);
-          observer.error(err);
-          return EMPTY;
-        })
-      ).subscribe({
-        next: res => { observer.next(res.token); observer.complete(); },
-      });
-    });
+    if (!this.refreshInProgress$) {
+      this.refreshInProgress$ = this.http
+        .post<{ token: string }>(`${environment.apiUrl}/auth/refresh`, {}, { withCredentials: true })
+        .pipe(
+          tap(res => localStorage.setItem(this.TOKEN_KEY, res.token)),
+          map(res => res.token),
+          catchError((err: HttpErrorResponse) => {
+            this.clearSession();
+            this.router.navigate(['/login']);
+            return throwError(() => err);
+          }),
+          shareReplay(1),
+          finalize(() => { this.refreshInProgress$ = null; }),
+        );
+    }
+    return this.refreshInProgress$;
   }
 
   getToken(): string | null {
