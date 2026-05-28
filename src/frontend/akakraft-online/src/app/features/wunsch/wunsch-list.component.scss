@@ -89,15 +89,26 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
-    color: var(--mat-sys-on-surface-variant);
   }
 
-  &.active-up mat-icon {
-    color: var(--mat-sys-primary);
+  &.vote-btn--up mat-icon {
+    color: #4caf50;
+    opacity: 0.55;
   }
 
-  &.active-down mat-icon {
+  &.vote-btn--up.active-up mat-icon,
+  &.vote-btn--up:not([disabled]):hover mat-icon {
+    opacity: 1;
+  }
+
+  &.vote-btn--down mat-icon {
     color: var(--mat-sys-error);
+    opacity: 0.55;
+  }
+
+  &.vote-btn--down.active-down mat-icon,
+  &.vote-btn--down:not([disabled]):hover mat-icon {
+    opacity: 1;
   }
 }
 

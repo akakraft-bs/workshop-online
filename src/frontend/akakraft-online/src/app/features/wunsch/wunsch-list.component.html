@@ -42,7 +42,7 @@
         <!-- Vote column -->
         <div class="vote-col">
           <button mat-icon-button
-                  class="vote-btn"
+                  class="vote-btn vote-btn--up"
                   [class.active-up]="wunsch.currentUserVote === true"
                   [disabled]="wunsch.status !== 'Offen' || pendingVoteId() === wunsch.id"
                   [matTooltip]="wunsch.currentUserVote === true ? 'Stimme entfernen' : 'Dafür'"
@@ -54,7 +54,7 @@
             {{ wunsch.upVotes - wunsch.downVotes }}
           </span>
           <button mat-icon-button
-                  class="vote-btn"
+                  class="vote-btn vote-btn--down"
                   [class.active-down]="wunsch.currentUserVote === false"
                   [disabled]="wunsch.status !== 'Offen' || pendingVoteId() === wunsch.id"
                   [matTooltip]="wunsch.currentUserVote === false ? 'Stimme entfernen' : 'Dagegen'"
