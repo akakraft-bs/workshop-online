@@ -36,7 +36,9 @@
 
     <div class="sidenav-footer">
       @if (version()) {
-        <span class="app-version">v{{ version() }}</span>
+        <a class="app-version"
+           [href]="'https://github.com/akakraft-bs/workshop-online/releases/tag/v' + version()"
+           target="_blank" rel="noopener">v{{ version() }}</a>
         <span>·</span>
       }
       <a href="nutzungsbedingungen.html" target="_blank">Nutzungsbedingungen</a>
