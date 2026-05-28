@@ -229,6 +229,22 @@
   flex-shrink: 0;
 }
 
+.price-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mat-sys-primary);
+  margin-bottom: 10px;
+
+  .price-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
 .card-footer {
   display: flex;
   align-items: center;

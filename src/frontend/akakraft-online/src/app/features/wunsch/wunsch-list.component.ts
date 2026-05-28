@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,7 +21,7 @@ type StatusFilter = 'offen' | 'abgeschlossen' | 'alle';
 @Component({
   selector: 'app-wunsch-list',
   imports: [
-    DatePipe,
+    DatePipe, DecimalPipe,
     MatButtonModule, MatButtonToggleModule,
     MatIconModule, MatProgressSpinnerModule, MatTooltipModule,
   ],
@@ -84,7 +84,7 @@ export class WunschListComponent implements OnInit {
     this.dialog
       .open(CreateWunschDialogComponent, { width: '480px' })
       .afterClosed()
-      .subscribe((result: { title: string; description: string; link: string | null } | undefined) => {
+      .subscribe((result: { title: string; description: string; link: string | null; priceMin: number | null; priceMax: number | null } | undefined) => {
         if (!result) return;
         this.api.post<Wunsch>('/wunsch', result).subscribe({
           next: created => {
@@ -117,7 +117,7 @@ export class WunschListComponent implements OnInit {
     this.dialog
       .open(CreateWunschDialogComponent, { data, width: '480px' })
       .afterClosed()
-      .subscribe((result: { title: string; description: string; link: string | null } | undefined) => {
+      .subscribe((result: { title: string; description: string; link: string | null; priceMin: number | null; priceMax: number | null } | undefined) => {
         if (!result) return;
         this.api.put<Wunsch>(`/wunsch/${wunsch.id}`, result).subscribe({
           next: updated => {

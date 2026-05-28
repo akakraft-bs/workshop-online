@@ -7,6 +7,8 @@ public record WunschDto(
     string Title,
     string Description,
     string? Link,
+    decimal? PriceMin,
+    decimal? PriceMax,
     WunschStatus Status,
     Guid CreatedByUserId,
     string CreatedByName,
@@ -23,13 +25,17 @@ public record WunschDto(
 public record CreateWunschDto(
     string Title,
     string Description,
-    string? Link
+    string? Link,
+    decimal? PriceMin,
+    decimal? PriceMax
 );
 
 public record UpdateWunschDto(
     string Title,
     string Description,
-    string? Link
+    string? Link,
+    decimal? PriceMin,
+    decimal? PriceMax
 );
 
 public record VoteWunschDto(bool IsUpvote);

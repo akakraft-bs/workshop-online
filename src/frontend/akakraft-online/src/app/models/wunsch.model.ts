@@ -5,6 +5,8 @@ export interface Wunsch {
   title: string;
   description: string;
   link?: string;
+  priceMin?: number | null;
+  priceMax?: number | null;
   status: WunschStatus;
   createdByUserId: string;
   createdByName: string;

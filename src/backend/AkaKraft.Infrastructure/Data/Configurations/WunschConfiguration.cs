@@ -21,6 +21,12 @@ public class WunschConfiguration : IEntityTypeConfiguration<Wunsch>
         builder.Property(w => w.Link)
             .HasMaxLength(2048);
 
+        builder.Property(w => w.PriceMin)
+            .HasPrecision(10, 2);
+
+        builder.Property(w => w.PriceMax)
+            .HasPrecision(10, 2);
+
         builder.Property(w => w.Status)
             .IsRequired()
             .HasConversion<string>();

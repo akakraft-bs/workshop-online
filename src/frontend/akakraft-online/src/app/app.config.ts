@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -13,6 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
+    { provide: LOCALE_ID, useValue: 'de' },
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
     { provide: DateAdapter, useClass: GermanDateAdapter },
     { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },

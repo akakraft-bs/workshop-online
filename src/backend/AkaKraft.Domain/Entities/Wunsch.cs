@@ -8,6 +8,8 @@ public class Wunsch
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? Link { get; set; }
+    public decimal? PriceMin { get; set; }
+    public decimal? PriceMax { get; set; }
     public WunschStatus Status { get; set; } = WunschStatus.Offen;
 
     public Guid CreatedByUserId { get; set; }
