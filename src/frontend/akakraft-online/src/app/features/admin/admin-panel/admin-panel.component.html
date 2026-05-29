@@ -1,0 +1,50 @@
+<h1 class="page-title">Adminbereich</h1>
+
+<div class="panel-grid">
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>image_search</mat-icon>
+      <mat-card-title>Thumbnails generieren</mat-card-title>
+      <mat-card-subtitle>Werkzeug &amp; Verbrauchsmaterial</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="card-description">
+        Generiert Vorschaubilder für alle Einträge, die noch kein Thumbnail haben.
+        Bereits vorhandene Thumbnails werden übersprungen.
+      </p>
+
+      @if (backfillResult(); as result) {
+        <div class="result-box">
+          <div class="result-row">
+            <mat-icon class="result-icon ok">check_circle</mat-icon>
+            <span>{{ result.processedWerkzeug }} Werkzeug</span>
+          </div>
+          <div class="result-row">
+            <mat-icon class="result-icon ok">check_circle</mat-icon>
+            <span>{{ result.processedVerbrauchsmaterial }} Verbrauchsmaterial</span>
+          </div>
+          @if (result.errors > 0) {
+            <div class="result-row">
+              <mat-icon class="result-icon error">error</mat-icon>
+              <span>{{ result.errors }} Fehler</span>
+            </div>
+          }
+        </div>
+      }
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button color="primary"
+        (click)="runBackfill()"
+        [disabled]="backfillRunning()">
+        @if (backfillRunning()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        } @else {
+          <mat-icon>auto_fix_high</mat-icon>
+        }
+        Thumbnails generieren
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+</div>

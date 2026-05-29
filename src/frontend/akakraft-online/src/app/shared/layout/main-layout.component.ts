@@ -74,6 +74,7 @@ export class MainLayoutComponent implements OnInit {
     { label: 'Verein', icon: 'groups', route: '/verein' },
     { label: 'Projekte', icon: 'engineering', route: '/projekte' },
     { label: 'Aufgaben', icon: 'task_alt', route: '/aufgaben', badge: () => this.badges.openAufgaben() },
+    { label: 'Adminbereich', icon: 'admin_panel_settings', route: '/admin', requiredRoles: [Role.Admin] },
     { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
     { label: 'Kalender-Einstellungen', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
     { label: 'Feedback', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin], badge: () => this.badges.unseenFeedback() },

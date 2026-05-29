@@ -10,5 +10,6 @@ public class Verbrauchsmaterial
     public int Quantity { get; set; }
     public int? MinQuantity { get; set; }
     public string? ImageUrl { get; set; }
+    public string? ThumbnailUrl { get; set; }
     public string? StorageLocation { get; set; }
 }

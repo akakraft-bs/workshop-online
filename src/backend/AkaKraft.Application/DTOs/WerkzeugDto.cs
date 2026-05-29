@@ -6,6 +6,7 @@ public record WerkzeugDto(
     string Description,
     string Category,
     string? ImageUrl,
+    string? ThumbnailUrl,
     string? Dimensions,
     string? StorageLocation,
     bool IsAvailable,

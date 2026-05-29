@@ -5,6 +5,7 @@ public record CreateWerkzeugDto(
     string Description,
     string Category,
     string? ImageUrl,
+    string? ThumbnailUrl,
     string? Dimensions,
     string? StorageLocation
 );
@@ -14,6 +15,7 @@ public record UpdateWerkzeugDto(
     string Description,
     string Category,
     string? ImageUrl,
+    string? ThumbnailUrl,
     string? Dimensions,
     string? StorageLocation
 );

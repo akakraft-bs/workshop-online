@@ -77,7 +77,7 @@
 
         <div class="card-image">
           @if (item.imageUrl) {
-            <img [src]="item.imageUrl" [alt]="item.name">
+            <img [src]="item.thumbnailUrl ?? item.imageUrl" [alt]="item.name" loading="lazy">
           } @else {
             <mat-icon>build</mat-icon>
           }
@@ -119,7 +119,7 @@
           <div class="name-with-thumb">
             <div class="thumb">
               @if (item.imageUrl) {
-                <img [src]="item.imageUrl" [alt]="item.name">
+                <img [src]="item.thumbnailUrl ?? item.imageUrl" [alt]="item.name" loading="lazy">
               } @else {
                 <mat-icon>build</mat-icon>
               }
