@@ -1,6 +1,8 @@
+using AkaKraft.Domain.Common;
+
 namespace AkaKraft.Domain.Entities;
 
-public class Aufgabe
+public class Aufgabe : IAuditable
 {
     public Guid Id { get; set; }
     public string Titel { get; set; } = string.Empty;
@@ -19,4 +21,5 @@ public class Aufgabe
     public Guid CreatedByUserId { get; set; }
     public User CreatedBy { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }

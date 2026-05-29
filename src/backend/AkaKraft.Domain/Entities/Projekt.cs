@@ -1,6 +1,8 @@
+using AkaKraft.Domain.Common;
+
 namespace AkaKraft.Domain.Entities;
 
-public class Projekt
+public class Projekt : IAuditable
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -13,4 +15,5 @@ public class Projekt
     public string? ProjektplanUrl { get; set; }
     public Guid CreatedByUserId { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }

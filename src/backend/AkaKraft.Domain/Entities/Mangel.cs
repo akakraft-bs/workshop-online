@@ -1,8 +1,9 @@
+using AkaKraft.Domain.Common;
 using AkaKraft.Domain.Enums;
 
 namespace AkaKraft.Domain.Entities;
 
-public class Mangel
+public class Mangel : IAuditable
 {
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
@@ -13,6 +14,7 @@ public class Mangel
     public Guid CreatedByUserId { get; set; }
     public User CreatedBy { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public string? ImageUrl { get; set; }
 

@@ -1,8 +1,9 @@
+using AkaKraft.Domain.Common;
 using AkaKraft.Domain.Enums;
 
 namespace AkaKraft.Domain.Entities;
 
-public class HallenbuchEintrag
+public class HallenbuchEintrag : IAuditable
 {
     public Guid Id { get; set; }
 
@@ -21,4 +22,5 @@ public class HallenbuchEintrag
     public bool HatFamiliegeschraubt { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 }
