@@ -14,5 +14,6 @@ public record WerkzeugDto(
     string? BorrowedByName,
     DateTime? BorrowedAt,
     DateTime? ExpectedReturnAt,
-    DateTime? ReturnedAt
+    DateTime? ReturnedAt,
+    DateTime CreatedAt
 );

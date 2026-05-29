@@ -10,6 +10,7 @@ public class Werkzeug
     public string? ThumbnailUrl { get; set; }
     public string? Dimensions { get; set; }
     public string? StorageLocation { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsAvailable { get; set; } = true;
     public Guid? BorrowedByUserId { get; set; }
     public User? BorrowedBy { get; set; }

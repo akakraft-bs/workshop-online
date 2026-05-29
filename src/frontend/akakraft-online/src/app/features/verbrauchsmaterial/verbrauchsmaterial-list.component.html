@@ -1,6 +1,6 @@
 <h1 class="page-title">Verbrauchsmaterial</h1>
 <div class="page-search-and-actions">
-  <mat-form-field appearance="outline" class="search-field">
+  <mat-form-field appearance="outline" class="search-field desktop-field" subscriptSizing="dynamic">
     <mat-label>Suche</mat-label>
     <mat-icon matPrefix>search</mat-icon>
     <input matInput [value]="searchQuery()" (input)="onSearch($event)" placeholder="Name, Kategorie...">
@@ -10,6 +10,24 @@
       </button>
     }
   </mat-form-field>
+
+  <mat-form-field appearance="outline" class="sort-field desktop-field" subscriptSizing="dynamic">
+    <mat-select [value]="sortOrder()" (selectionChange)="setSortOrder($event.value)" aria-label="Sortierung">
+      <mat-option value="name">A – Z</mat-option>
+      <mat-option value="createdAt">Zuletzt hinzugefügt</mat-option>
+      <mat-option value="category">Kategorie</mat-option>
+      <mat-option value="storageLocation">Ablageort</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-icon-button class="mobile-icon-btn" [class.active]="mobilePanel() === 'search' || !!searchQuery()"
+    (click)="toggleMobilePanel('search')" aria-label="Suche">
+    <mat-icon>search</mat-icon>
+  </button>
+  <button mat-icon-button class="mobile-icon-btn" [class.active]="mobilePanel() === 'sort' || sortOrder() !== 'name'"
+    (click)="toggleMobilePanel('sort')" aria-label="Sortierung">
+    <mat-icon>sort</mat-icon>
+  </button>
 
   <div class="page-actions">
   @if (canManage()) {
@@ -23,6 +41,33 @@
   }
   </div>
 </div>
+
+@if (mobilePanel()) {
+  <div class="mobile-panel">
+    @if (mobilePanel() === 'search') {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="panel-field">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput #mobileSearchInput [value]="searchQuery()" (input)="onSearch($event)"
+          placeholder="Name, Kategorie..." (keydown.escape)="closeMobilePanel()">
+        @if (searchQuery()) {
+          <button matSuffix mat-icon-button (click)="clearSearch()"><mat-icon>close</mat-icon></button>
+        }
+      </mat-form-field>
+    } @else {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="panel-field">
+        <mat-select [value]="sortOrder()" (selectionChange)="setSortOrder($event.value)">
+          <mat-option value="name">A – Z</mat-option>
+          <mat-option value="createdAt">Zuletzt hinzugefügt</mat-option>
+          <mat-option value="category">Kategorie</mat-option>
+          <mat-option value="storageLocation">Ablageort</mat-option>
+        </mat-select>
+      </mat-form-field>
+    }
+    <button mat-icon-button (click)="closeMobilePanel()" aria-label="Schließen">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+}
 
 @if (!loading() && categories().length > 1) {
   <div class="category-filter">

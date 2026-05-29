@@ -13,4 +13,5 @@ export interface Werkzeug {
   borrowedAt?: string;
   expectedReturnAt?: string;
   returnedAt?: string;
+  createdAt: string;
 }

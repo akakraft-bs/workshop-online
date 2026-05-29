@@ -9,4 +9,5 @@ export interface Verbrauchsmaterial {
   imageUrl?: string;
   thumbnailUrl?: string;
   storageLocation?: string;
+  createdAt: string;
 }

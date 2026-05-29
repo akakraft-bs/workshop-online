@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -7,9 +7,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+
+type SortOrder = 'name' | 'createdAt' | 'category' | 'storageLocation';
 import { ApiService } from '../../core/api/api.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
@@ -21,7 +24,7 @@ import { VerbrauchsmaterialFormDialogComponent, VerbrauchsmaterialFormDialogData
     FormsModule,
     MatFormFieldModule, MatInputModule, MatIconModule,
     MatButtonModule, MatTableModule, MatProgressSpinnerModule,
-    MatChipsModule, MatTooltipModule,
+    MatChipsModule, MatSelectModule, MatTooltipModule,
   ],
   templateUrl: './verbrauchsmaterial-list.component.html',
   styleUrl: './verbrauchsmaterial-list.component.scss',
@@ -32,10 +35,18 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
+  @ViewChild('mobileSearchInput') mobileSearchInput?: ElementRef<HTMLInputElement>;
+
+  private readonly SORT_ORDER_KEY = 'verbrauchsmaterial-sort-order';
+  readonly mobilePanel = signal<'search' | 'sort' | null>(null);
+
   readonly items = signal<Verbrauchsmaterial[]>([]);
   readonly loading = signal(true);
   readonly searchQuery = signal('');
   readonly selectedCategory = signal<string | null>(null);
+  readonly sortOrder = signal<SortOrder>(
+    (localStorage.getItem(this.SORT_ORDER_KEY) as SortOrder) ?? 'name'
+  );
 
   readonly canManage = computed(() => this.auth.isPrivileged());
 
@@ -50,15 +61,28 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   );
 
   readonly filteredItems = computed(() => {
-    const q = this.searchQuery().toLowerCase().trim();
-    const cat = this.selectedCategory();
+    const q    = this.searchQuery().toLowerCase().trim();
+    const cat  = this.selectedCategory();
+    const sort = this.sortOrder();
+
     return this.items()
       .filter(v => {
         if (cat && v.category !== cat) return false;
         if (!q) return true;
         return v.name.toLowerCase().includes(q) || v.category.toLowerCase().includes(q);
       })
-      .sort((a, b) => a.name.localeCompare(b.name, 'de'));
+      .sort((a, b) => {
+        switch (sort) {
+          case 'createdAt':     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          case 'category':      return a.category.localeCompare(b.category, 'de') || a.name.localeCompare(b.name, 'de');
+          case 'storageLocation': {
+            const la = a.storageLocation ?? '';
+            const lb = b.storageLocation ?? '';
+            return la.localeCompare(lb, 'de') || a.name.localeCompare(b.name, 'de');
+          }
+          default:              return a.name.localeCompare(b.name, 'de');
+        }
+      });
   });
 
   ngOnInit(): void {
@@ -133,6 +157,24 @@ export class VerbrauchsmaterialListComponent implements OnInit {
 
   clearSearch(): void {
     this.searchQuery.set('');
+  }
+
+  setSortOrder(order: SortOrder): void {
+    this.sortOrder.set(order);
+    localStorage.setItem(this.SORT_ORDER_KEY, order);
+    this.mobilePanel.set(null);
+  }
+
+  toggleMobilePanel(panel: 'search' | 'sort'): void {
+    const next = this.mobilePanel() === panel ? null : panel;
+    this.mobilePanel.set(next);
+    if (next === 'search') {
+      setTimeout(() => this.mobileSearchInput?.nativeElement.focus(), 50);
+    }
+  }
+
+  closeMobilePanel(): void {
+    this.mobilePanel.set(null);
   }
 
   isLowStock(item: Verbrauchsmaterial): boolean {

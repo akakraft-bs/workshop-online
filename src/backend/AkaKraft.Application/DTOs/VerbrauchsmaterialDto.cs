@@ -10,7 +10,8 @@ public record VerbrauchsmaterialDto(
     int? MinQuantity,
     string? ImageUrl,
     string? ThumbnailUrl,
-    string? StorageLocation
+    string? StorageLocation,
+    DateTime CreatedAt
 );
 
 public record CreateVerbrauchsmaterialDto(

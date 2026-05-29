@@ -32,7 +32,8 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
                     : null,
                 w.BorrowedAt,
                 w.ExpectedReturnAt,
-                w.ReturnedAt))
+                w.ReturnedAt,
+                w.CreatedAt))
             .ToListAsync();
     }
 
@@ -84,7 +85,8 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             werkzeug.Id, werkzeug.Name, werkzeug.Description,
             werkzeug.Category, werkzeug.ImageUrl, werkzeug.ThumbnailUrl,
             werkzeug.Dimensions, werkzeug.StorageLocation,
-            werkzeug.IsAvailable, null, null, null, null, null);
+            werkzeug.IsAvailable, null, null, null, null, null,
+            werkzeug.CreatedAt);
     }
 
     public async Task<WerkzeugDto?> UpdateAsync(Guid id, UpdateWerkzeugDto dto)
@@ -184,5 +186,5 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         w.Id, w.Name, w.Description, w.Category,
         w.ImageUrl, w.ThumbnailUrl, w.Dimensions, w.StorageLocation, w.IsAvailable,
         w.BorrowedByUserId, ResolveDisplayName(w),
-        w.BorrowedAt, w.ExpectedReturnAt, w.ReturnedAt);
+        w.BorrowedAt, w.ExpectedReturnAt, w.ReturnedAt, w.CreatedAt);
 }

@@ -12,4 +12,5 @@ public class Verbrauchsmaterial
     public string? ImageUrl { get; set; }
     public string? ThumbnailUrl { get; set; }
     public string? StorageLocation { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

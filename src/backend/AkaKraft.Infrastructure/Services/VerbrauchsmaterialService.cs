@@ -23,7 +23,8 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
                 v.MinQuantity,
                 v.ImageUrl,
                 v.ThumbnailUrl,
-                v.StorageLocation))
+                v.StorageLocation,
+                v.CreatedAt))
             .ToListAsync();
     }
 
@@ -62,7 +63,8 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
 
         return new VerbrauchsmaterialDto(
             item.Id, item.Name, item.Description, item.Category,
-            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation);
+            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation,
+            item.CreatedAt);
     }
 
     public async Task<VerbrauchsmaterialDto?> UpdateAsync(Guid id, UpdateVerbrauchsmaterialDto dto)
@@ -87,7 +89,8 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
 
         return new VerbrauchsmaterialDto(
             item.Id, item.Name, item.Description, item.Category,
-            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation);
+            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation,
+            item.CreatedAt);
     }
 
     public async Task<VerbrauchsmaterialDto?> AdjustQuantityAsync(Guid id, int delta)
@@ -100,7 +103,8 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
 
         return new VerbrauchsmaterialDto(
             item.Id, item.Name, item.Description, item.Category,
-            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation);
+            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation,
+            item.CreatedAt);
     }
 
     public async Task<bool> DeleteAsync(Guid id)

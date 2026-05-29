@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,10 +8,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
+
+type SortOrder = 'name' | 'createdAt' | 'category' | 'storageLocation';
 import { ApiService } from '../../core/api/api.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { Werkzeug } from '../../models/werkzeug.model';
@@ -23,7 +26,7 @@ import { WerkzeugDetailDialogComponent, WerkzeugDetailResult } from './werkzeug-
   imports: [
     MatFormFieldModule, MatInputModule, MatIconModule,
     MatButtonModule, MatButtonToggleModule, MatCardModule, MatChipsModule,
-    MatProgressSpinnerModule, MatTableModule, MatTooltipModule,
+    MatProgressSpinnerModule, MatTableModule, MatSelectModule, MatTooltipModule,
     DatePipe,
   ],
   templateUrl: './werkzeug-list.component.html',
@@ -41,9 +44,16 @@ export class WerkzeugListComponent implements OnInit {
   readonly showOnlyBorrowed = signal(false);
   readonly selectedCategory = signal<string | null>(null);
 
-  private readonly VIEW_MODE_KEY = 'werkzeug-view-mode';
-  readonly viewMode      = signal<'card' | 'table'>(
+  @ViewChild('mobileSearchInput') mobileSearchInput?: ElementRef<HTMLInputElement>;
+
+  private readonly VIEW_MODE_KEY  = 'werkzeug-view-mode';
+  private readonly SORT_ORDER_KEY = 'werkzeug-sort-order';
+  readonly mobilePanel = signal<'search' | 'sort' | null>(null);
+  readonly viewMode  = signal<'card' | 'table'>(
     (localStorage.getItem(this.VIEW_MODE_KEY) as 'card' | 'table') ?? 'card'
+  );
+  readonly sortOrder = signal<SortOrder>(
+    (localStorage.getItem(this.SORT_ORDER_KEY) as SortOrder) ?? 'name'
   );
   readonly tableColumns  = ['name', 'category', 'storageLocation', 'status', 'borrowedBy', 'expectedReturn'];
 
@@ -55,9 +65,10 @@ export class WerkzeugListComponent implements OnInit {
   );
 
   readonly filteredItems = computed(() => {
-    const q           = this.searchQuery().toLowerCase().trim();
+    const q            = this.searchQuery().toLowerCase().trim();
     const onlyBorrowed = this.showOnlyBorrowed();
-    const cat         = this.selectedCategory();
+    const cat          = this.selectedCategory();
+    const sort         = this.sortOrder();
 
     return this.items()
       .filter(w => {
@@ -70,7 +81,18 @@ export class WerkzeugListComponent implements OnInit {
           w.category.toLowerCase().includes(q)
         );
       })
-      .sort((a, b) => a.name.localeCompare(b.name, 'de'));
+      .sort((a, b) => {
+        switch (sort) {
+          case 'createdAt':     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          case 'category':      return a.category.localeCompare(b.category, 'de') || a.name.localeCompare(b.name, 'de');
+          case 'storageLocation': {
+            const la = a.storageLocation ?? '';
+            const lb = b.storageLocation ?? '';
+            return la.localeCompare(lb, 'de') || a.name.localeCompare(b.name, 'de');
+          }
+          default:              return a.name.localeCompare(b.name, 'de');
+        }
+      });
   });
 
   readonly borrowedCount = computed(() => this.items().filter(w => !w.isAvailable).length);
@@ -99,6 +121,24 @@ export class WerkzeugListComponent implements OnInit {
   setViewMode(mode: 'card' | 'table'): void {
     this.viewMode.set(mode);
     localStorage.setItem(this.VIEW_MODE_KEY, mode);
+  }
+
+  setSortOrder(order: SortOrder): void {
+    this.sortOrder.set(order);
+    localStorage.setItem(this.SORT_ORDER_KEY, order);
+    this.mobilePanel.set(null);
+  }
+
+  toggleMobilePanel(panel: 'search' | 'sort'): void {
+    const next = this.mobilePanel() === panel ? null : panel;
+    this.mobilePanel.set(next);
+    if (next === 'search') {
+      setTimeout(() => this.mobileSearchInput?.nativeElement.focus(), 50);
+    }
+  }
+
+  closeMobilePanel(): void {
+    this.mobilePanel.set(null);
   }
 
   isOverdue(item: Werkzeug): boolean {
