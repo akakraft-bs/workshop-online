@@ -1,6 +1,6 @@
 # AkaKraft Online
 
-Webbasierte Vereinsverwaltung für die AkaKraft Braunschweig. Die App bietet Mitgliedern Zugriff auf Werkzeuginventar, Verbrauchsmaterialien, Hallenbelegung, Veranstaltungsplanung und weitere Vereinsfunktionen – alles hinter Google-Login mit rollenbasierter Zugriffskontrolle.
+Webbasierte Vereinsverwaltung für die AkaKraft Braunschweig. Die App bietet Mitgliedern Zugriff auf Werkzeuginventar, Verbrauchsmaterialien, Hallenbelegung, Veranstaltungsplanung und weitere Vereinsfunktionen – alles hinter Login mit rollenbasierter Zugriffskontrolle.
 
 > Teile dieses Projekts wurden mit Unterstützung von [Claude Code](https://claude.ai/code) (Anthropic) generiert.
 
@@ -10,15 +10,23 @@ Webbasierte Vereinsverwaltung für die AkaKraft Braunschweig. Die App bietet Mit
 
 | Bereich | Beschreibung |
 |---|---|
-| **Dashboard** | Nächste Veranstaltungen, konfigurierbarer Schnellzugriff (gerätübergreifend gespeichert) |
+| **Dashboard** | Nächste Veranstaltungen, konfigurierbarer Schnellzugriff (geräteübergreifend gespeichert) |
 | **Hallenbelegung** | Wochenkalender auf Basis von Google Calendar, Termine anlegen/bearbeiten/löschen |
 | **Veranstaltungen** | Agenda-Übersicht aller Veranstaltungskalender, Einträge verwalten |
-| **Werkzeug** | Inventarverwaltung mit Ausleihe und Rückgabe |
-| **Verbrauchsmaterial** | Bestandsübersicht mit Mengen und Mindestbeständen |
+| **Werkzeug** | Inventarverwaltung mit Ausleihe und Rückgabe, Ablageort-Autocomplete |
+| **Verbrauchsmaterial** | Bestandsübersicht mit Mengen und Mindestbeständen, Badge bei niedrigem Bestand |
+| **Mängelmelder** | Mängel und Schäden melden, mit Bild, Status und Anmerkungen; Badge für offene Mängel |
+| **Wunschliste** | Anschaffungsvorschläge einreichen, per Up-/Downvote bewerten, Preis angeben, abschließen |
+| **Umfragen** | Abstimmungen erstellen und teilnehmen; Badge für ausstehende Abstimmungen |
+| **Hallenbuch** | Manuelle Nutzungseinträge der Halle inkl. Statistik-Export |
+| **Aufgaben** | Aufgaben anlegen, zuweisen und erledigen; Badge für offene Aufgaben |
+| **Verein** | Vereinsinfo, Dokumente und Zugangsdaten (rollengeschützt) |
+| **Projekte** | Projektübersicht des Vereins |
 | **Nutzerverwaltung** | Rollen vergeben und entziehen (Admin) |
 | **Kalender-Einstellungen** | Google-Kalender abonnieren, Typ und Farbe konfigurieren (Admin) |
-| **Feedback** | Nutzer-Feedback einreichen und verwalten |
-| **Profil** | Anzeigename setzen (wird als Präfix bei Hallenbelegungseinträgen verwendet) |
+| **Feedback** | Nutzer-Feedback einreichen (inkl. App-Version) und verwalten (Admin) |
+| **Push-Benachrichtigungen** | Web-Push-Abonnement für Nutzer, Test-Versand durch Admin |
+| **Profil** | Anzeigename und Kontaktdaten setzen |
 
 ---
 
@@ -29,10 +37,11 @@ Webbasierte Vereinsverwaltung für die AkaKraft Braunschweig. Die App bietet Mit
 | Backend | ASP.NET Core 10 (Minimal API), Clean Architecture |
 | Frontend | Angular 21, Angular Material 3, Standalone Components, Signals |
 | Datenbank | PostgreSQL 18 via Entity Framework Core 10 |
-| Authentifizierung | Google OAuth 2.0 + JWT Bearer + httpOnly Refresh-Token-Cookie |
+| Authentifizierung | Google OAuth 2.0 oder E-Mail/Passwort + JWT Bearer + httpOnly Refresh-Token-Cookie |
 | Dateiablage | MinIO (S3-kompatibel) |
 | Kalender | Google Calendar API (Service Account) |
-| Deployment | Kubernetes (k3s) |
+| Versionierung | Semantic Release (Conventional Commits → SemVer), Version im App-Footer |
+| Deployment | Kubernetes (k3s), Images via GitHub Container Registry (ghcr.io) |
 
 ---
 
@@ -40,6 +49,11 @@ Webbasierte Vereinsverwaltung für die AkaKraft Braunschweig. Die App bietet Mit
 
 ```
 workshop-online/
+├── .github/
+│   └── workflows/
+│       ├── release-and-build.yml   # Semantic Release + Docker-Images (main branch)
+│       ├── build-frontend.yml      # Manueller Frontend-Build
+│       └── build-backend.yml       # Manueller Backend-Build
 ├── infra/
 │   └── docker-compose.yml          # Lokale Entwicklung: PostgreSQL + Adminer + MinIO
 ├── k8s/                             # Kubernetes-Manifeste (Produktion)
@@ -77,9 +91,10 @@ Neu registrierte Nutzer erhalten automatisch die Rolle `None` und haben keinen Z
 | `Treasurer` | Kassenwart (Vorstandsrolle) |
 | `ViceChairman` | 2. Vorsitzender – erweiterte Schreibrechte |
 | `Chairman` | 1. Vorsitzender – erweiterte Schreibrechte |
+| `Moderator` | Moderationsrechte (Mängelmelder, Wunschliste, Aufgaben) |
 | `Admin` | Voller Zugriff inkl. Nutzerverwaltung und Kalender-Einstellungen |
 
-Alle Rollen von `Getraenkewart` bis `Chairman` gelten als **Vorstand** und können über die Policy `VorstandOnly` gemeinsam berechtigt werden.
+Alle Rollen von `Getraenkewart` bis `Chairman` gelten als **Vorstand** und können über die Policy `VorstandOnly` gemeinsam berechtigt werden. `Moderator` wird wie Vorstand als „privilegiert" behandelt (`VorstandOrAdmin`-Policy).
 
 Schreibrechte auf einzelne Kalender werden pro Kalender über die Kalender-Einstellungen konfiguriert (Rollen-Whitelist).
 
@@ -129,6 +144,17 @@ Für die Google Calendar API zusätzlich das Service-Account-JSON hinterlegen:
 dotnet user-secrets set "GoogleCalendar:ServiceAccountJson" "$(cat pfad/zum/service-account.json)"
 ```
 
+Für den E-Mail-Versand (Registrierungsbestätigung, Passwort-Reset):
+
+```bash
+dotnet user-secrets set "Email:SmtpHost"         "smtp.example.com"
+dotnet user-secrets set "Email:SmtpPort"         "587"
+dotnet user-secrets set "Email:SmtpUsername"     "<user>"
+dotnet user-secrets set "Email:SmtpPassword"     "<passwort>"
+dotnet user-secrets set "Email:FromAddress"      "noreply@example.com"
+dotnet user-secrets set "Email:FromName"         "AkaKraft"
+```
+
 ### 3. Backend starten
 
 Migrationen werden beim Start **automatisch** angewendet.
@@ -152,7 +178,7 @@ npm start
 
 ## Ersten Admin anlegen
 
-Beim ersten Start liest das Backend die Variable `Admin:Email`. Ist ein Nutzer mit dieser E-Mail-Adresse bereits registriert, erhält er automatisch die Admin-Rolle. Vor dem ersten Login muss der Nutzer daher einmalig die App aufrufen und sich per Google anmelden – danach ist die Rolle gesetzt.
+Beim ersten Start liest das Backend die Variable `Admin:Email`. Ist ein Nutzer mit dieser E-Mail-Adresse bereits registriert, erhält er automatisch die Admin-Rolle. Vor dem ersten Login muss der Nutzer daher einmalig die App aufrufen und sich anmelden – danach ist die Rolle gesetzt.
 
 Alternativ direkt per SQL:
 
@@ -165,7 +191,16 @@ WHERE "Email" = 'deine@email.de';
 
 ---
 
-## Google OAuth einrichten
+## Authentifizierung
+
+Die App unterstützt zwei Anmeldewege:
+
+- **Google OAuth 2.0** – Login per Google-Konto
+- **E-Mail/Passwort** – Registrierung mit Bestätigungsmail, Passwort-Reset per E-Mail
+
+Beide Wege erzeugen ein JWT (Laufzeit konfigurierbar über `Authentication:Jwt:ExpiryMinutes`, Standard: 480 Minuten) und einen httpOnly Refresh-Token-Cookie (30 Tage). Der Refresh-Token wird bei jeder Nutzung rotiert.
+
+### Google OAuth einrichten
 
 1. In der [Google Cloud Console](https://console.cloud.google.com/) ein Projekt anlegen
 2. *APIs & Services → OAuth consent screen* konfigurieren (Scopes: `email`, `profile`)
@@ -204,6 +239,23 @@ dotnet ef database update \
   --project src/backend/AkaKraft.Infrastructure \
   --startup-project src/backend/AkaKraft.WebApi
 ```
+
+---
+
+## Versionierung & CI/CD
+
+Die App nutzt **Semantic Release** mit Conventional Commits für automatisches Versioning nach SemVer:
+
+| Commit-Typ | Beispiel | Versions-Bump |
+|---|---|---|
+| `fix:` | `fix: Fehler bei Datumsanzeige behoben` | Patch (1.0.0 → 1.0.1) |
+| `feat:` | `feat: Wunschliste hinzugefügt` | Minor (1.0.0 → 1.1.0) |
+| `feat!:` / `BREAKING CHANGE:` | `feat!: API-Struktur geändert` | Major (1.0.0 → 2.0.0) |
+
+Bei jedem Push auf `main` läuft der Workflow `.github/workflows/release-and-build.yml`:
+1. Semantic Release ermittelt die neue Version und erstellt ein GitHub Release
+2. Docker-Images für Frontend und Backend werden gebaut und in die GitHub Container Registry gepusht
+3. Die Versionsnummer wird als Build-Arg in das Frontend-Image gebacken und im App-Footer als Link auf das GitHub Release angezeigt
 
 ---
 
