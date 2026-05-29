@@ -122,6 +122,13 @@ export const routes: Routes = [
           import('./features/verein/verein-projekte/verein-projekte.component').then(m => m.VereinProjekteComponent),
       },
       {
+        path: 'admin',
+        loadComponent: () =>
+          import('./features/admin/admin-panel/admin-panel.component').then(m => m.AdminPanelComponent),
+        canActivate: [roleGuard],
+        data: { roles: [Role.Admin] },
+      },
+      {
         path: 'admin/users',
         loadComponent: () =>
           import('./features/admin/users/user-list.component').then(m => m.UserListComponent),

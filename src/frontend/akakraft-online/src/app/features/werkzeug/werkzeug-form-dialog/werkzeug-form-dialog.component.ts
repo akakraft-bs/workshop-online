@@ -42,7 +42,8 @@ export class WerkzeugFormDialogComponent implements OnInit {
   readonly isEdit = this.data.werkzeug !== null;
 
   readonly selectedFile = signal<File | null>(null);
-  readonly previewUrl = signal<string | null>(this.data.werkzeug?.imageUrl ?? null);
+  readonly previewUrl    = signal<string | null>(this.data.werkzeug?.imageUrl     ?? null);
+  private thumbnailUrl   = this.data.werkzeug?.thumbnailUrl ?? null;
 
   allCategories: string[] = [];
   allStorageLocations: string[] = [];
@@ -125,6 +126,7 @@ export class WerkzeugFormDialogComponent implements OnInit {
   clearImage(): void {
     this.selectedFile.set(null);
     this.previewUrl.set(null);
+    this.thumbnailUrl = null;
   }
 
   save(): void {
@@ -138,23 +140,25 @@ export class WerkzeugFormDialogComponent implements OnInit {
     const file = this.selectedFile();
     const existingImageUrl = this.previewUrl();
 
-    const upload$: Observable<{ url: string } | null> = file
+    const upload$: Observable<{ imageUrl: string; thumbnailUrl: string } | null> = file
       ? (() => {
           const formData = new FormData();
           formData.append('file', file);
-          return this.api.postFormData<{ url: string }>('/uploads/werkzeug', formData);
+          return this.api.postFormData<{ imageUrl: string; thumbnailUrl: string }>('/uploads/werkzeug', formData);
         })()
       : of(null);
 
     upload$.pipe(
-      switchMap((uploadResult: { url: string } | null) => {
-        const imageUrl = uploadResult?.url ?? existingImageUrl;
+      switchMap((uploadResult: { imageUrl: string; thumbnailUrl: string } | null) => {
+        const imageUrl    = uploadResult?.imageUrl    ?? existingImageUrl;
+        const thumbnailUrl = uploadResult?.thumbnailUrl ?? this.thumbnailUrl;
 
         const body = {
           name:            value.name,
           description:     value.description,
           category:        value.category,
           imageUrl,
+          thumbnailUrl,
           dimensions:      value.dimensions || null,
           storageLocation: value.storageLocation || null,
         };

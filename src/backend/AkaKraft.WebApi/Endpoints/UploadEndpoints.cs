@@ -15,8 +15,8 @@ internal static class UploadEndpoints
             try
             {
                 var model = new FileUploadModel(file.OpenReadStream(), file.FileName, file.ContentType, file.Length);
-                var url = await uploadService.SaveAsync(model);
-                return Results.Ok(new { url });
+                var result = await uploadService.SaveAsync(model);
+                return Results.Ok(new { imageUrl = result.ImageUrl, thumbnailUrl = result.ThumbnailUrl });
             }
             catch (InvalidOperationException ex)
             {
@@ -24,14 +24,14 @@ internal static class UploadEndpoints
             }
         }).RequireAuthorization("VorstandOrAdmin")
           .DisableAntiforgery();
-          
+
         app.MapPost("/uploads/verbrauchsmaterial", async (IFormFile file, IUploadService uploadService) =>
         {
             try
             {
                 var model = new FileUploadModel(file.OpenReadStream(), file.FileName, file.ContentType, file.Length);
-                var url = await uploadService.SaveAsync(model);
-                return Results.Ok(new { url });
+                var result = await uploadService.SaveAsync(model);
+                return Results.Ok(new { imageUrl = result.ImageUrl, thumbnailUrl = result.ThumbnailUrl });
             }
             catch (InvalidOperationException ex)
             {
@@ -45,8 +45,8 @@ internal static class UploadEndpoints
             try
             {
                 var model = new FileUploadModel(file.OpenReadStream(), file.FileName, file.ContentType, file.Length);
-                var url = await uploadService.SaveAsync(model);
-                return Results.Ok(new { url });
+                var result = await uploadService.SaveAsync(model);
+                return Results.Ok(new { url = result.ImageUrl });
             }
             catch (InvalidOperationException ex)
             {
@@ -60,8 +60,8 @@ internal static class UploadEndpoints
             try
             {
                 var model = new FileUploadModel(file.OpenReadStream(), file.FileName, file.ContentType, file.Length);
-                var url = await uploadService.SaveAsync(model);
-                return Results.Ok(new { url });
+                var result = await uploadService.SaveAsync(model);
+                return Results.Ok(new { url = result.ImageUrl });
             }
             catch (InvalidOperationException ex)
             {

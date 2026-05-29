@@ -9,7 +9,9 @@ public record VerbrauchsmaterialDto(
     int Quantity,
     int? MinQuantity,
     string? ImageUrl,
-    string? StorageLocation
+    string? ThumbnailUrl,
+    string? StorageLocation,
+    DateTime CreatedAt
 );
 
 public record CreateVerbrauchsmaterialDto(
@@ -20,6 +22,7 @@ public record CreateVerbrauchsmaterialDto(
     int Quantity,
     int? MinQuantity,
     string? ImageUrl,
+    string? ThumbnailUrl,
     string? StorageLocation
 );
 
@@ -31,6 +34,7 @@ public record UpdateVerbrauchsmaterialDto(
     int Quantity,
     int? MinQuantity,
     string? ImageUrl,
+    string? ThumbnailUrl,
     string? StorageLocation
 );
 

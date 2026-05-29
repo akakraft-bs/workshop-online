@@ -1,6 +1,8 @@
+using AkaKraft.Domain.Common;
+
 namespace AkaKraft.Domain.Entities;
 
-public class Verbrauchsmaterial
+public class Verbrauchsmaterial : IAuditable
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -10,5 +12,8 @@ public class Verbrauchsmaterial
     public int Quantity { get; set; }
     public int? MinQuantity { get; set; }
     public string? ImageUrl { get; set; }
+    public string? ThumbnailUrl { get; set; }
     public string? StorageLocation { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 }

@@ -4,6 +4,7 @@ export interface Werkzeug {
   description: string;
   category: string;
   imageUrl?: string;
+  thumbnailUrl?: string;
   dimensions?: string;
   storageLocation?: string;
   isAvailable: boolean;
@@ -12,4 +13,5 @@ export interface Werkzeug {
   borrowedAt?: string;
   expectedReturnAt?: string;
   returnedAt?: string;
+  createdAt: string;
 }

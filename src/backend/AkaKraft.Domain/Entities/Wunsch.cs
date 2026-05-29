@@ -1,8 +1,9 @@
+using AkaKraft.Domain.Common;
 using AkaKraft.Domain.Enums;
 
 namespace AkaKraft.Domain.Entities;
 
-public class Wunsch
+public class Wunsch : IAuditable
 {
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
@@ -15,6 +16,7 @@ public class Wunsch
     public Guid CreatedByUserId { get; set; }
     public User CreatedBy { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public Guid? ClosedByUserId { get; set; }
     public User? ClosedBy { get; set; }

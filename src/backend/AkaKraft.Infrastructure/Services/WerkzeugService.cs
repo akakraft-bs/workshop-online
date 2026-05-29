@@ -19,6 +19,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
                 w.Description,
                 w.Category,
                 w.ImageUrl,
+                w.ThumbnailUrl,
                 w.Dimensions,
                 w.StorageLocation,
                 w.IsAvailable,
@@ -31,7 +32,8 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
                     : null,
                 w.BorrowedAt,
                 w.ExpectedReturnAt,
-                w.ReturnedAt))
+                w.ReturnedAt,
+                w.CreatedAt))
             .ToListAsync();
     }
 
@@ -70,6 +72,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             Description = dto.Description,
             Category = dto.Category,
             ImageUrl = dto.ImageUrl,
+            ThumbnailUrl = dto.ThumbnailUrl,
             Dimensions = dto.Dimensions,
             StorageLocation = dto.StorageLocation,
             IsAvailable = true,
@@ -80,8 +83,10 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
 
         return new WerkzeugDto(
             werkzeug.Id, werkzeug.Name, werkzeug.Description,
-            werkzeug.Category, werkzeug.ImageUrl, werkzeug.Dimensions,
-            werkzeug.StorageLocation, werkzeug.IsAvailable, null, null, null, null, null);
+            werkzeug.Category, werkzeug.ImageUrl, werkzeug.ThumbnailUrl,
+            werkzeug.Dimensions, werkzeug.StorageLocation,
+            werkzeug.IsAvailable, null, null, null, null, null,
+            werkzeug.CreatedAt);
     }
 
     public async Task<WerkzeugDto?> UpdateAsync(Guid id, UpdateWerkzeugDto dto)
@@ -95,12 +100,13 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
 
         // Altes hochgeladenes Bild löschen wenn es ersetzt wird
         if (werkzeug.ImageUrl != dto.ImageUrl)
-            await uploadService.DeleteAsync(werkzeug.ImageUrl);
+            await uploadService.DeleteAsync(werkzeug.ImageUrl, werkzeug.ThumbnailUrl);
 
         werkzeug.Name = dto.Name;
         werkzeug.Description = dto.Description;
         werkzeug.Category = dto.Category;
         werkzeug.ImageUrl = dto.ImageUrl;
+        werkzeug.ThumbnailUrl = dto.ThumbnailUrl;
         werkzeug.Dimensions = dto.Dimensions;
         werkzeug.StorageLocation = dto.StorageLocation;
 
@@ -115,7 +121,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         if (werkzeug is null)
             return false;
 
-        await uploadService.DeleteAsync(werkzeug.ImageUrl);
+        await uploadService.DeleteAsync(werkzeug.ImageUrl, werkzeug.ThumbnailUrl);
         db.Werkzeuge.Remove(werkzeug);
         await db.SaveChangesAsync();
         return true;
@@ -178,7 +184,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
 
     private WerkzeugDto ToDto(Werkzeug w) => new(
         w.Id, w.Name, w.Description, w.Category,
-        w.ImageUrl, w.Dimensions, w.StorageLocation, w.IsAvailable,
+        w.ImageUrl, w.ThumbnailUrl, w.Dimensions, w.StorageLocation, w.IsAvailable,
         w.BorrowedByUserId, ResolveDisplayName(w),
-        w.BorrowedAt, w.ExpectedReturnAt, w.ReturnedAt);
+        w.BorrowedAt, w.ExpectedReturnAt, w.ReturnedAt, w.CreatedAt);
 }

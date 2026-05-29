@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AkaKraft.Infrastructure.Services;
 
-public class VerbrauchsmaterialService(ApplicationDbContext db) : IVerbrauchsmaterialService
+public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService uploadService) : IVerbrauchsmaterialService
 {
     public async Task<IEnumerable<VerbrauchsmaterialDto>> GetAllAsync()
     {
@@ -22,7 +22,9 @@ public class VerbrauchsmaterialService(ApplicationDbContext db) : IVerbrauchsmat
                 v.Quantity,
                 v.MinQuantity,
                 v.ImageUrl,
-                v.StorageLocation))
+                v.ThumbnailUrl,
+                v.StorageLocation,
+                v.CreatedAt))
             .ToListAsync();
     }
 
@@ -52,6 +54,7 @@ public class VerbrauchsmaterialService(ApplicationDbContext db) : IVerbrauchsmat
             Quantity = dto.Quantity,
             MinQuantity = dto.MinQuantity,
             ImageUrl = dto.ImageUrl,
+            ThumbnailUrl = dto.ThumbnailUrl,
             StorageLocation = dto.StorageLocation,
         };
 
@@ -60,13 +63,17 @@ public class VerbrauchsmaterialService(ApplicationDbContext db) : IVerbrauchsmat
 
         return new VerbrauchsmaterialDto(
             item.Id, item.Name, item.Description, item.Category,
-            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.StorageLocation);
+            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation,
+            item.CreatedAt);
     }
 
     public async Task<VerbrauchsmaterialDto?> UpdateAsync(Guid id, UpdateVerbrauchsmaterialDto dto)
     {
         var item = await db.Verbrauchsmaterialien.FindAsync(id);
         if (item is null) return null;
+
+        if (item.ImageUrl != dto.ImageUrl)
+            await uploadService.DeleteAsync(item.ImageUrl, item.ThumbnailUrl);
 
         item.Name            = dto.Name;
         item.Description     = dto.Description;
@@ -75,13 +82,15 @@ public class VerbrauchsmaterialService(ApplicationDbContext db) : IVerbrauchsmat
         item.Quantity        = dto.Quantity;
         item.MinQuantity     = dto.MinQuantity;
         item.ImageUrl        = dto.ImageUrl;
+        item.ThumbnailUrl    = dto.ThumbnailUrl;
         item.StorageLocation = dto.StorageLocation;
 
         await db.SaveChangesAsync();
 
         return new VerbrauchsmaterialDto(
             item.Id, item.Name, item.Description, item.Category,
-            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.StorageLocation);
+            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation,
+            item.CreatedAt);
     }
 
     public async Task<VerbrauchsmaterialDto?> AdjustQuantityAsync(Guid id, int delta)
@@ -94,7 +103,8 @@ public class VerbrauchsmaterialService(ApplicationDbContext db) : IVerbrauchsmat
 
         return new VerbrauchsmaterialDto(
             item.Id, item.Name, item.Description, item.Category,
-            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.StorageLocation);
+            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation,
+            item.CreatedAt);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
@@ -102,6 +112,7 @@ public class VerbrauchsmaterialService(ApplicationDbContext db) : IVerbrauchsmat
         var item = await db.Verbrauchsmaterialien.FindAsync(id);
         if (item is null) return false;
 
+        await uploadService.DeleteAsync(item.ImageUrl, item.ThumbnailUrl);
         db.Verbrauchsmaterialien.Remove(item);
         await db.SaveChangesAsync();
         return true;

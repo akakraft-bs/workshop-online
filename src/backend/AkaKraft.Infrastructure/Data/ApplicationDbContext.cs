@@ -1,3 +1,4 @@
+using AkaKraft.Domain.Common;
 using AkaKraft.Domain.Entities;
 using AkaKraft.Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Projekt> Projekte => Set<Projekt>();
     public DbSet<VereinZugang> VereinZugaenge => Set<VereinZugang>();
     public DbSet<Aufgabe> Aufgaben => Set<Aufgabe>();
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        foreach (var entry in ChangeTracker.Entries<IAuditable>())
+        {
+            if (entry.State == EntityState.Added && entry.Entity.CreatedAt == default)
+                entry.Entity.CreatedAt = now;
+
+            if (entry.State == EntityState.Modified)
+                entry.Entity.UpdatedAt = now;
+        }
+        return await base.SaveChangesAsync(cancellationToken);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

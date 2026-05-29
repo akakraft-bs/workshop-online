@@ -1,6 +1,8 @@
+using AkaKraft.Domain.Common;
+
 namespace AkaKraft.Domain.Entities;
 
-public class MangelAnmerkung
+public class MangelAnmerkung : IAuditable
 {
     public Guid Id { get; set; }
     public Guid MangelId { get; set; }
