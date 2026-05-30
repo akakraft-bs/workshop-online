@@ -129,6 +129,15 @@ export const routes: Routes = [
         data: { roles: [Role.Admin] },
       },
       {
+        path: 'admin/ablageorte',
+        loadComponent: () =>
+          import('./features/admin/ablageort-verwaltung/ablageort-verwaltung.component').then(
+            m => m.AblageortVerwaltungComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: [Role.Admin] },
+      },
+      {
         path: 'admin/users',
         loadComponent: () =>
           import('./features/admin/users/user-list.component').then(m => m.UserListComponent),

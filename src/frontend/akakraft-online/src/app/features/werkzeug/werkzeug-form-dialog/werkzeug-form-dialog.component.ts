@@ -46,7 +46,7 @@ export class WerkzeugFormDialogComponent implements OnInit {
   private thumbnailUrl   = this.data.werkzeug?.thumbnailUrl ?? null;
 
   allCategories: string[] = [];
-  allStorageLocations: string[] = [];
+  allStorageLocations: { name: string; color?: string }[] = [];
   filteredCategories$!: Observable<string[]>;
   filteredStorageLocations$!: Observable<string[]>;
 
@@ -75,7 +75,7 @@ export class WerkzeugFormDialogComponent implements OnInit {
     this.api.get<string[]>('/werkzeug/categories').subscribe(cats => {
       this.allCategories = cats;
     });
-    this.api.get<string[]>('/storage-locations').subscribe(locs => {
+    this.api.get<{ name: string; color?: string }[]>('/storage-locations').subscribe(locs => {
       this.allStorageLocations = locs;
     });
 
@@ -91,7 +91,9 @@ export class WerkzeugFormDialogComponent implements OnInit {
       startWith(this.form.controls.storageLocation.value),
       map(value => {
         const filter = (value ?? '').toLowerCase();
-        return this.allStorageLocations.filter(l => l.toLowerCase().includes(filter));
+        return this.allStorageLocations
+          .filter(l => l.name.toLowerCase().includes(filter))
+          .map(l => l.name);
       }),
     );
   }

@@ -43,7 +43,7 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
 
   allCategories: string[] = [];
   allUnits: string[] = [];
-  allStorageLocations: string[] = [];
+  allStorageLocations: { name: string; color?: string }[] = [];
   filteredCategories$!: Observable<string[]>;
   filteredUnits$!: Observable<string[]>;
   filteredStorageLocations$!: Observable<string[]>;
@@ -78,7 +78,7 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
     this.api.get<string[]>('/verbrauchsmaterial/units').subscribe(units => {
       this.allUnits = units;
     });
-    this.api.get<string[]>('/storage-locations').subscribe(locs => {
+    this.api.get<{ name: string; color?: string }[]>('/storage-locations').subscribe(locs => {
       this.allStorageLocations = locs;
     });
 
@@ -102,7 +102,9 @@ export class VerbrauchsmaterialFormDialogComponent implements OnInit {
       startWith(this.form.controls.storageLocation.value),
       map(value => {
         const filter = (value ?? '').toLowerCase();
-        return this.allStorageLocations.filter(l => l.toLowerCase().includes(filter));
+        return this.allStorageLocations
+          .filter(l => l.name.toLowerCase().includes(filter))
+          .map(l => l.name);
       }),
     );
   }

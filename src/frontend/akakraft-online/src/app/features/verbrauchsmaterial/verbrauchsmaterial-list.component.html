@@ -123,7 +123,12 @@
           <small class="description">{{ item.description }}</small>
           @if (item.storageLocation) {
             <small class="storage-location">
-              <mat-icon class="location-icon">place</mat-icon>{{ item.storageLocation }}
+              @if (storageLocationColorMap().get(item.storageLocation); as color) {
+                <span class="location-dot" [style.background]="color"></span>
+              } @else {
+                <mat-icon class="location-icon">place</mat-icon>
+              }
+              {{ item.storageLocation }}
             </small>
           }
         </td>
