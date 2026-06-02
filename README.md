@@ -10,21 +10,22 @@ Webbasierte Vereinsverwaltung für die AkaKraft Braunschweig. Die App bietet Mit
 
 | Bereich | Beschreibung |
 |---|---|
-| **Dashboard** | Nächste Veranstaltungen, konfigurierbarer Schnellzugriff (geräteübergreifend gespeichert) |
+| **Dashboard** | Nächste Veranstaltungen, konfigurierbarer Schnellzugriff (geräteübergreifend gespeichert), Nachricht des Tages |
+| **Nachricht des Tages** | Vorstand/Admin kann eine tagesaktuelle Mitteilung mit Priorität (Info/Warnung/Kritisch) für alle Mitglieder setzen |
 | **Hallenbelegung** | Wochenkalender auf Basis von Google Calendar, Termine anlegen/bearbeiten/löschen |
 | **Veranstaltungen** | Agenda-Übersicht aller Veranstaltungskalender, Einträge verwalten |
 | **Werkzeug** | Inventarverwaltung mit Ausleihe und Rückgabe, Ablageort-Autocomplete |
 | **Verbrauchsmaterial** | Bestandsübersicht mit Mengen und Mindestbeständen, Badge bei niedrigem Bestand |
 | **Mängelmelder** | Mängel und Schäden melden, mit Bild, Status und Anmerkungen; Badge für offene Mängel |
 | **Wunschliste** | Anschaffungsvorschläge einreichen, per Up-/Downvote bewerten, Preis angeben, abschließen |
-| **Umfragen** | Abstimmungen erstellen und teilnehmen; Badge für ausstehende Abstimmungen |
+| **Umfragen** | Abstimmungen erstellen und teilnehmen; Enthaltung möglich; manuelle Push-Erinnerung (Ersteller/Vorstand); Badge für ausstehende Abstimmungen |
 | **Hallenbuch** | Manuelle Nutzungseinträge der Halle inkl. Statistik-Export |
 | **Aufgaben** | Aufgaben anlegen, zuweisen und erledigen; Badge für offene Aufgaben |
 | **Verein** | Vereinsinfo, Dokumente und Zugangsdaten (rollengeschützt) |
 | **Projekte** | Projektübersicht des Vereins |
-| **Nutzerverwaltung** | Rollen vergeben und entziehen (Admin) |
-| **Kalender-Einstellungen** | Google-Kalender abonnieren, Typ und Farbe konfigurieren (Admin) |
-| **Feedback** | Nutzer-Feedback einreichen (inkl. App-Version) und verwalten (Admin) |
+| **Vorstandsbereich** | Einstiegsbereich für Vorstandsrollen (CRM und weitere Vorstandsfunktionen) |
+| **Partner & Sponsoren (CRM)** | Potentielle und aktive Partner verwalten, Kontaktpersonen hinterlegen, Kontakthistorie mit Kanal und Reaktion pflegen (Vorstand) |
+| **Adminbereich** | Zentraler Einstieg für Admin-Funktionen: Nutzerverwaltung, Kalender-Einstellungen, Ablageorte, Feedback-Verwaltung, Test-Benachrichtigungen, Thumbnail-Generierung |
 | **Push-Benachrichtigungen** | Web-Push-Abonnement für Nutzer, Test-Versand durch Admin |
 | **Profil** | Anzeigename und Kontaktdaten setzen |
 
@@ -94,7 +95,7 @@ Neu registrierte Nutzer erhalten automatisch die Rolle `None` und haben keinen Z
 | `Moderator` | Moderationsrechte (Mängelmelder, Wunschliste, Aufgaben) |
 | `Admin` | Voller Zugriff inkl. Nutzerverwaltung und Kalender-Einstellungen |
 
-Alle Rollen von `Getraenkewart` bis `Chairman` gelten als **Vorstand** und können über die Policy `VorstandOnly` gemeinsam berechtigt werden. `Moderator` wird wie Vorstand als „privilegiert" behandelt (`VorstandOrAdmin`-Policy).
+Alle Rollen von `Getraenkewart` bis `Chairman` gelten als **Vorstand** und werden gemeinsam mit `Admin` und `Moderator` über die Policy `VorstandOrAdmin` berechtigt. `Moderator` wird dabei wie Vorstand als „privilegiert" behandelt.
 
 Schreibrechte auf einzelne Kalender werden pro Kalender über die Kalender-Einstellungen konfiguriert (Rollen-Whitelist).
 
