@@ -176,6 +176,13 @@ export const routes: Routes = [
         data: { roles: [Role.Admin] },
       },
       {
+        path: 'vorstand',
+        loadComponent: () =>
+          import('./features/vorstand/vorstand-panel/vorstand-panel.component').then(m => m.VorstandPanelComponent),
+        canActivate: [roleGuard],
+        data: { roles: [...Object.values(Role).filter(r => r !== Role.None && r !== Role.Member && r !== Role.Moderator)] },
+      },
+      {
         path: 'crm',
         loadComponent: () =>
           import('./features/crm/crm-list/crm-list.component').then(m => m.CrmListComponent),

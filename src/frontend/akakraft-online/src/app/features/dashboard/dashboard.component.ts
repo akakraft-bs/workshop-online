@@ -149,7 +149,7 @@ export class DashboardComponent implements OnInit {
     { label: 'Wunschliste', description: 'Neuanschaffungen vorschlagen', icon: 'playlist_add', route: '/wunsch' },
     { label: 'Umfragen', description: 'Umfragen erstellen und abstimmen', icon: 'poll', route: '/umfrage', badge: () => this.badges.pendingUmfragen() },
     { label: 'Hallenbuch', description: 'Hallenbuchzeiten eintragen und einsehen', icon: 'menu_book', route: '/hallenbuch' },
-    { label: 'Partner & Sponsoren', description: 'Partner und Sponsoren verwalten', icon: 'handshake', route: '/crm', requiredRoles: [...VORSTAND_ROLES, Role.Admin] },
+    { label: 'Vorstandsbereich', description: 'Vorstandsbereich öffnen', icon: 'verified_user', route: '/vorstand', requiredRoles: [...VORSTAND_ROLES, Role.Admin] },
     { label: 'Nutzerverwaltung', description: 'Nutzer und Rollen verwalten', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
     { label: 'Kalender-Einstellungen', description: 'Kalender konfigurieren', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
     { label: 'Feedback', description: 'Eingegangenes Feedback verwalten', icon: 'feedback', route: '/admin/feedback', requiredRoles: [Role.Admin], badge: () => this.badges.unseenFeedback() },

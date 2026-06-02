@@ -74,7 +74,7 @@ export class MainLayoutComponent implements OnInit {
     { label: 'Verein', icon: 'groups', route: '/verein' },
     { label: 'Projekte', icon: 'engineering', route: '/projekte' },
     { label: 'Aufgaben', icon: 'task_alt', route: '/aufgaben', badge: () => this.badges.openAufgaben() },
-    { label: 'Partner & Sponsoren', icon: 'handshake', route: '/crm', requiredRoles: [...VORSTAND_ROLES, Role.Admin] },
+    { label: 'Vorstandsbereich', icon: 'verified_user', route: '/vorstand', requiredRoles: [...VORSTAND_ROLES, Role.Admin] },
     { label: 'Adminbereich', icon: 'admin_panel_settings', route: '/admin', requiredRoles: [Role.Admin] },
   ];
 
