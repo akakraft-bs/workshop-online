@@ -34,6 +34,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Aufgabe> Aufgaben => Set<Aufgabe>();
     public DbSet<Ablageort> Ablageorte => Set<Ablageort>();
     public DbSet<Motd> Motds => Set<Motd>();
+    public DbSet<Partner> Partner => Set<Partner>();
+    public DbSet<Ansprechpartner> Ansprechpartner => Set<Ansprechpartner>();
+    public DbSet<Kontakteintrag> Kontakteintraege => Set<Kontakteintrag>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -78,5 +81,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new AufgabeConfiguration());
         modelBuilder.ApplyConfiguration(new AblageortConfiguration());
         modelBuilder.ApplyConfiguration(new MotdConfiguration());
+        modelBuilder.ApplyConfiguration(new PartnerConfiguration());
+        modelBuilder.ApplyConfiguration(new AnsprechpartnerConfiguration());
+        modelBuilder.ApplyConfiguration(new KontakteintragConfiguration());
     }
 }

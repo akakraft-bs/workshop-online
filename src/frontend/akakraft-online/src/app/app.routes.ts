@@ -175,6 +175,20 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: [Role.Admin] },
       },
+      {
+        path: 'crm',
+        loadComponent: () =>
+          import('./features/crm/crm-list/crm-list.component').then(m => m.CrmListComponent),
+        canActivate: [roleGuard],
+        data: { roles: [...Object.values(Role).filter(r => r !== Role.None && r !== Role.Member && r !== Role.Moderator)] },
+      },
+      {
+        path: 'crm/:id',
+        loadComponent: () =>
+          import('./features/crm/crm-detail/crm-detail.component').then(m => m.CrmDetailComponent),
+        canActivate: [roleGuard],
+        data: { roles: [...Object.values(Role).filter(r => r !== Role.None && r !== Role.Member && r !== Role.Moderator)] },
+      },
     ],
   },
   { path: '**', redirectTo: '' },

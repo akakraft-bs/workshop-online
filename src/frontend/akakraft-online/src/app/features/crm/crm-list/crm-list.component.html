@@ -1,0 +1,85 @@
+<div class="page-header">
+  <h1 class="page-title">Partner & Sponsoren</h1>
+  <button mat-flat-button color="primary" (click)="openCreate()">
+    <mat-icon>add</mat-icon>
+    Neuer Partner
+  </button>
+</div>
+
+<div class="toolbar">
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput placeholder="Suchen…" [ngModel]="search()" (ngModelChange)="search.set($event)">
+  </mat-form-field>
+
+  <div class="status-chips">
+    @for (s of statuses; track s) {
+      <button class="status-chip status-{{ s.toLowerCase() }}"
+              [class.active]="activeStatus() === s"
+              (click)="toggleStatus(s)">
+        {{ statusLabels[s] }}
+      </button>
+    }
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading"><mat-spinner diameter="36"></mat-spinner></div>
+} @else if (filtered().length === 0) {
+  <p class="empty">Keine Partner gefunden.</p>
+} @else {
+  <mat-table [dataSource]="filtered()" class="partner-table">
+
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+      <mat-cell *matCellDef="let p">
+        <strong>{{ p.name }}</strong>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="kategorie">
+      <mat-header-cell *matHeaderCellDef>Kategorie</mat-header-cell>
+      <mat-cell *matCellDef="let p">{{ p.kategorie || '—' }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+      <mat-cell *matCellDef="let p">
+        <span class="status-badge status-{{ p.status.toLowerCase() }}">{{ statusLabel(p.status) }}</span>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="letzterKontakt">
+      <mat-header-cell *matHeaderCellDef>Letzter Kontakt</mat-header-cell>
+      <mat-cell *matCellDef="let p">{{ formatDate(p.letzterKontakt) }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="anzahlKontakte">
+      <mat-header-cell *matHeaderCellDef class="center-cell"># Kontakte</mat-header-cell>
+      <mat-cell *matCellDef="let p" class="center-cell">
+        @if (p.anzahlKontakte > 0) {
+          <span class="count-badge">{{ p.anzahlKontakte }}</span>
+        } @else {
+          <span class="muted">—</span>
+        }
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef></mat-header-cell>
+      <mat-cell *matCellDef="let p" class="actions-cell">
+        <button mat-icon-button (click)="openEdit(p, $event)" matTooltip="Bearbeiten">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button (click)="delete(p, $event)" matTooltip="Löschen" class="delete-btn">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let p; columns: displayedColumns;"
+             class="clickable-row"
+             [routerLink]="['/crm', p.id]"></mat-row>
+  </mat-table>
+}

@@ -103,6 +103,7 @@ public static class Program
         app.MapAufgabeEndpoints();
         app.MapAdminEndpoints();
         app.MapMotdEndpoints();
+        app.MapCrmEndpoints();
 
         app.Run();
     }

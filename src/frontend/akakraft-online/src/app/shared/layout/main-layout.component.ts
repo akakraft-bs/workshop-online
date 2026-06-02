@@ -15,7 +15,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { Signal } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { BadgeService } from '../../core/badges/badge.service';
-import { Role } from '../../models/user.model';
+import { Role, VORSTAND_ROLES } from '../../models/user.model';
 import { FeedbackDialogComponent } from '../../features/feedback/feedback-dialog/feedback-dialog.component';
 import { ProfileDialogComponent } from '../../features/profile/profile-dialog.component';
 import { PushNotificationService } from '../../core/push/push-notification.service';
@@ -74,6 +74,7 @@ export class MainLayoutComponent implements OnInit {
     { label: 'Verein', icon: 'groups', route: '/verein' },
     { label: 'Projekte', icon: 'engineering', route: '/projekte' },
     { label: 'Aufgaben', icon: 'task_alt', route: '/aufgaben', badge: () => this.badges.openAufgaben() },
+    { label: 'Partner & Sponsoren', icon: 'handshake', route: '/crm', requiredRoles: [...VORSTAND_ROLES, Role.Admin] },
     { label: 'Adminbereich', icon: 'admin_panel_settings', route: '/admin', requiredRoles: [Role.Admin] },
     { label: 'Nutzerverwaltung', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
     { label: 'Kalender-Einstellungen', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },

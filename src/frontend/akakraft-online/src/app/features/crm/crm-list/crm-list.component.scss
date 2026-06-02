@@ -1,0 +1,105 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+
+  .search-field {
+    width: 260px;
+    flex-shrink: 0;
+  }
+
+  .status-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 4px;
+  }
+}
+
+.status-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &.active { border-color: var(--mat-sys-primary); background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container); }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+  padding: 32px;
+}
+
+.partner-table {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+
+  .mat-mdc-header-row { background: var(--mat-sys-surface-container); }
+
+  .clickable-row {
+    cursor: pointer;
+    transition: background 0.15s;
+    &:hover { background: var(--mat-sys-surface-container-low); }
+  }
+
+  .center-cell { justify-content: center; }
+
+  .actions-cell {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+  }
+
+  .delete-btn { color: var(--mat-sys-error); }
+  .muted { color: var(--mat-sys-on-surface-variant); }
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// Status badges
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-potentiell  { background: color-mix(in srgb, #9e9e9e 15%, transparent); color: #424242; }
+.status-angeschrieben { background: color-mix(in srgb, #2196f3 15%, transparent); color: #1565c0; }
+.status-inverhandlung { background: color-mix(in srgb, #ff9800 15%, transparent); color: #e65100; }
+.status-aktiv       { background: color-mix(in srgb, #4caf50 15%, transparent); color: #1b5e20; }
+.status-abgelehnt   { background: color-mix(in srgb, #f44336 15%, transparent); color: #b71c1c; }
+.status-inaktiv     { background: color-mix(in srgb, #9e9e9e 12%, transparent); color: #616161; }
