@@ -73,13 +73,13 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         var werkzeug = new Werkzeug
         {
             Id = Guid.NewGuid(),
-            Name = dto.Name,
-            Description = dto.Description,
-            Category = dto.Category,
+            Name = dto.Name.Trim(),
+            Description = dto.Description?.Trim(),
+            Category = dto.Category.Trim(),
             ImageUrl = dto.ImageUrl,
             ThumbnailUrl = dto.ThumbnailUrl,
-            Dimensions = dto.Dimensions,
-            StorageLocation = dto.StorageLocation,
+            Dimensions = dto.Dimensions?.Trim(),
+            StorageLocation = dto.StorageLocation?.Trim(),
             IsAvailable = true,
         };
 
@@ -107,13 +107,13 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         if (werkzeug.ImageUrl != dto.ImageUrl)
             await uploadService.DeleteAsync(werkzeug.ImageUrl, werkzeug.ThumbnailUrl);
 
-        werkzeug.Name = dto.Name;
-        werkzeug.Description = dto.Description;
-        werkzeug.Category = dto.Category;
+        werkzeug.Name = dto.Name.Trim();
+        werkzeug.Description = dto.Description?.Trim();
+        werkzeug.Category = dto.Category.Trim();
         werkzeug.ImageUrl = dto.ImageUrl;
         werkzeug.ThumbnailUrl = dto.ThumbnailUrl;
-        werkzeug.Dimensions = dto.Dimensions;
-        werkzeug.StorageLocation = dto.StorageLocation;
+        werkzeug.Dimensions = dto.Dimensions?.Trim();
+        werkzeug.StorageLocation = dto.StorageLocation?.Trim();
 
         await db.SaveChangesAsync();
 

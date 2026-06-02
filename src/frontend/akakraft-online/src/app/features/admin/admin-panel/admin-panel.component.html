@@ -101,6 +101,31 @@
 
   <mat-card appearance="outlined">
     <mat-card-header>
+      <mat-icon mat-card-avatar>format_clear</mat-icon>
+      <mat-card-title>Leerzeichen bereinigen</mat-card-title>
+      <mat-card-subtitle>Werkzeug &amp; Verbrauchsmaterial</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="card-description">
+        Entfernt führende und abschließende Leerzeichen aus Textfeldern (Name, Kategorie, Beschreibung, Ablageort) aller vorhandenen Einträge.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button color="primary"
+        (click)="runTrim()"
+        [disabled]="trimRunning()">
+        @if (trimRunning()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        } @else {
+          <mat-icon>auto_fix_high</mat-icon>
+        }
+        Bereinigen
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
       <mat-icon mat-card-avatar>image_search</mat-icon>
       <mat-card-title>Thumbnails generieren</mat-card-title>
       <mat-card-subtitle>Werkzeug &amp; Verbrauchsmaterial</mat-card-subtitle>
