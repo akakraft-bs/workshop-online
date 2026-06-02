@@ -102,6 +102,7 @@ public static class Program
         app.MapVereinZugangEndpoints();
         app.MapAufgabeEndpoints();
         app.MapAdminEndpoints();
+        app.MapMotdEndpoints();
 
         app.Run();
     }

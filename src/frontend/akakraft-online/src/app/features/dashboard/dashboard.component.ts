@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,6 +8,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/auth/auth.service';
 import { ApiService } from '../../core/api/api.service';
 import { CalendarService } from '../../core/calendar/calendar.service';
@@ -17,6 +23,77 @@ import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
 import { Mangel } from '../../models/mangel.model';
 import { Umfrage } from '../../models/umfrage.model';
 import { Role } from '../../models/user.model';
+
+type MotdSeverity = 'Info' | 'Warning' | 'Critical';
+
+interface MotdDto {
+  id: string;
+  message: string;
+  severity: MotdSeverity;
+  updatedAt: string;
+}
+
+interface MotdDialogData {
+  motd: MotdDto | null;
+}
+
+@Component({
+  selector: 'app-motd-edit-dialog',
+  imports: [
+    FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule,
+    MatSelectModule, MatButtonModule, MatProgressSpinnerModule, MatIconModule,
+  ],
+  template: `
+    <h2 mat-dialog-title>Nachricht des Tages</h2>
+    <mat-dialog-content>
+      <div class="motd-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Nachricht</mat-label>
+          <textarea matInput [(ngModel)]="message" rows="4" placeholder="Wichtige Mitteilung..."></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Priorität</mat-label>
+          <mat-select [(ngModel)]="severity">
+            <mat-option value="Info">Info</mat-option>
+            <mat-option value="Warning">Warnung</mat-option>
+            <mat-option value="Critical">Kritisch</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Abbrechen</button>
+      <button mat-flat-button color="primary" (click)="save()" [disabled]="saving() || !message.trim()">
+        @if (saving()) { <mat-spinner diameter="18"></mat-spinner> }
+        @else { Speichern }
+      </button>
+    </mat-dialog-actions>
+  `,
+  styles: [`.motd-form { display: flex; flex-direction: column; gap: 12px; padding-top: 8px; min-width: 320px; } mat-form-field { width: 100%; }`],
+})
+export class MotdEditDialogComponent {
+  private readonly api = inject(ApiService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly dialogRef = inject(MatDialogRef<MotdEditDialogComponent>);
+  readonly data: MotdDialogData = inject(MAT_DIALOG_DATA);
+
+  message = this.data.motd?.message ?? '';
+  severity: MotdSeverity = this.data.motd?.severity ?? 'Info';
+  readonly saving = signal(false);
+
+  save(): void {
+    if (!this.message.trim()) return;
+    this.saving.set(true);
+    this.api.put<MotdDto>('/motd', { message: this.message.trim(), severity: this.severity }).subscribe({
+      next: result => this.dialogRef.close(result),
+      error: (err) => {
+        this.saving.set(false);
+        console.error('MOTD save error:', err);
+        this.snackBar.open('Fehler beim Speichern. Bitte Backend-Logs prüfen.', 'OK', { duration: 5000 });
+      },
+    });
+  }
+}
 
 export interface NavItem {
   label: string;
@@ -44,6 +121,11 @@ export class DashboardComponent implements OnInit {
   private readonly calendarService = inject(CalendarService);
   private readonly prefsService = inject(UserPreferencesService);
   readonly badges = inject(BadgeService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
+
+  readonly motd = signal<MotdDto | null>(null);
+  readonly canEditMotd = computed(() => this.auth.isVorstand() || this.auth.isAdmin());
 
   readonly upcomingEvents = signal<CalendarEvent[]>([]);
   readonly loadingEvents = signal(true);
@@ -84,6 +166,11 @@ export class DashboardComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    this.api.get<MotdDto>('/motd').subscribe({
+      next: m => this.motd.set(m),
+      error: (err) => console.error('MOTD load error:', err),
+    });
+
     this.calendarService.getUpcomingEvents().subscribe({
       next: events => { this.upcomingEvents.set(events); this.loadingEvents.set(false); },
       error: () => this.loadingEvents.set(false),
@@ -119,6 +206,29 @@ export class DashboardComponent implements OnInit {
         this.loadedAddress = prefs.address;
       },
       error: () => {},
+    });
+  }
+
+  openMotdDialog(): void {
+    this.dialog.open(MotdEditDialogComponent, {
+      width: '420px',
+      data: { motd: this.motd() } satisfies MotdDialogData,
+    }).afterClosed().subscribe((result: MotdDto | undefined) => {
+      if (result) {
+        this.motd.set(result);
+        this.snackBar.open('Nachricht gespeichert.', undefined, { duration: 3000 });
+      }
+    });
+  }
+
+  deleteMotd(): void {
+    if (!confirm('Nachricht des Tages löschen?')) return;
+    this.api.delete<void>('/motd').subscribe({
+      next: () => {
+        this.motd.set(null);
+        this.snackBar.open('Nachricht gelöscht.', undefined, { duration: 3000 });
+      },
+      error: () => this.snackBar.open('Fehler beim Löschen.', 'OK', { duration: 3000 }),
     });
   }
 

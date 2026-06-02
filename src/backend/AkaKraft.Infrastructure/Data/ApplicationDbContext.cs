@@ -33,6 +33,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<VereinZugang> VereinZugaenge => Set<VereinZugang>();
     public DbSet<Aufgabe> Aufgaben => Set<Aufgabe>();
     public DbSet<Ablageort> Ablageorte => Set<Ablageort>();
+    public DbSet<Motd> Motds => Set<Motd>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -76,5 +77,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new VereinZugangConfiguration());
         modelBuilder.ApplyConfiguration(new AufgabeConfiguration());
         modelBuilder.ApplyConfiguration(new AblageortConfiguration());
+        modelBuilder.ApplyConfiguration(new MotdConfiguration());
     }
 }
