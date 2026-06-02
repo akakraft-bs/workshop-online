@@ -79,8 +79,15 @@ public class UmfrageDeadlineBackgroundService(
                 .Distinct()
                 .ToListAsync(ct);
 
+            var abstainedUserIds = await db.UmfrageEnthaltungen
+                .Where(e => e.UmfrageId == u.Id)
+                .Select(e => e.UserId)
+                .ToListAsync(ct);
+
+            var excludedIds = votedUserIds.Union(abstainedUserIds).ToHashSet();
+
             var subscribedUserIds = await db.FcmTokens
-                .Where(t => !votedUserIds.Contains(t.UserId))
+                .Where(t => !excludedIds.Contains(t.UserId))
                 .Select(t => t.UserId)
                 .Distinct()
                 .ToListAsync(ct);

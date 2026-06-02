@@ -4,6 +4,103 @@
 
   <mat-card appearance="outlined">
     <mat-card-header>
+      <mat-icon mat-card-avatar>manage_accounts</mat-icon>
+      <mat-card-title>Nutzerverwaltung</mat-card-title>
+      <mat-card-subtitle>Rollen & Zugriffsrechte</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="card-description">
+        Nutzer einsehen, Rollen zuweisen und Zugriffsrechte verwalten.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button color="primary" routerLink="/admin/users">
+        <mat-icon>arrow_forward</mat-icon>
+        Verwalten
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>place</mat-icon>
+      <mat-card-title>Ablageorte</mat-card-title>
+      <mat-card-subtitle>Farben & Umbenennen</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="card-description">
+        Weise Ablageorten eine Farbe zu, die in der Werkzeug- und Verbrauchsmaterialliste als
+        farbiger Punkt angezeigt wird. Ablageorte können hier auch umbenannt werden.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button color="primary" routerLink="/admin/ablageorte">
+        <mat-icon>arrow_forward</mat-icon>
+        Verwalten
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>tune</mat-icon>
+      <mat-card-title>Kalender-Einstellungen</mat-card-title>
+      <mat-card-subtitle>Kalender konfigurieren</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="card-description">
+        Kalenderquellen verwalten und Einstellungen für die Hallenbelegung konfigurieren.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button color="primary" routerLink="/admin/kalender">
+        <mat-icon>arrow_forward</mat-icon>
+        Verwalten
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>feedback</mat-icon>
+      <mat-card-title>Feedback</mat-card-title>
+      <mat-card-subtitle>Eingegangenes Feedback verwalten</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="card-description">
+        Eingegangenes Nutzerfeedback einsehen und bearbeiten.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button color="primary" routerLink="/admin/feedback">
+        <mat-icon>arrow_forward</mat-icon>
+        Ansehen
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>notifications_active</mat-icon>
+      <mat-card-title>Test-Benachrichtigung</mat-card-title>
+      <mat-card-subtitle>Push-Benachrichtigung senden</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="card-description">
+        Test-Push-Benachrichtigungen an Nutzer senden.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button color="primary" routerLink="/admin/push">
+        <mat-icon>arrow_forward</mat-icon>
+        Öffnen
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
       <mat-icon mat-card-avatar>image_search</mat-icon>
       <mat-card-title>Thumbnails generieren</mat-card-title>
       <mat-card-subtitle>Werkzeug &amp; Verbrauchsmaterial</mat-card-subtitle>

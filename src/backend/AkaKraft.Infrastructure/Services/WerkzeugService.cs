@@ -44,7 +44,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             .OrderBy(c => c)
             .ToListAsync();
 
-    public async Task<IEnumerable<string>> GetStorageLocationsAsync()
+    public async Task<IEnumerable<StorageLocationDto>> GetStorageLocationsAsync()
     {
         var werkzeugLocations = await db.Werkzeuge
             .Where(w => w.StorageLocation != null && w.StorageLocation != "")
@@ -56,11 +56,16 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             .Select(v => v.StorageLocation!)
             .ToListAsync();
 
-        return werkzeugLocations
+        var allNames = werkzeugLocations
             .Concat(verbrauchsLocations)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(l => l)
             .ToList();
+
+        var colorMap = (await db.Ablageorte.ToListAsync())
+            .ToDictionary(a => a.Name, a => a.Color, StringComparer.OrdinalIgnoreCase);
+
+        return allNames.Select(name => new StorageLocationDto(name, colorMap.GetValueOrDefault(name)));
     }
 
     public async Task<WerkzeugDto> CreateAsync(CreateWerkzeugDto dto)

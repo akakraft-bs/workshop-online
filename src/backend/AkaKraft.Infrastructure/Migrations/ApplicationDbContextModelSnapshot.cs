@@ -22,6 +22,78 @@ namespace AkaKraft.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Ablageort", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Ablageorte");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Ansprechpartner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Notizen")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("PartnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Position")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("Telefon")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PartnerId");
+
+                    b.ToTable("Ansprechpartner");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.Aufgabe", b =>
                 {
                     b.Property<Guid>("Id")
@@ -320,6 +392,53 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.ToTable("HallenbuchEintraege");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Kontakteintrag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AnsprechpartnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Datum")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Kanal")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NaechsteSchritte")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("PartnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reaktion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Zusammenfassung")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnsprechpartnerId");
+
+                    b.HasIndex("PartnerId");
+
+                    b.ToTable("Kontakteintraege");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.Mangel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -406,6 +525,70 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.HasIndex("MangelId");
 
                     b.ToTable("MangelAnmerkungen");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Motd", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Motds");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Partner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Kategorie")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Notizen")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Website")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Partner");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Projekt", b =>
@@ -520,6 +703,9 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.Property<bool>("IsMultipleChoice")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime?>("LastManualReminderSentAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("LinkedCalendarId")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -590,6 +776,31 @@ namespace AkaKraft.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("UmfrageAntworten");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.UmfrageEnthaltung", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AbstainedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UmfrageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UmfrageId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("UmfrageEnthaltungen");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.UmfrageOption", b =>
@@ -994,6 +1205,17 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.ToTable("WunschVotes");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Ansprechpartner", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.Partner", "Partner")
+                        .WithMany("Ansprechpartner")
+                        .HasForeignKey("PartnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Partner");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.Aufgabe", b =>
                 {
                     b.HasOne("AkaKraft.Domain.Entities.User", "AssignedUser")
@@ -1065,6 +1287,24 @@ namespace AkaKraft.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Kontakteintrag", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.Ansprechpartner", "Ansprechpartner")
+                        .WithMany()
+                        .HasForeignKey("AnsprechpartnerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("AkaKraft.Domain.Entities.Partner", "Partner")
+                        .WithMany("Kontakteintraege")
+                        .HasForeignKey("PartnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ansprechpartner");
+
+                    b.Navigation("Partner");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Mangel", b =>
@@ -1143,6 +1383,25 @@ namespace AkaKraft.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Option");
+
+                    b.Navigation("Umfrage");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.UmfrageEnthaltung", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.Umfrage", "Umfrage")
+                        .WithMany("Enthaltungen")
+                        .HasForeignKey("UmfrageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AkaKraft.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Umfrage");
 
@@ -1233,9 +1492,18 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.Navigation("Anmerkungen");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Partner", b =>
+                {
+                    b.Navigation("Ansprechpartner");
+
+                    b.Navigation("Kontakteintraege");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.Umfrage", b =>
                 {
                     b.Navigation("Antworten");
+
+                    b.Navigation("Enthaltungen");
 
                     b.Navigation("Options");
                 });

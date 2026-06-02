@@ -24,6 +24,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Umfrage> Umfragen => Set<Umfrage>();
     public DbSet<UmfrageOption> UmfrageOptions => Set<UmfrageOption>();
     public DbSet<UmfrageAntwort> UmfrageAntworten => Set<UmfrageAntwort>();
+    public DbSet<UmfrageEnthaltung> UmfrageEnthaltungen => Set<UmfrageEnthaltung>();
     public DbSet<HallenbuchEintrag> HallenbuchEintraege => Set<HallenbuchEintrag>();
     public DbSet<VereinAmtsTraegerKontakt> VereinAmtsTraegerKontakte => Set<VereinAmtsTraegerKontakt>();
     public DbSet<VereinSchluesselhinterlegung> VereinSchluesselhinterlegungen => Set<VereinSchluesselhinterlegung>();
@@ -32,6 +33,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Projekt> Projekte => Set<Projekt>();
     public DbSet<VereinZugang> VereinZugaenge => Set<VereinZugang>();
     public DbSet<Aufgabe> Aufgaben => Set<Aufgabe>();
+    public DbSet<Ablageort> Ablageorte => Set<Ablageort>();
+    public DbSet<Motd> Motds => Set<Motd>();
+    public DbSet<Partner> Partner => Set<Partner>();
+    public DbSet<Ansprechpartner> Ansprechpartner => Set<Ansprechpartner>();
+    public DbSet<Kontakteintrag> Kontakteintraege => Set<Kontakteintrag>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -66,6 +72,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new UmfrageConfiguration());
         modelBuilder.ApplyConfiguration(new UmfrageOptionConfiguration());
         modelBuilder.ApplyConfiguration(new UmfrageAntwortConfiguration());
+        modelBuilder.ApplyConfiguration(new UmfrageEnthaltungConfiguration());
         modelBuilder.ApplyConfiguration(new HallenbuchEintragConfiguration());
         modelBuilder.ApplyConfiguration(new VereinAmtsTraegerKontaktConfiguration());
         modelBuilder.ApplyConfiguration(new VereinSchluesselhinterlegungConfiguration());
@@ -74,5 +81,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new ProjektConfiguration());
         modelBuilder.ApplyConfiguration(new VereinZugangConfiguration());
         modelBuilder.ApplyConfiguration(new AufgabeConfiguration());
+        modelBuilder.ApplyConfiguration(new AblageortConfiguration());
+        modelBuilder.ApplyConfiguration(new MotdConfiguration());
+        modelBuilder.ApplyConfiguration(new PartnerConfiguration());
+        modelBuilder.ApplyConfiguration(new AnsprechpartnerConfiguration());
+        modelBuilder.ApplyConfiguration(new KontakteintragConfiguration());
     }
 }

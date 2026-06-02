@@ -1,0 +1,30 @@
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+mat-card {
+  mat-icon[mat-card-avatar] {
+    font-size: 28px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mat-sys-primary);
+    background: none;
+  }
+}
+
+.card-description {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+mat-card-actions {
+  padding: 8px 16px 16px;
+}

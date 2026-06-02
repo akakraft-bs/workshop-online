@@ -1,0 +1,76 @@
+<div class="page-header">
+  <a mat-icon-button routerLink="/admin" matTooltip="Zurück">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
+  <h1 class="page-title">Ablageorte</h1>
+  <button mat-flat-button color="primary" (click)="openCreate()">
+    <mat-icon>add</mat-icon>
+    Neu anlegen
+  </button>
+</div>
+
+<p class="page-hint">
+  Weise Ablageorten eine Farbe zu. Diese wird dann als farbiger Punkt in der Werkzeug- und
+  Verbrauchsmaterialliste angezeigt. Ablageorte entstehen automatisch, sobald sie einem Eintrag
+  zugewiesen werden.
+</p>
+
+@if (loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="48" />
+  </div>
+} @else if (items().length === 0) {
+  <div class="empty-state">
+    <mat-icon>place</mat-icon>
+    <p>Noch keine Ablageorte vorhanden</p>
+  </div>
+} @else {
+  <div class="table-wrapper">
+    <table mat-table [dataSource]="items()">
+
+      <ng-container matColumnDef="color">
+        <th mat-header-cell *matHeaderCellDef>Farbe</th>
+        <td mat-cell *matCellDef="let item">
+          @if (item.color) {
+            <span class="color-swatch" [style.background]="item.color"></span>
+          } @else {
+            <span class="color-swatch empty"></span>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let item" class="name-cell">{{ item.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="itemCount">
+        <th mat-header-cell *matHeaderCellDef>Einträge</th>
+        <td mat-cell *matCellDef="let item">
+          @if (item.itemCount > 0) {
+            <span class="count-badge">{{ item.itemCount }}</span>
+          } @else {
+            <span class="count-zero">–</span>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let item" class="actions-cell">
+          <button mat-icon-button matTooltip="Bearbeiten" (click)="openEdit(item)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          @if (item.id) {
+            <button mat-icon-button color="warn" matTooltip="Konfiguration löschen" (click)="delete(item)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+    </table>
+  </div>
+}

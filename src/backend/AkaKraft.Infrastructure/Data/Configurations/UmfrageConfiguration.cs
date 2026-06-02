@@ -43,6 +43,25 @@ public class UmfrageConfiguration : IEntityTypeConfiguration<Umfrage>
             .WithOne(a => a.Umfrage)
             .HasForeignKey(a => a.UmfrageId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(u => u.Enthaltungen)
+            .WithOne(e => e.Umfrage)
+            .HasForeignKey(e => e.UmfrageId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class UmfrageEnthaltungConfiguration : IEntityTypeConfiguration<UmfrageEnthaltung>
+{
+    public void Configure(EntityTypeBuilder<UmfrageEnthaltung> builder)
+    {
+        builder.HasKey(e => e.Id);
+        builder.HasIndex(e => new { e.UmfrageId, e.UserId }).IsUnique();
+
+        builder.HasOne(e => e.User)
+            .WithMany()
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

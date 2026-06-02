@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AkaKraft.Infrastructure.Services;
 
-public class UmfrageService(ApplicationDbContext db) : IUmfrageService
+public class UmfrageService(ApplicationDbContext db, IPushNotificationService pushService) : IUmfrageService
 {
     public async Task<IEnumerable<UmfrageDto>> GetAllAsync(Guid currentUserId, bool isPrivileged)
     {
@@ -17,6 +17,7 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
             .Include(u => u.Options.OrderBy(o => o.SortOrder))
                 .ThenInclude(o => o.Antworten)
                     .ThenInclude(a => a.User)
+            .Include(u => u.Enthaltungen)
             .OrderByDescending(u => u.CreatedAt)
             .ToListAsync();
 
@@ -76,6 +77,7 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
             .Include(u => u.Options.OrderBy(o => o.SortOrder))
                 .ThenInclude(o => o.Antworten)
                     .ThenInclude(a => a.User)
+            .Include(u => u.Enthaltungen)
             .FirstOrDefaultAsync(u => u.Id == umfrageId);
 
         if (umfrage is null)
@@ -98,7 +100,6 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
         umfrage.LinkedEventTitle = dto.LinkedEventTitle;
         umfrage.LinkedEventStart = dto.LinkedEventStart?.ToUniversalTime();
 
-        // Update options: keep existing (by Id), add new, remove absent
         var existingOptions = umfrage.Options.ToDictionary(o => o.Id);
         var keptIds = new HashSet<Guid>();
 
@@ -125,16 +126,15 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
             }
         }
 
-        // Remove options not in the new list (cascade deletes answers)
         foreach (var opt in existingOptions.Values.Where(o => !keptIds.Contains(o.Id)))
             db.UmfrageOptions.Remove(opt);
 
         await db.SaveChangesAsync();
 
-        // Reload options after changes
         await db.Entry(umfrage).Collection(u => u.Options).Query()
             .Include(o => o.Antworten).ThenInclude(a => a.User)
             .LoadAsync();
+        await db.Entry(umfrage).Collection(u => u.Enthaltungen).LoadAsync();
 
         var userPrefs = await LoadPrefsAsync();
         return (BuildDto(umfrage, requestingUserId, isPrivileged, userPrefs), false);
@@ -162,6 +162,7 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
         var umfrage = await db.Umfragen
             .Include(u => u.CreatedBy)
             .Include(u => u.Options.OrderBy(o => o.SortOrder))
+            .Include(u => u.Enthaltungen)
             .FirstOrDefaultAsync(u => u.Id == umfrageId);
 
         if (umfrage is null)
@@ -170,21 +171,23 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
         if (umfrage.Status == UmfrageStatus.Geschlossen)
             return (null, "Diese Umfrage ist bereits geschlossen.");
 
-        // Validate option IDs belong to this poll
         var validOptionIds = umfrage.Options.Select(o => o.Id).ToHashSet();
         if (dto.OptionIds.Any(id => !validOptionIds.Contains(id)))
             return (null, "Ungültige Antwortmöglichkeit.");
 
-        // Enforce single-choice constraint
         if (!umfrage.IsMultipleChoice && dto.OptionIds.Count > 1)
             return (null, "Diese Umfrage erlaubt nur eine Antwort.");
 
-        // Replace existing answers for this user in this poll
+        // Remove existing votes
         var existing = await db.UmfrageAntworten
             .Where(a => a.UmfrageId == umfrageId && a.UserId == userId)
             .ToListAsync();
-
         db.UmfrageAntworten.RemoveRange(existing);
+
+        // Remove abstain when casting a real vote
+        var enthaltung = umfrage.Enthaltungen.FirstOrDefault(e => e.UserId == userId);
+        if (enthaltung != null)
+            db.UmfrageEnthaltungen.Remove(enthaltung);
 
         foreach (var optionId in dto.OptionIds)
         {
@@ -200,10 +203,10 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
 
         await db.SaveChangesAsync();
 
-        // Reload with full data
         await db.Entry(umfrage).Collection(u => u.Options).Query()
             .Include(o => o.Antworten).ThenInclude(a => a.User)
             .LoadAsync();
+        await db.Entry(umfrage).Collection(u => u.Enthaltungen).LoadAsync();
 
         var userPrefs = await LoadPrefsAsync();
         return (BuildDto(umfrage, userId, isPrivileged, userPrefs), null);
@@ -217,6 +220,7 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
             .Include(u => u.Options.OrderBy(o => o.SortOrder))
                 .ThenInclude(o => o.Antworten)
                     .ThenInclude(a => a.User)
+            .Include(u => u.Enthaltungen)
             .FirstOrDefaultAsync(u => u.Id == umfrageId);
 
         if (umfrage is null)
@@ -234,6 +238,110 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
 
         var userPrefs = await LoadPrefsAsync();
         return (BuildDto(umfrage, requestingUserId, isPrivileged, userPrefs), false);
+    }
+
+    public async Task<(UmfrageDto? Dto, string? Error)> AbstainAsync(
+        Guid umfrageId, Guid userId, bool isPrivileged)
+    {
+        var umfrage = await db.Umfragen
+            .Include(u => u.CreatedBy)
+            .Include(u => u.Options.OrderBy(o => o.SortOrder))
+                .ThenInclude(o => o.Antworten)
+                    .ThenInclude(a => a.User)
+            .Include(u => u.Enthaltungen)
+            .FirstOrDefaultAsync(u => u.Id == umfrageId);
+
+        if (umfrage is null)
+            return (null, "Umfrage nicht gefunden.");
+
+        if (umfrage.Status == UmfrageStatus.Geschlossen)
+            return (null, "Diese Umfrage ist bereits geschlossen.");
+
+        var existing = umfrage.Enthaltungen.FirstOrDefault(e => e.UserId == userId);
+        if (existing != null)
+        {
+            // Toggle off
+            db.UmfrageEnthaltungen.Remove(existing);
+        }
+        else
+        {
+            // Remove votes and add abstain
+            var votes = await db.UmfrageAntworten
+                .Where(a => a.UmfrageId == umfrageId && a.UserId == userId)
+                .ToListAsync();
+            db.UmfrageAntworten.RemoveRange(votes);
+
+            db.UmfrageEnthaltungen.Add(new UmfrageEnthaltung
+            {
+                Id = Guid.NewGuid(),
+                UmfrageId = umfrageId,
+                UserId = userId,
+                AbstainedAt = DateTime.UtcNow,
+            });
+        }
+
+        await db.SaveChangesAsync();
+
+        await db.Entry(umfrage).Collection(u => u.Options).Query()
+            .Include(o => o.Antworten).ThenInclude(a => a.User)
+            .LoadAsync();
+        await db.Entry(umfrage).Collection(u => u.Enthaltungen).LoadAsync();
+
+        var userPrefs = await LoadPrefsAsync();
+        return (BuildDto(umfrage, userId, isPrivileged, userPrefs), null);
+    }
+
+    public async Task<(bool Success, string? Error)> RemindAsync(
+        Guid umfrageId, Guid requestingUserId, bool isPrivileged)
+    {
+        var umfrage = await db.Umfragen.FirstOrDefaultAsync(u => u.Id == umfrageId);
+
+        if (umfrage is null)
+            return (false, "Umfrage nicht gefunden.");
+
+        if (!isPrivileged && umfrage.CreatedByUserId != requestingUserId)
+            return (false, "Keine Berechtigung.");
+
+        if (umfrage.Status == UmfrageStatus.Geschlossen)
+            return (false, "Diese Umfrage ist bereits geschlossen.");
+
+        if (umfrage.LastManualReminderSentAt.HasValue &&
+            (DateTime.UtcNow - umfrage.LastManualReminderSentAt.Value).TotalHours < 24)
+            return (false, "Es kann nur einmal täglich eine Erinnerung gesendet werden.");
+
+        var votedUserIds = await db.UmfrageAntworten
+            .Where(a => a.UmfrageId == umfrageId)
+            .Select(a => a.UserId)
+            .Distinct()
+            .ToListAsync();
+
+        var abstainedUserIds = await db.UmfrageEnthaltungen
+            .Where(e => e.UmfrageId == umfrageId)
+            .Select(e => e.UserId)
+            .ToListAsync();
+
+        var excludedIds = votedUserIds.Union(abstainedUserIds).ToHashSet();
+
+        var targetUserIds = await db.FcmTokens
+            .Where(t => !excludedIds.Contains(t.UserId))
+            .Select(t => t.UserId)
+            .Distinct()
+            .ToListAsync();
+
+        if (targetUserIds.Count > 0)
+        {
+            var question = umfrage.Question.Length > 60 ? umfrage.Question[..57] + "…" : umfrage.Question;
+            await pushService.SendToUsersAsync(
+                targetUserIds,
+                "Erinnerung: Umfrage ⏰",
+                $"Noch nicht abgestimmt: {question}",
+                url: "/umfrage");
+        }
+
+        umfrage.LastManualReminderSentAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        return (true, null);
     }
 
     // -------------------------------------------------------------------------
@@ -268,12 +376,19 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
 
         var showResults = CanSeeResults(umfrage, currentUserId, isPrivileged);
 
-        // Distinct participants (users who answered at least one option)
-        var participantCount = umfrage.Options
+        var voterIds = umfrage.Options
             .SelectMany(o => o.Antworten)
             .Select(a => a.UserId)
             .Distinct()
-            .Count();
+            .ToHashSet();
+
+        var abstainerIds = umfrage.Enthaltungen
+            .Select(e => e.UserId)
+            .ToHashSet();
+
+        var participantCount = voterIds.Union(abstainerIds).Count();
+        var enthaltungCount = abstainerIds.Count;
+        var currentUserAbstained = abstainerIds.Contains(currentUserId);
 
         var currentUserOptionIds = umfrage.Options
             .SelectMany(o => o.Antworten)
@@ -301,6 +416,7 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
             umfrage.ResultsVisible,
             umfrage.RevealAfterClose,
             umfrage.Deadline,
+            umfrage.LastManualReminderSentAt,
             umfrage.Status,
             umfrage.CreatedByUserId,
             DisplayName(umfrage.CreatedByUserId, umfrage.CreatedBy.Name),
@@ -310,7 +426,9 @@ public class UmfrageService(ApplicationDbContext db) : IUmfrageService
             umfrage.ClosedAt,
             options,
             currentUserOptionIds,
+            currentUserAbstained,
             participantCount,
+            enthaltungCount,
             umfrage.LinkedEventId,
             umfrage.LinkedCalendarId,
             umfrage.LinkedEventTitle,

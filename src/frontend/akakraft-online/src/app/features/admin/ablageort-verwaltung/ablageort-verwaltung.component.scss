@@ -1,0 +1,93 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  .page-title {
+    margin: 0;
+    flex: 1;
+  }
+}
+
+.page-hint {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 16px;
+  gap: 16px;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.table-wrapper {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+
+  .mat-mdc-header-row {
+    background: var(--mat-sys-surface-variant);
+  }
+
+  .table-row:hover {
+    background: color-mix(in srgb, var(--mat-sys-primary) 5%, transparent);
+  }
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--mat-sys-outline-variant);
+  vertical-align: middle;
+
+  &.empty {
+    background: var(--mat-sys-surface-variant);
+  }
+}
+
+.name-cell {
+  font-weight: 500;
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+  color: var(--mat-sys-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.count-zero {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}

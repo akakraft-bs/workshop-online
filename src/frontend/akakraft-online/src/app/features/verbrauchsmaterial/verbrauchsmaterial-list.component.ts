@@ -41,6 +41,10 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   readonly mobilePanel = signal<'search' | 'sort' | null>(null);
 
   readonly items = signal<Verbrauchsmaterial[]>([]);
+  readonly storageLocations = signal<{ name: string; color?: string }[]>([]);
+  readonly storageLocationColorMap = computed(() =>
+    new Map(this.storageLocations().filter(l => l.color).map(l => [l.name, l.color!]))
+  );
   readonly loading = signal(true);
   readonly searchQuery = signal('');
   readonly selectedCategory = signal<string | null>(null);
@@ -99,6 +103,9 @@ export class VerbrauchsmaterialListComponent implements OnInit {
         this.loading.set(false);
         this.snackBar.open('Verbrauchsmaterialien konnten nicht geladen werden.', 'OK', { duration: 3000 });
       },
+    });
+    this.api.get<{ name: string; color?: string }[]>('/storage-locations').subscribe({
+      next: locs => this.storageLocations.set(locs),
     });
   }
 

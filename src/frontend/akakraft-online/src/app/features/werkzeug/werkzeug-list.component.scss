@@ -253,3 +253,19 @@
     }
   }
 }
+
+.location-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 6px 0 0;
+
+  .location-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}

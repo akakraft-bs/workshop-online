@@ -19,6 +19,7 @@ public record UmfrageDto(
     bool ResultsVisible,
     bool RevealAfterClose,
     DateTime? Deadline,
+    DateTime? LastManualReminderSentAt,
     UmfrageStatus Status,
     Guid CreatedByUserId,
     string CreatedByName,
@@ -29,8 +30,12 @@ public record UmfrageDto(
     List<UmfrageOptionDto> Options,
     /// <summary>IDs of options the current user has selected.</summary>
     List<Guid> CurrentUserOptionIds,
-    /// <summary>Total number of participants who have answered (regardless of visibility).</summary>
+    /// <summary>Whether the current user has explicitly abstained.</summary>
+    bool CurrentUserAbstained,
+    /// <summary>Total number of participants (voters + abstainers).</summary>
     int ParticipantCount,
+    /// <summary>Number of users who explicitly abstained.</summary>
+    int EnthaltungCount,
     string? LinkedEventId,
     string? LinkedCalendarId,
     string? LinkedEventTitle,

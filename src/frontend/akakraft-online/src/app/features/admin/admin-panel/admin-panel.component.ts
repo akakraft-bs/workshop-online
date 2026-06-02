@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/api/api.service';
 
 interface BackfillResult {
@@ -15,7 +16,7 @@ interface BackfillResult {
 
 @Component({
   selector: 'app-admin-panel',
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, RouterLink],
   templateUrl: './admin-panel.component.html',
   styleUrl: './admin-panel.component.scss',
 })

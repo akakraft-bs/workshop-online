@@ -24,6 +24,9 @@ public class Umfrage : IAuditable
     /// <summary>Set when the 1-hour deadline reminder notification has been sent.</summary>
     public DateTime? DeadlineReminderSentAt { get; set; }
 
+    /// <summary>Set when a manual reminder was last sent by the creator/Vorstand.</summary>
+    public DateTime? LastManualReminderSentAt { get; set; }
+
     public UmfrageStatus Status { get; set; } = UmfrageStatus.Offen;
 
     public Guid CreatedByUserId { get; set; }
@@ -49,4 +52,5 @@ public class Umfrage : IAuditable
 
     public ICollection<UmfrageOption> Options { get; set; } = [];
     public ICollection<UmfrageAntwort> Antworten { get; set; } = [];
+    public ICollection<UmfrageEnthaltung> Enthaltungen { get; set; } = [];
 }

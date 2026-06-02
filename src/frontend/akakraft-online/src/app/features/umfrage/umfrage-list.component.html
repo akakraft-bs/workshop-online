@@ -77,6 +77,14 @@
           </div>
 
           <div class="card-actions">
+            @if (canSendReminder(umfrage)) {
+              <button mat-icon-button class="action-btn"
+                      [matTooltip]="reminderTooltip(umfrage)"
+                      [disabled]="reminderCooldownHours(umfrage) != null"
+                      (click)="sendReminder(umfrage)">
+                <mat-icon>notifications</mat-icon>
+              </button>
+            }
             @if (canEdit(umfrage) && umfrage.status === 'Offen') {
               <button mat-icon-button class="action-btn"
                       matTooltip="Bearbeiten"
@@ -150,6 +158,24 @@
           }
         </div>
 
+        <!-- Abstain -->
+        @if (umfrage.status === 'Offen') {
+          <button
+            class="option-btn abstain-btn"
+            [class.selected]="umfrage.currentUserAbstained"
+            [disabled]="pendingVoteId() === umfrage.id"
+            (click)="abstain(umfrage)">
+            <div class="option-content">
+              <span class="option-check">
+                <mat-icon class="check-icon" [class.unset]="!umfrage.currentUserAbstained">
+                  {{ umfrage.currentUserAbstained ? 'do_not_disturb_on' : 'do_not_disturb_off' }}
+                </mat-icon>
+              </span>
+              <span class="option-text">Enthalten</span>
+            </div>
+          </button>
+        }
+
         <!-- Footer -->
         <div class="card-footer">
           <span class="reporter">
@@ -158,7 +184,10 @@
           </span>
           <span class="participant-count">
             <mat-icon class="footer-icon">how_to_vote</mat-icon>
-            {{ umfrage.participantCount }} {{ umfrage.participantCount === 1 ? 'Teilnehmer' : 'Teilnehmer' }}
+            {{ umfrage.participantCount }} Teilnehmer
+            @if (umfrage.enthaltungCount > 0) {
+              <span class="enthaltung-count">({{ umfrage.enthaltungCount }} enthalten)</span>
+            }
           </span>
           <span class="date">{{ umfrage.createdAt | date:'dd.MM.yyyy' }}</span>
         </div>

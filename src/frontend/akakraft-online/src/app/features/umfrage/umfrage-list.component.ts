@@ -79,6 +79,21 @@ export class UmfrageListComponent implements OnInit {
     return umfrage.status === 'Offen' && this.canEdit(umfrage);
   }
 
+  canSendReminder(umfrage: Umfrage): boolean {
+    return umfrage.status === 'Offen' && this.canEdit(umfrage);
+  }
+
+  reminderCooldownHours(umfrage: Umfrage): number | null {
+    if (!umfrage.lastManualReminderSentAt) return null;
+    const diff = 24 - (Date.now() - new Date(umfrage.lastManualReminderSentAt).getTime()) / 3_600_000;
+    return diff > 0 ? Math.ceil(diff) : null;
+  }
+
+  reminderTooltip(umfrage: Umfrage): string {
+    const h = this.reminderCooldownHours(umfrage);
+    return h != null ? `Nächste Erinnerung in ${h}h möglich` : 'Erinnerung senden';
+  }
+
   isSelected(umfrage: Umfrage, option: UmfrageOption): boolean {
     return umfrage.currentUserOptionIds.includes(option.id);
   }
@@ -210,6 +225,33 @@ export class UmfrageListComponent implements OnInit {
       error: () => {
         this.snackBar.open('Abstimmung fehlgeschlagen.', 'OK', { duration: 3000 });
         this.pendingVoteId.set(null);
+      },
+    });
+  }
+
+  abstain(umfrage: Umfrage): void {
+    if (umfrage.status !== 'Offen') return;
+    if (this.pendingVoteId()) return;
+    this.pendingVoteId.set(umfrage.id);
+    this.api.post<Umfrage>(`/umfrage/${umfrage.id}/abstain`, {}).subscribe({
+      next: updated => {
+        this.items.update(list => list.map(u => u.id === updated.id ? updated : u));
+        this.pendingVoteId.set(null);
+      },
+      error: () => {
+        this.snackBar.open('Enthaltung fehlgeschlagen.', 'OK', { duration: 3000 });
+        this.pendingVoteId.set(null);
+      },
+    });
+  }
+
+  sendReminder(umfrage: Umfrage): void {
+    if (this.reminderCooldownHours(umfrage) != null) return;
+    this.api.post<void>(`/umfrage/${umfrage.id}/remind`, {}).subscribe({
+      next: () => this.snackBar.open('Erinnerung gesendet.', undefined, { duration: 3000 }),
+      error: (err) => {
+        const msg = err?.error ?? 'Fehler beim Senden.';
+        this.snackBar.open(msg, 'OK', { duration: 4000 });
       },
     });
   }

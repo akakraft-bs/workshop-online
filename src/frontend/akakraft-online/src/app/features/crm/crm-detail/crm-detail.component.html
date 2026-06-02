@@ -1,0 +1,152 @@
+@if (loading()) {
+  <div class="loading"><mat-spinner diameter="36"></mat-spinner></div>
+} @else if (partner(); as p) {
+  <!-- Header -->
+  <div class="detail-header">
+    <a mat-icon-button routerLink="/crm" matTooltip="Zurück zur Übersicht">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+    <div class="header-info">
+      <h1>{{ p.name }}</h1>
+      <span class="status-badge status-{{ p.status.toLowerCase() }}">
+        {{ statusLabels[p.status] }}
+      </span>
+      @if (p.kategorie) {
+        <span class="kategorie-tag">{{ p.kategorie }}</span>
+      }
+    </div>
+    <div class="header-actions">
+      <button mat-icon-button (click)="openEditPartner()" matTooltip="Partner bearbeiten">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button (click)="deletePartner()" matTooltip="Partner löschen" class="delete-btn">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Meta info -->
+  @if (p.website || p.notizen) {
+    <div class="meta-section">
+      @if (p.website) {
+        <a [href]="p.website" target="_blank" rel="noopener" class="website-link">
+          <mat-icon>open_in_new</mat-icon>
+          {{ p.website }}
+        </a>
+      }
+      @if (p.notizen) {
+        <p class="notizen">{{ p.notizen }}</p>
+      }
+    </div>
+  }
+
+  <div class="content-grid">
+    <!-- Ansprechpartner -->
+    <mat-card appearance="outlined" class="section-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>person</mat-icon>
+          Ansprechpartner
+        </mat-card-title>
+        <button mat-icon-button (click)="openAddAp()" matTooltip="Hinzufügen">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        @if (p.ansprechpartner.length === 0) {
+          <p class="empty-hint">Noch keine Ansprechpartner hinterlegt.</p>
+        } @else {
+          <div class="ap-list">
+            @for (ap of p.ansprechpartner; track ap.id) {
+              <div class="ap-item">
+                <div class="ap-avatar">
+                  <mat-icon>person</mat-icon>
+                </div>
+                <div class="ap-info">
+                  <strong>{{ ap.name }}</strong>
+                  @if (ap.position) { <span class="ap-sub">{{ ap.position }}</span> }
+                  @if (ap.email) {
+                    <a [href]="'mailto:' + ap.email" class="ap-contact">
+                      <mat-icon>email</mat-icon> {{ ap.email }}
+                    </a>
+                  }
+                  @if (ap.telefon) {
+                    <a [href]="'tel:' + ap.telefon" class="ap-contact">
+                      <mat-icon>phone</mat-icon> {{ ap.telefon }}
+                    </a>
+                  }
+                  @if (ap.notizen) { <span class="ap-sub ap-notizen">{{ ap.notizen }}</span> }
+                </div>
+                <div class="ap-actions">
+                  <button mat-icon-button (click)="openEditAp(ap)" matTooltip="Bearbeiten">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="deleteAp(ap)" matTooltip="Löschen" class="delete-btn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Kontakthistorie -->
+    <mat-card appearance="outlined" class="section-card full-width">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>history</mat-icon>
+          Kontakthistorie
+        </mat-card-title>
+        <button mat-icon-button (click)="openAddKontakt()" matTooltip="Eintrag hinzufügen">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        @if (p.kontakteintraege.length === 0) {
+          <p class="empty-hint">Noch keine Kontakteinträge vorhanden.</p>
+        } @else {
+          <div class="timeline">
+            @for (k of p.kontakteintraege; track k.id) {
+              <div class="timeline-item">
+                <div class="timeline-dot reaktion-{{ k.reaktion.toLowerCase() }}">
+                  <mat-icon>{{ kanalIcons[k.kanal] }}</mat-icon>
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <span class="timeline-date">{{ formatDate(k.datum) }}</span>
+                    <span class="kanal-label">{{ kanalLabels[k.kanal] }}</span>
+                    <span class="reaktion-chip reaktion-{{ k.reaktion.toLowerCase() }}">
+                      {{ reaktionLabels[k.reaktion] }}
+                    </span>
+                    @if (k.ansprechpartnerName) {
+                      <span class="ap-chip">
+                        <mat-icon>person</mat-icon>{{ k.ansprechpartnerName }}
+                      </span>
+                    }
+                    <div class="timeline-actions">
+                      <button mat-icon-button (click)="openEditKontakt(k)" matTooltip="Bearbeiten">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="deleteKontakt(k)" matTooltip="Löschen" class="delete-btn">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="zusammenfassung">{{ k.zusammenfassung }}</p>
+                  @if (k.naechsteSchritte) {
+                    <div class="naechste-schritte">
+                      <mat-icon>arrow_forward</mat-icon>
+                      <span>{{ k.naechsteSchritte }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

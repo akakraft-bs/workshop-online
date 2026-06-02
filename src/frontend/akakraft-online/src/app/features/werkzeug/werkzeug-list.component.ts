@@ -39,6 +39,10 @@ export class WerkzeugListComponent implements OnInit {
   private readonly dialog   = inject(MatDialog);
 
   readonly items            = signal<Werkzeug[]>([]);
+  readonly storageLocations = signal<{ name: string; color?: string }[]>([]);
+  readonly storageLocationColorMap = computed(() =>
+    new Map(this.storageLocations().filter(l => l.color).map(l => [l.name, l.color!]))
+  );
   readonly loading          = signal(true);
   readonly searchQuery      = signal('');
   readonly showOnlyBorrowed = signal(false);
@@ -107,6 +111,9 @@ export class WerkzeugListComponent implements OnInit {
         this.loading.set(false);
         this.snackBar.open('Werkzeuge konnten nicht geladen werden.', 'OK', { duration: 3000 });
       },
+    });
+    this.api.get<{ name: string; color?: string }[]>('/storage-locations').subscribe({
+      next: locs => this.storageLocations.set(locs),
     });
   }
 

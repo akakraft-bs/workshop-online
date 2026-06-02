@@ -129,6 +129,15 @@ export const routes: Routes = [
         data: { roles: [Role.Admin] },
       },
       {
+        path: 'admin/ablageorte',
+        loadComponent: () =>
+          import('./features/admin/ablageort-verwaltung/ablageort-verwaltung.component').then(
+            m => m.AblageortVerwaltungComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: [Role.Admin] },
+      },
+      {
         path: 'admin/users',
         loadComponent: () =>
           import('./features/admin/users/user-list.component').then(m => m.UserListComponent),
@@ -165,6 +174,27 @@ export const routes: Routes = [
           import('./features/admin/kalender/admin-kalender.component').then(m => m.AdminKalenderComponent),
         canActivate: [roleGuard],
         data: { roles: [Role.Admin] },
+      },
+      {
+        path: 'vorstand',
+        loadComponent: () =>
+          import('./features/vorstand/vorstand-panel/vorstand-panel.component').then(m => m.VorstandPanelComponent),
+        canActivate: [roleGuard],
+        data: { roles: [...Object.values(Role).filter(r => r !== Role.None && r !== Role.Member && r !== Role.Moderator)] },
+      },
+      {
+        path: 'crm',
+        loadComponent: () =>
+          import('./features/crm/crm-list/crm-list.component').then(m => m.CrmListComponent),
+        canActivate: [roleGuard],
+        data: { roles: [...Object.values(Role).filter(r => r !== Role.None && r !== Role.Member && r !== Role.Moderator)] },
+      },
+      {
+        path: 'crm/:id',
+        loadComponent: () =>
+          import('./features/crm/crm-detail/crm-detail.component').then(m => m.CrmDetailComponent),
+        canActivate: [roleGuard],
+        data: { roles: [...Object.values(Role).filter(r => r !== Role.None && r !== Role.Member && r !== Role.Moderator)] },
       },
     ],
   },

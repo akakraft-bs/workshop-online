@@ -1,4 +1,29 @@
 <div class="dashboard">
+  <!-- Message of the Day -->
+  @if (motd(); as m) {
+    <div class="motd-banner motd-{{ m.severity.toLowerCase() }}">
+      <mat-icon class="motd-icon">
+        {{ m.severity === 'Critical' ? 'error' : m.severity === 'Warning' ? 'warning' : 'info' }}
+      </mat-icon>
+      <p class="motd-message">{{ m.message }}</p>
+      @if (canEditMotd()) {
+        <div class="motd-actions">
+          <button mat-icon-button (click)="openMotdDialog()" matTooltip="Bearbeiten">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="deleteMotd()" matTooltip="Löschen">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+  } @else if (canEditMotd()) {
+    <button mat-stroked-button class="motd-create-btn" (click)="openMotdDialog()">
+      <mat-icon>add_comment</mat-icon>
+      Nachricht des Tages setzen
+    </button>
+  }
+
   <h1 class="greeting">
     Hallo, {{ auth.currentUser()?.displayName || (auth.currentUser()?.name ?? 'Mitglied').split(' ')[0] }}!
   </h1>
