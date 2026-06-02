@@ -112,36 +112,13 @@ internal static class AdminEndpoints
                 return Results.BadRequest("Name darf nicht leer sein.");
 
             var newName = dto.Name.Trim();
-            var oldName = dto.OldName?.Trim();
-            var isRename = oldName is not null
-                && !string.Equals(oldName, newName, StringComparison.OrdinalIgnoreCase);
 
             var conflict = await db.Ablageorte
                 .Where(a => a.Name.ToLower() == newName.ToLower())
-                .Select(a => new { a.Id, a.Name, a.Color })
                 .FirstOrDefaultAsync();
 
             if (conflict is not null)
-            {
-                if (isRename)
-                    return Results.Conflict(new
-                    {
-                        conflictsWithId    = conflict.Id,
-                        conflictsWithName  = conflict.Name,
-                        conflictsWithColor = conflict.Color,
-                    });
                 return Results.Conflict("Ein Ablageort mit diesem Namen existiert bereits.");
-            }
-
-            if (isRename)
-            {
-                await db.Werkzeuge
-                    .Where(w => w.StorageLocation == oldName)
-                    .ExecuteUpdateAsync(s => s.SetProperty(w => w.StorageLocation, newName));
-                await db.Verbrauchsmaterialien
-                    .Where(v => v.StorageLocation == oldName)
-                    .ExecuteUpdateAsync(s => s.SetProperty(v => v.StorageLocation, newName));
-            }
 
             var ablageort = new Ablageort
             {
@@ -149,6 +126,59 @@ internal static class AdminEndpoints
                 Name = newName,
                 Color = dto.Color,
             };
+            db.Ablageorte.Add(ablageort);
+            await db.SaveChangesAsync();
+
+            return Results.Created($"/admin/ablageorte/{ablageort.Id}",
+                new AblageortDto(ablageort.Id, ablageort.Name, ablageort.Color));
+        }).RequireAuthorization("AdminOnly");
+
+        // Rename a name-only (no Ablageort record) location and optionally assign a color.
+        app.MapPost("/admin/ablageorte/rename-from-name", async (RenameByNameDto dto, ApplicationDbContext db) =>
+        {
+            if (string.IsNullOrWhiteSpace(dto.CurrentName) || string.IsNullOrWhiteSpace(dto.NewName))
+                return Results.BadRequest("Name darf nicht leer sein.");
+
+            var currentName = dto.CurrentName.Trim();
+            var newName     = dto.NewName.Trim();
+            var isRename    = !string.Equals(currentName, newName, StringComparison.OrdinalIgnoreCase);
+
+            if (isRename)
+            {
+                var conflict = await db.Ablageorte
+                    .Where(a => a.Name.ToLower() == newName.ToLower())
+                    .Select(a => new { a.Id, a.Name, a.Color })
+                    .FirstOrDefaultAsync();
+
+                if (conflict is not null)
+                    return Results.Conflict(new
+                    {
+                        conflictsWithId    = conflict.Id,
+                        conflictsWithName  = conflict.Name,
+                        conflictsWithColor = conflict.Color,
+                    });
+
+                await db.Werkzeuge
+                    .Where(w => w.StorageLocation == currentName)
+                    .ExecuteUpdateAsync(s => s.SetProperty(w => w.StorageLocation, newName));
+                await db.Verbrauchsmaterialien
+                    .Where(v => v.StorageLocation == currentName)
+                    .ExecuteUpdateAsync(s => s.SetProperty(v => v.StorageLocation, newName));
+            }
+
+            // Find or create the Ablageort for the final name.
+            var existing = await db.Ablageorte
+                .Where(a => a.Name.ToLower() == newName.ToLower())
+                .FirstOrDefaultAsync();
+
+            if (existing is not null)
+            {
+                existing.Color = dto.Color;
+                await db.SaveChangesAsync();
+                return Results.Ok(new AblageortDto(existing.Id, existing.Name, existing.Color));
+            }
+
+            var ablageort = new Ablageort { Id = Guid.NewGuid(), Name = newName, Color = dto.Color };
             db.Ablageorte.Add(ablageort);
             await db.SaveChangesAsync();
 
