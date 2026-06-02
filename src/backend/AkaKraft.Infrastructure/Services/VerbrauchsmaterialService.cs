@@ -47,15 +47,15 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
         var item = new Verbrauchsmaterial
         {
             Id = Guid.NewGuid(),
-            Name = dto.Name,
-            Description = dto.Description,
-            Category = dto.Category,
-            Unit = dto.Unit,
+            Name = dto.Name.Trim(),
+            Description = dto.Description?.Trim(),
+            Category = dto.Category.Trim(),
+            Unit = dto.Unit.Trim(),
             Quantity = dto.Quantity,
             MinQuantity = dto.MinQuantity,
             ImageUrl = dto.ImageUrl,
             ThumbnailUrl = dto.ThumbnailUrl,
-            StorageLocation = dto.StorageLocation,
+            StorageLocation = dto.StorageLocation?.Trim(),
         };
 
         db.Verbrauchsmaterialien.Add(item);
@@ -75,15 +75,15 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
         if (item.ImageUrl != dto.ImageUrl)
             await uploadService.DeleteAsync(item.ImageUrl, item.ThumbnailUrl);
 
-        item.Name            = dto.Name;
-        item.Description     = dto.Description;
-        item.Category        = dto.Category;
-        item.Unit            = dto.Unit;
+        item.Name            = dto.Name.Trim();
+        item.Description     = dto.Description?.Trim();
+        item.Category        = dto.Category.Trim();
+        item.Unit            = dto.Unit.Trim();
         item.Quantity        = dto.Quantity;
         item.MinQuantity     = dto.MinQuantity;
         item.ImageUrl        = dto.ImageUrl;
         item.ThumbnailUrl    = dto.ThumbnailUrl;
-        item.StorageLocation = dto.StorageLocation;
+        item.StorageLocation = dto.StorageLocation?.Trim();
 
         await db.SaveChangesAsync();
 

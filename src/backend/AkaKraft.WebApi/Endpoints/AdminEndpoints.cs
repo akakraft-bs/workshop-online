@@ -66,6 +66,44 @@ internal static class AdminEndpoints
         }).RequireAuthorization("AdminOnly");
 
         // -------------------------------------------------------------------------
+        // Trim whitespace from existing text fields
+        // -------------------------------------------------------------------------
+
+        app.MapPost("/admin/trim-text-fields", async (ApplicationDbContext db) =>
+        {
+            int trimmedWerkzeug = 0;
+            int trimmedVerbrauchsmaterial = 0;
+
+            var werkzeuge = await db.Werkzeuge.ToListAsync();
+            foreach (var w in werkzeuge)
+            {
+                var changed = false;
+                if (w.Name != w.Name.Trim())                                   { w.Name = w.Name.Trim(); changed = true; }
+                if (w.Description != w.Description?.Trim())                    { w.Description = w.Description?.Trim(); changed = true; }
+                if (w.Category != w.Category.Trim())                           { w.Category = w.Category.Trim(); changed = true; }
+                if (w.Dimensions != w.Dimensions?.Trim())                      { w.Dimensions = w.Dimensions?.Trim(); changed = true; }
+                if (w.StorageLocation != w.StorageLocation?.Trim())            { w.StorageLocation = w.StorageLocation?.Trim(); changed = true; }
+                if (changed) trimmedWerkzeug++;
+            }
+
+            var verbrauchsmaterialien = await db.Verbrauchsmaterialien.ToListAsync();
+            foreach (var v in verbrauchsmaterialien)
+            {
+                var changed = false;
+                if (v.Name != v.Name.Trim())                                   { v.Name = v.Name.Trim(); changed = true; }
+                if (v.Description != v.Description?.Trim())                    { v.Description = v.Description?.Trim(); changed = true; }
+                if (v.Category != v.Category.Trim())                           { v.Category = v.Category.Trim(); changed = true; }
+                if (v.Unit != v.Unit.Trim())                                   { v.Unit = v.Unit.Trim(); changed = true; }
+                if (v.StorageLocation != v.StorageLocation?.Trim())            { v.StorageLocation = v.StorageLocation?.Trim(); changed = true; }
+                if (changed) trimmedVerbrauchsmaterial++;
+            }
+
+            await db.SaveChangesAsync();
+
+            return Results.Ok(new { trimmedWerkzeug, trimmedVerbrauchsmaterial });
+        }).RequireAuthorization("AdminOnly");
+
+        // -------------------------------------------------------------------------
         // Ablageort (Storage Location) Management
         // -------------------------------------------------------------------------
 
@@ -139,11 +177,15 @@ internal static class AdminEndpoints
             if (string.IsNullOrWhiteSpace(dto.CurrentName) || string.IsNullOrWhiteSpace(dto.NewName))
                 return Results.BadRequest("Name darf nicht leer sein.");
 
-            var currentName = dto.CurrentName.Trim();
-            var newName     = dto.NewName.Trim();
-            var isRename    = !string.Equals(currentName, newName, StringComparison.OrdinalIgnoreCase);
+            // Preserve the original (untrimmed) name for exact item lookup.
+            var originalName     = dto.CurrentName;
+            var currentName      = dto.CurrentName.Trim();
+            var newName          = dto.NewName.Trim();
+            var isLogicalRename  = !string.Equals(currentName, newName, StringComparison.OrdinalIgnoreCase);
+            // Also treat whitespace-only differences as a rename for item updates.
+            var itemsNeedUpdate  = isLogicalRename || originalName != currentName;
 
-            if (isRename)
+            if (isLogicalRename)
             {
                 var conflict = await db.Ablageorte
                     .Where(a => a.Name.ToLower() == newName.ToLower())
@@ -157,12 +199,15 @@ internal static class AdminEndpoints
                         conflictsWithName  = conflict.Name,
                         conflictsWithColor = conflict.Color,
                     });
+            }
 
+            if (itemsNeedUpdate)
+            {
                 await db.Werkzeuge
-                    .Where(w => w.StorageLocation == currentName)
+                    .Where(w => w.StorageLocation == originalName)
                     .ExecuteUpdateAsync(s => s.SetProperty(w => w.StorageLocation, newName));
                 await db.Verbrauchsmaterialien
-                    .Where(v => v.StorageLocation == currentName)
+                    .Where(v => v.StorageLocation == originalName)
                     .ExecuteUpdateAsync(s => s.SetProperty(v => v.StorageLocation, newName));
             }
 
@@ -173,7 +218,9 @@ internal static class AdminEndpoints
 
             if (existing is not null)
             {
-                existing.Color = dto.Color;
+                // Keep existing color when merging whitespace-only duplicates.
+                if (dto.Color is not null)
+                    existing.Color = dto.Color;
                 await db.SaveChangesAsync();
                 return Results.Ok(new AblageortDto(existing.Id, existing.Name, existing.Color));
             }
