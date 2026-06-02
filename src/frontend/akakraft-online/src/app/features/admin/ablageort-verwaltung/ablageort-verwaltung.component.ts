@@ -157,19 +157,25 @@ export class AblageortEditDialogComponent {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
     const { name, color } = this.form.getRawValue();
-    const id = this.data.item?.id;
+    const id       = this.data.item?.id;
+    const newName  = name.trim();
+    const colorVal = this.useColor() ? color : null;
 
-    const body: Record<string, unknown> = {
-      name: name.trim(),
-      color: this.useColor() ? color : null,
-    };
-    if (!id && this.data.item?.name) {
-      body['oldName'] = this.data.item.name;
+    let request$;
+    if (id) {
+      // Location has an Ablageort record → PUT by ID
+      request$ = this.api.put<AblageortDialogResult>(`/admin/ablageorte/${id}`, { name: newName, color: colorVal });
+    } else if (this.data.item) {
+      // Name-only location (no color/ID) → dedicated rename endpoint
+      request$ = this.api.post<AblageortDialogResult>('/admin/ablageorte/rename-from-name', {
+        currentName: this.data.item.name,
+        newName,
+        color: colorVal,
+      });
+    } else {
+      // Create new Ablageort
+      request$ = this.api.post<AblageortDialogResult>('/admin/ablageorte', { name: newName, color: colorVal });
     }
-
-    const request$ = id
-      ? this.api.put<AblageortDialogResult>(`/admin/ablageorte/${id}`, body)
-      : this.api.post<AblageortDialogResult>('/admin/ablageorte', body);
 
     request$.subscribe({
       next: result => this.dialogRef.close(result),
