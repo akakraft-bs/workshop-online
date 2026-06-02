@@ -18,6 +18,7 @@ export interface Umfrage {
   resultsVisible: boolean;
   revealAfterClose: boolean;
   deadline?: string | null;
+  lastManualReminderSentAt?: string | null;
   status: UmfrageStatus;
   createdByUserId: string;
   createdByName: string;
@@ -28,8 +29,12 @@ export interface Umfrage {
   options: UmfrageOption[];
   /** IDs of options the current user has selected. */
   currentUserOptionIds: string[];
-  /** Total number of distinct users who answered. */
+  /** Whether the current user has explicitly abstained. */
+  currentUserAbstained: boolean;
+  /** Total number of distinct users who voted or abstained. */
   participantCount: number;
+  /** Number of users who explicitly abstained. */
+  enthaltungCount: number;
   linkedEventId?: string | null;
   linkedCalendarId?: string | null;
   linkedEventTitle?: string | null;

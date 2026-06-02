@@ -193,7 +193,7 @@ export class DashboardComponent implements OnInit {
 
     this.api.get<Umfrage[]>('/umfrage').subscribe({
       next: items => this.pendingUmfragen.set(
-        items.filter(u => u.status === 'Offen' && u.currentUserOptionIds.length === 0)
+        items.filter(u => u.status === 'Offen' && u.currentUserOptionIds.length === 0 && !u.currentUserAbstained)
       ),
       error: () => {},
     });

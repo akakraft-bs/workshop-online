@@ -23,4 +23,12 @@ public interface IUmfrageService
     /// <summary>Returns (updated DTO, forbidden flag). Null DTO = not found.</summary>
     Task<(UmfrageDto? Dto, bool Forbidden)> CloseAsync(
         Guid umfrageId, Guid requestingUserId, bool isPrivileged);
+
+    /// <summary>Toggles abstain for the current user. Removes any existing votes when abstaining.</summary>
+    Task<(UmfrageDto? Dto, string? Error)> AbstainAsync(
+        Guid umfrageId, Guid userId, bool isPrivileged);
+
+    /// <summary>Sends a push reminder to non-voters. Max once per 24 hours. Creator or privileged only.</summary>
+    Task<(bool Success, string? Error)> RemindAsync(
+        Guid umfrageId, Guid requestingUserId, bool isPrivileged);
 }

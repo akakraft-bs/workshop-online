@@ -88,5 +88,29 @@ internal static class UmfrageEndpoints
             if (forbidden) return Results.Forbid();
             return result is null ? Results.NotFound() : Results.Ok(result);
         }).RequireAuthorization("AnyRole");
+
+        app.MapPost("/umfrage/{id:guid}/abstain", async (
+            Guid id, HttpContext ctx, IUmfrageService umfrageService) =>
+        {
+            if (!ctx.TryGetCurrentUserId(out var userId))
+                return Results.Unauthorized();
+
+            var (result, error) = await umfrageService.AbstainAsync(id, userId, ctx.IsPrivileged());
+
+            return error is not null ? Results.BadRequest(error) : Results.Ok(result);
+        }).RequireAuthorization("AnyRole");
+
+        app.MapPost("/umfrage/{id:guid}/remind", async (
+            Guid id, HttpContext ctx, IUmfrageService umfrageService) =>
+        {
+            if (!ctx.TryGetCurrentUserId(out var userId))
+                return Results.Unauthorized();
+
+            var (success, error) = await umfrageService.RemindAsync(id, userId, ctx.IsPrivileged());
+
+            if (!success && error == "Keine Berechtigung.") return Results.Forbid();
+            if (!success) return Results.BadRequest(error);
+            return Results.Ok();
+        }).RequireAuthorization("AnyRole");
     }
 }
