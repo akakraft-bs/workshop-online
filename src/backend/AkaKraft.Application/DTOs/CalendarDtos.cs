@@ -40,6 +40,7 @@ public record CalendarEventDto(
     bool IsAllDay,
     string? CreatorName,
     string? CreatorEmail,
+    Guid? CreatorUserId,
     string? Description,
     string? Location,
     string? Url

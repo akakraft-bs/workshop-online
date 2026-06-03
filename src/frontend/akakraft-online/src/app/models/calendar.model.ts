@@ -37,6 +37,7 @@ export interface CalendarEvent {
   isAllDay: boolean;
   creatorName?: string;
   creatorEmail?: string;
+  creatorUserId?: string;
   description?: string;
   location?: string;
   url?: string;
