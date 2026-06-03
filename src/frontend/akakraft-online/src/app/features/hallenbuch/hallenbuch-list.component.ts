@@ -13,10 +13,22 @@ import { HallenbuchEintrag } from '../../models/hallenbuch.model';
 import {
   HallenbuchDialogComponent,
   HallenbuchDialogData,
+  HallenbuchDialogPrefill,
   HallenbuchDialogResult,
 } from './hallenbuch-dialog/hallenbuch-dialog.component';
 import { Mangel } from '../../models/mangel.model';
 import { HallenbuchStatistikDialogComponent } from './hallenbuch-statistik-dialog/hallenbuch-statistik-dialog.component';
+import { CalendarEvent } from '../../models/calendar.model';
+import { User } from '../../models/user.model';
+
+function toTimeStr(d: Date): string {
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+}
+
+function roundTo15Min(d: Date): Date {
+  const ms = 15 * 60 * 1000;
+  return new Date(Math.round(d.getTime() / ms) * ms);
+}
 
 @Component({
   selector: 'app-hallenbuch-list',
@@ -80,8 +92,50 @@ export class HallenbuchListComponent implements OnInit {
   }
 
   openCreateDialog(): void {
+    const user = this.auth.currentUser();
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const todayEnd   = new Date(); todayEnd.setHours(23, 59, 59, 999);
+
+    this.api.get<CalendarEvent[]>(
+      `/calendar/events?from=${todayStart.toISOString()}&to=${todayEnd.toISOString()}&type=Hallenbelegung`
+    ).subscribe({
+      next: events => this.openHallenbuchDialog(this.buildPrefill(this.findMyEventToday(events, user))),
+      error: ()     => this.openHallenbuchDialog(undefined),
+    });
+  }
+
+  private findMyEventToday(events: CalendarEvent[], user: User | null): CalendarEvent | null {
+    if (!user) return null;
+    const myEvents = events.filter(ev =>
+      ev.start != null && (
+        ev.creatorUserId === user.id ||
+        ev.creatorEmail?.toLowerCase() === user.email.toLowerCase()
+      )
+    );
+    if (myEvents.length === 0) return null;
+    const now = Date.now();
+    return myEvents.reduce((best, ev) => {
+      const diff = (e: CalendarEvent) => Math.abs(new Date(e.start!).getTime() - now);
+      return diff(ev) < diff(best) ? ev : best;
+    });
+  }
+
+  private buildPrefill(event: CalendarEvent | null): HallenbuchDialogPrefill | undefined {
+    if (!event?.start) return undefined;
+    const now = new Date();
+    const end = event.end ? new Date(event.end) : null;
+    const endDate = end && now > end ? roundTo15Min(now) : (end ?? now);
+    return {
+      startTime:   toTimeStr(new Date(event.start)),
+      endTime:     toTimeStr(endDate),
+      description: (event.description || event.title).substring(0, 256),
+    };
+  }
+
+  private openHallenbuchDialog(prefill: HallenbuchDialogPrefill | undefined): void {
+    const data: HallenbuchDialogData = prefill ? { prefill } : {};
     this.dialog
-      .open(HallenbuchDialogComponent, { width: '520px' })
+      .open(HallenbuchDialogComponent, { data, width: '520px' })
       .afterClosed()
       .subscribe((result: HallenbuchDialogResult | undefined) => {
         if (!result) return;
@@ -90,12 +144,8 @@ export class HallenbuchListComponent implements OnInit {
             this.items.update(list => this.sortByStart([created, ...list]));
             if (result.mangel) {
               this.api.post<Mangel>('/mangel', result.mangel).subscribe({
-                next: () => {
-                  this.snackBar.open('Eintrag und Mangel wurden gespeichert.', 'OK', { duration: 3000 });
-                },
-                error: () => {
-                  this.snackBar.open('Eintrag gespeichert, Mangel konnte nicht gemeldet werden.', 'OK', { duration: 4000 });
-                },
+                next: () => this.snackBar.open('Eintrag und Mangel wurden gespeichert.', 'OK', { duration: 3000 }),
+                error: () => this.snackBar.open('Eintrag gespeichert, Mangel konnte nicht gemeldet werden.', 'OK', { duration: 4000 }),
               });
             } else {
               this.snackBar.open('Eintrag wurde gespeichert.', 'OK', { duration: 3000 });

@@ -106,6 +106,31 @@ public class SmtpEmailService(
         }
     }
 
+    public Task SendHallenbuchReminderAsync(string toEmail, string toName, string frontendBaseUrl)
+    {
+        const string subject = "Hallenbucheintrag ausstehend – AkaKraft Online";
+        var link = $"{frontendBaseUrl.TrimEnd('/')}/hallenbuch";
+        var body = $"""
+            <html><body style="font-family:sans-serif;color:#1a1a1a;max-width:560px;margin:0 auto">
+              <h2 style="color:#1565c0">Hallenbucheintrag ausstehend</h2>
+              <p>Hallo {HtmlEncode(toName)},</p>
+              <p>du hattest heute eine Hallenreservierung, aber es fehlt noch ein Hallenbucheintrag für heute.</p>
+              <p>Bitte trag kurz ein, was du heute in der Halle gemacht hast:</p>
+              <p style="margin:24px 0">
+                <a href="{link}"
+                   style="background:#1565c0;color:#fff;padding:12px 24px;border-radius:6px;
+                          text-decoration:none;font-weight:600;display:inline-block">
+                  Zum Hallenbuch
+                </a>
+              </p>
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+              <p style="font-size:12px;color:#999">AkaKraft Online · Vereinsverwaltung</p>
+            </body></html>
+            """;
+
+        return SendAsync(toEmail, toName, subject, body);
+    }
+
     private static string HtmlEncode(string value) =>
         System.Net.WebUtility.HtmlEncode(value);
 }

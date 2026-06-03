@@ -122,7 +122,7 @@ internal static class CalendarEndpoints
             var creatorName = !string.IsNullOrWhiteSpace(prefs.DisplayName) ? prefs.DisplayName : user.Name;
 
             var created = await calendarService.CreateEventAsync(
-                dto.CalendarId, config.Name, config.Color, dto, creatorName, user.Email);
+                dto.CalendarId, config.Name, config.Color, dto, creatorName, user.Email, userId);
 
             if (config.CalendarType == nameof(CalendarType.Veranstaltungen))
             {

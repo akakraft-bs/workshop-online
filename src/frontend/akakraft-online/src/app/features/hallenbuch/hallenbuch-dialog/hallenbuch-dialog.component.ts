@@ -12,8 +12,15 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { HallenbuchEintrag, GastschraubenArt, CreateHallenbuchEintragDto } from '../../../models/hallenbuch.model';
 import { MangelKategorie } from '../../../models/mangel.model';
 
+export interface HallenbuchDialogPrefill {
+  startTime: string; // HH:mm
+  endTime: string;   // HH:mm
+  description: string;
+}
+
 export interface HallenbuchDialogData {
   eintrag?: HallenbuchEintrag;
+  prefill?: HallenbuchDialogPrefill;
 }
 
 export interface HallenbuchDialogResult {
@@ -113,6 +120,15 @@ export class HallenbuchDialogComponent implements OnInit {
         gastschraubenArt:     this.eintrag.gastschraubenArt,
         gastschraubenBezahlt: this.eintrag.gastschraubenBezahlt ?? false,
         hatFamiliegeschraubt: this.eintrag.hatFamiliegeschraubt,
+      });
+    } else if (this.data?.prefill) {
+      const today = dateOnly(new Date());
+      this.form.patchValue({
+        startDate:   today,
+        startTime:   this.data.prefill.startTime,
+        endDate:     today,
+        endTime:     this.data.prefill.endTime,
+        description: this.data.prefill.description,
       });
     } else {
       const now = new Date();
