@@ -24,6 +24,7 @@ public static class Program
         builder.Services.AddInfrastructure(builder.Configuration);
         builder.Services.AddHostedService<UmfrageDeadlineBackgroundService>();
         builder.Services.AddHostedService<CalendarUserResolutionBackgroundService>();
+        builder.Services.AddHostedService<HallenbuchReminderBackgroundService>();
 
         builder.Services.ConfigureHttpJsonOptions(options =>
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
