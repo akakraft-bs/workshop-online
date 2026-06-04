@@ -185,6 +185,6 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   }
 
   isLowStock(item: Verbrauchsmaterial): boolean {
-    return item.minQuantity != null && item.quantity <= item.minQuantity;
+    return item.minQuantity != null && item.quantity < item.minQuantity;
   }
 }
