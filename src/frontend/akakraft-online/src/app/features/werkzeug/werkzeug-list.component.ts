@@ -53,6 +53,7 @@ export class WerkzeugListComponent implements OnInit {
 
   private readonly VIEW_MODE_KEY  = 'werkzeug-view-mode';
   private readonly SORT_ORDER_KEY = 'werkzeug-sort-order';
+  private readonly PAGE_SIZE_KEY  = 'werkzeug-page-size';
   readonly mobilePanel = signal<'search' | 'sort' | null>(null);
   readonly viewMode  = signal<'card' | 'table'>(
     (localStorage.getItem(this.VIEW_MODE_KEY) as 'card' | 'table') ?? 'card'
@@ -103,7 +104,7 @@ export class WerkzeugListComponent implements OnInit {
   readonly borrowedCount = computed(() => this.items().filter(w => !w.isAvailable).length);
 
   readonly pageIndex = signal(0);
-  readonly pageSize  = signal(25);
+  readonly pageSize  = signal<number>(Number(localStorage.getItem(this.PAGE_SIZE_KEY)) || 25);
 
   readonly pagedItems = computed(() => {
     const start = this.pageIndex() * this.pageSize();
@@ -123,6 +124,7 @@ export class WerkzeugListComponent implements OnInit {
   onPage(e: PageEvent): void {
     this.pageSize.set(e.pageSize);
     this.pageIndex.set(e.pageIndex);
+    localStorage.setItem(this.PAGE_SIZE_KEY, String(e.pageSize));
   }
 
   ngOnInit(): void { this.load(); }

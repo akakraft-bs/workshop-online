@@ -39,6 +39,7 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   @ViewChild('mobileSearchInput') mobileSearchInput?: ElementRef<HTMLInputElement>;
 
   private readonly SORT_ORDER_KEY = 'verbrauchsmaterial-sort-order';
+  private readonly PAGE_SIZE_KEY  = 'verbrauchsmaterial-page-size';
   readonly mobilePanel = signal<'search' | 'sort' | null>(null);
 
   readonly items = signal<Verbrauchsmaterial[]>([]);
@@ -91,7 +92,7 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   });
 
   readonly pageIndex = signal(0);
-  readonly pageSize  = signal(25);
+  readonly pageSize  = signal<number>(Number(localStorage.getItem(this.PAGE_SIZE_KEY)) || 25);
 
   readonly pagedItems = computed(() => {
     const start = this.pageIndex() * this.pageSize();
@@ -110,6 +111,7 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   onPage(e: PageEvent): void {
     this.pageSize.set(e.pageSize);
     this.pageIndex.set(e.pageIndex);
+    localStorage.setItem(this.PAGE_SIZE_KEY, String(e.pageSize));
   }
 
   ngOnInit(): void {

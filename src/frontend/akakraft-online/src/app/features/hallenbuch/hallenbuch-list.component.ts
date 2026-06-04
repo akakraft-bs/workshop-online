@@ -56,9 +56,11 @@ export class HallenbuchListComponent implements OnInit {
 
   readonly items = signal<HallenbuchEintrag[]>([]);
   readonly loading = signal(true);
+  private readonly PAGE_SIZE_KEY = 'hallenbuch-page-size';
+
   readonly totalItems = signal(0);
-  readonly pageIndex = signal(0);
-  readonly pageSize  = signal(20);
+  readonly pageIndex  = signal(0);
+  readonly pageSize   = signal<number>(Number(localStorage.getItem(this.PAGE_SIZE_KEY)) || 20);
 
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
   readonly isPrivileged = computed(() => this.auth.isPrivileged());
@@ -92,6 +94,7 @@ export class HallenbuchListComponent implements OnInit {
 
   onPage(e: PageEvent): void {
     this.pageSize.set(e.pageSize);
+    localStorage.setItem(this.PAGE_SIZE_KEY, String(e.pageSize));
     this.load(e.pageIndex);
   }
 
