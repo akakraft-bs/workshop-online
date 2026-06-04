@@ -15,6 +15,9 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Dokument-Uploads bis 50 MB + Overhead für multipart/form-data
+        builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 60 * 1024 * 1024);
+
         // Lokale Overrides (gitignored): appsettings.Development.local.json etc.
         builder.Configuration.AddJsonFile(
             $"appsettings.{builder.Environment.EnvironmentName}.local.json",
