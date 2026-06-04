@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, OnInit, signal, untracked, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -24,7 +25,7 @@ import { VerbrauchsmaterialFormDialogComponent, VerbrauchsmaterialFormDialogData
     FormsModule,
     MatFormFieldModule, MatInputModule, MatIconModule,
     MatButtonModule, MatTableModule, MatProgressSpinnerModule,
-    MatChipsModule, MatSelectModule, MatTooltipModule,
+    MatChipsModule, MatSelectModule, MatTooltipModule, MatPaginatorModule,
   ],
   templateUrl: './verbrauchsmaterial-list.component.html',
   styleUrl: './verbrauchsmaterial-list.component.scss',
@@ -88,6 +89,28 @@ export class VerbrauchsmaterialListComponent implements OnInit {
         }
       });
   });
+
+  readonly pageIndex = signal(0);
+  readonly pageSize  = signal(25);
+
+  readonly pagedItems = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filteredItems().slice(start, start + this.pageSize());
+  });
+
+  constructor() {
+    effect(() => {
+      this.searchQuery();
+      this.selectedCategory();
+      this.sortOrder();
+      untracked(() => this.pageIndex.set(0));
+    });
+  }
+
+  onPage(e: PageEvent): void {
+    this.pageSize.set(e.pageSize);
+    this.pageIndex.set(e.pageIndex);
+  }
 
   ngOnInit(): void {
     this.load();

@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ApiService } from '../../core/api/api.service';
@@ -30,12 +31,19 @@ function roundTo15Min(d: Date): Date {
   return new Date(Math.round(d.getTime() / ms) * ms);
 }
 
+interface PagedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 @Component({
   selector: 'app-hallenbuch-list',
   imports: [
     DatePipe,
     MatButtonModule, MatIconModule, MatProgressSpinnerModule,
-    MatTooltipModule, MatChipsModule,
+    MatTooltipModule, MatChipsModule, MatPaginatorModule,
   ],
   templateUrl: './hallenbuch-list.component.html',
   styleUrl: './hallenbuch-list.component.scss',
@@ -48,6 +56,9 @@ export class HallenbuchListComponent implements OnInit {
 
   readonly items = signal<HallenbuchEintrag[]>([]);
   readonly loading = signal(true);
+  readonly totalItems = signal(0);
+  readonly pageIndex = signal(0);
+  readonly pageSize  = signal(20);
 
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
   readonly isPrivileged = computed(() => this.auth.isPrivileged());
@@ -59,7 +70,6 @@ export class HallenbuchListComponent implements OnInit {
     return age < 7 * 24 * 60 * 60 * 1000;
   }
 
-  /** Duration in hours formatted */
   duration(eintrag: HallenbuchEintrag): string {
     const ms = new Date(eintrag.end).getTime() - new Date(eintrag.start).getTime();
     const h = Math.floor(ms / 3600000);
@@ -77,13 +87,24 @@ export class HallenbuchListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.load();
+    this.load(0);
   }
 
-  private load(): void {
+  onPage(e: PageEvent): void {
+    this.pageSize.set(e.pageSize);
+    this.load(e.pageIndex);
+  }
+
+  private load(page: number): void {
     this.loading.set(true);
-    this.api.get<HallenbuchEintrag[]>('/hallenbuch').subscribe({
-      next: data => { this.items.set(this.sortByStart(data)); this.loading.set(false); },
+    this.pageIndex.set(page);
+    const size = this.pageSize();
+    this.api.get<PagedResult<HallenbuchEintrag>>(`/hallenbuch?page=${page}&pageSize=${size}`).subscribe({
+      next: result => {
+        this.items.set(result.items);
+        this.totalItems.set(result.total);
+        this.loading.set(false);
+      },
       error: () => {
         this.loading.set(false);
         this.snackBar.open('Hallenbuch konnte nicht geladen werden.', 'OK', { duration: 3000 });
@@ -140,8 +161,9 @@ export class HallenbuchListComponent implements OnInit {
       .subscribe((result: HallenbuchDialogResult | undefined) => {
         if (!result) return;
         this.api.post<HallenbuchEintrag>('/hallenbuch', result.hallenbuch).subscribe({
-          next: created => {
-            this.items.update(list => this.sortByStart([created, ...list]));
+          next: () => {
+            // Reload page 0 so the new entry (newest first) is visible
+            this.load(0);
             if (result.mangel) {
               this.api.post<Mangel>('/mangel', result.mangel).subscribe({
                 next: () => this.snackBar.open('Eintrag und Mangel wurden gespeichert.', 'OK', { duration: 3000 }),
@@ -168,7 +190,7 @@ export class HallenbuchListComponent implements OnInit {
         if (!result) return;
         this.api.put<HallenbuchEintrag>(`/hallenbuch/${eintrag.id}`, result.hallenbuch).subscribe({
           next: updated => {
-            this.items.update(list => this.sortByStart(list.map(e => e.id === updated.id ? updated : e)));
+            this.items.update(list => list.map(e => e.id === updated.id ? updated : e));
             this.snackBar.open('Eintrag wurde aktualisiert.', 'OK', { duration: 3000 });
           },
           error: () => this.snackBar.open('Fehler beim Speichern.', 'OK', { duration: 3000 }),
@@ -180,7 +202,7 @@ export class HallenbuchListComponent implements OnInit {
     if (!confirm(`Eintrag von ${eintrag.userName} vom ${new Date(eintrag.start).toLocaleDateString('de-DE')} löschen?`)) return;
     this.api.delete<void>(`/hallenbuch/${eintrag.id}`).subscribe({
       next: () => {
-        this.items.update(list => list.filter(e => e.id !== eintrag.id));
+        this.load(this.pageIndex());
         this.snackBar.open('Eintrag wurde gelöscht.', 'OK', { duration: 3000 });
       },
       error: () => this.snackBar.open('Fehler beim Löschen.', 'OK', { duration: 3000 }),
@@ -189,9 +211,5 @@ export class HallenbuchListComponent implements OnInit {
 
   openStatistikDialog(): void {
     this.dialog.open(HallenbuchStatistikDialogComponent, { width: '360px' });
-  }
-
-  private sortByStart(list: HallenbuchEintrag[]): HallenbuchEintrag[] {
-    return [...list].sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
   }
 }

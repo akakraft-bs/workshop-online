@@ -8,18 +8,25 @@ namespace AkaKraft.Infrastructure.Services;
 
 public class HallenbuchService(ApplicationDbContext db) : IHallenbuchService
 {
-    public async Task<IEnumerable<HallenbuchEintragDto>> GetAllAsync()
+    public async Task<PagedResult<HallenbuchEintragDto>> GetPageAsync(int page, int pageSize)
     {
+        var total = await db.HallenbuchEintraege.CountAsync();
+
         var eintraege = await db.HallenbuchEintraege
             .Include(h => h.User)
             .OrderByDescending(h => h.Start)
+            .Skip(page * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
+        var userIds = eintraege.Select(h => h.UserId).Distinct().ToList();
         var userPrefs = await db.UserPreferences
-            .Where(p => p.DisplayName != null)
+            .Where(p => userIds.Contains(p.UserId) && p.DisplayName != null)
             .ToDictionaryAsync(p => p.UserId, p => p.DisplayName!);
 
-        return eintraege.Select(h => ToDto(h, userPrefs));
+        return new PagedResult<HallenbuchEintragDto>(
+            eintraege.Select(h => ToDto(h, userPrefs)),
+            total, page, pageSize);
     }
 
     public async Task<HallenbuchEintragDto> CreateAsync(Guid userId, CreateHallenbuchEintragDto dto)
