@@ -162,7 +162,7 @@
           } @else {
             {{ item.quantity }} {{ item.unit }}
           }
-          @if (item.minQuantity != null) {
+          @if (item.minQuantity !== null) {
             <small class="min-qty">(Min: {{ item.minQuantity }})</small>
           }
         </td>

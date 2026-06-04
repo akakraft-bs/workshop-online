@@ -79,7 +79,7 @@ internal static class AdminEndpoints
             {
                 var changed = false;
                 if (w.Name != w.Name.Trim())                                   { w.Name = w.Name.Trim(); changed = true; }
-                if (w.Description != w.Description?.Trim())                    { w.Description = w.Description?.Trim(); changed = true; }
+                if (w.Description != w.Description.Trim())                     { w.Description = w.Description.Trim(); changed = true; }
                 if (w.Category != w.Category.Trim())                           { w.Category = w.Category.Trim(); changed = true; }
                 if (w.Dimensions != w.Dimensions?.Trim())                      { w.Dimensions = w.Dimensions?.Trim(); changed = true; }
                 if (w.StorageLocation != w.StorageLocation?.Trim())            { w.StorageLocation = w.StorageLocation?.Trim(); changed = true; }
@@ -91,7 +91,7 @@ internal static class AdminEndpoints
             {
                 var changed = false;
                 if (v.Name != v.Name.Trim())                                   { v.Name = v.Name.Trim(); changed = true; }
-                if (v.Description != v.Description?.Trim())                    { v.Description = v.Description?.Trim(); changed = true; }
+                if (v.Description != v.Description.Trim())                     { v.Description = v.Description.Trim(); changed = true; }
                 if (v.Category != v.Category.Trim())                           { v.Category = v.Category.Trim(); changed = true; }
                 if (v.Unit != v.Unit.Trim())                                   { v.Unit = v.Unit.Trim(); changed = true; }
                 if (v.StorageLocation != v.StorageLocation?.Trim())            { v.StorageLocation = v.StorageLocation?.Trim(); changed = true; }

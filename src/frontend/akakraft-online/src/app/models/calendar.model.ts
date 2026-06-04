@@ -1,4 +1,3 @@
-import { Role } from './user.model';
 
 export type CalendarType = 'Hallenbelegung' | 'Veranstaltungen' | 'Hallendienst';
 

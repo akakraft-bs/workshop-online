@@ -80,7 +80,7 @@
             @if (canSendReminder(umfrage)) {
               <button mat-icon-button class="action-btn"
                       [matTooltip]="reminderTooltip(umfrage)"
-                      [disabled]="reminderCooldownHours(umfrage) != null"
+                      [disabled]="reminderCooldownHours(umfrage) !== null"
                       (click)="sendReminder(umfrage)">
                 <mat-icon>notifications</mat-icon>
               </button>

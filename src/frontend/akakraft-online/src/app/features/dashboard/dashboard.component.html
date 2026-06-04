@@ -95,7 +95,7 @@
               <span class="event-title">{{ item.name }}</span>
               <span class="event-date">
                 {{ item.quantity }} {{ item.unit }} vorhanden
-                @if (item.minQuantity != null) {
+                @if (item.minQuantity !== null) {
                   · Mindestbestand: {{ item.minQuantity }} {{ item.unit }}
                 }
               </span>

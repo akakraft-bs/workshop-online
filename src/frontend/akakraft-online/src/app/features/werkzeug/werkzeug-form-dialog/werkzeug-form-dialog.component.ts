@@ -62,9 +62,9 @@ export class WerkzeugFormDialogComponent implements OnInit {
   onPaste(event: ClipboardEvent): void {
     const items = event.clipboardData?.items;
     if (!items) return;
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.startsWith('image/')) {
-        const file = items[i].getAsFile();
+    for (const clipItem of Array.from(items)) {
+      if (clipItem.type.startsWith('image/')) {
+        const file = clipItem.getAsFile();
         if (file) { this.setFile(file); event.preventDefault(); }
         return;
       }

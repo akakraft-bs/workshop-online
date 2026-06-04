@@ -15,8 +15,8 @@ export class GermanDateAdapter extends NativeDateAdapter {
       // Match dd.MM.yyyy, d.M.yyyy, dd.M.yy, etc.
       const match = trimmed.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/);
       if (match) {
-        let day   = parseInt(match[1], 10);
-        let month = parseInt(match[2], 10) - 1;
+        const day   = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
         let year  = parseInt(match[3], 10);
         if (year < 100) year += 2000;
         const date = new Date(year, month, day);
@@ -33,7 +33,7 @@ export class GermanDateAdapter extends NativeDateAdapter {
     return super.parse(value);
   }
 
-  override format(date: Date, displayFormat: object): string {
+  override format(date: Date, _displayFormat: object): string {
     if (!this.isValid(date)) return '';
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;

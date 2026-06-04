@@ -70,7 +70,6 @@ export class LoginComponent {
         this.auth.refreshCurrentUser();
         this.loading.set(false);
         // refreshCurrentUser navigiert nicht – wir warten auf Signal-Update
-        this.auth.currentUser; // trigger read
         setTimeout(() => {
           this.router.navigate([this.auth.hasAccess() ? '/dashboard' : '/pending']);
         }, 100);
