@@ -82,4 +82,13 @@
       </div>
     }
   </div>
+
+  <mat-paginator
+    [length]="totalItems()"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageIndex()"
+    [pageSizeOptions]="[10, 20, 50]"
+    (page)="onPage($event)"
+    showFirstLastButtons>
+  </mat-paginator>
 }

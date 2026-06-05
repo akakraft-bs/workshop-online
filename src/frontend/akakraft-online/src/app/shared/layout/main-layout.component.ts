@@ -12,7 +12,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { Signal } from '@angular/core';
+
 import { AuthService } from '../../core/auth/auth.service';
 import { BadgeService } from '../../core/badges/badge.service';
 import { Role, VORSTAND_ROLES } from '../../models/user.model';

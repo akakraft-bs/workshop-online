@@ -19,13 +19,13 @@ Webbasierte Vereinsverwaltung für die AkaKraft Braunschweig. Die App bietet Mit
 | **Mängelmelder** | Mängel und Schäden melden, mit Bild, Status und Anmerkungen; Badge für offene Mängel |
 | **Wunschliste** | Anschaffungsvorschläge einreichen, per Up-/Downvote bewerten, Preis angeben, abschließen |
 | **Umfragen** | Abstimmungen erstellen und teilnehmen; Enthaltung möglich; manuelle Push-Erinnerung (Ersteller/Vorstand); Badge für ausstehende Abstimmungen |
-| **Hallenbuch** | Manuelle Nutzungseinträge der Halle inkl. Statistik-Export |
+| **Hallenbuch** | Manuelle Nutzungseinträge der Halle inkl. Statistik-Export; Dialog wird automatisch mit Zeiten und Beschreibung der heutigen Kalenderreservierung vorausgefüllt; Nutzer mit Reservierung aber fehlendem Eintrag erhalten um 22 Uhr eine Push- und E-Mail-Erinnerung |
 | **Aufgaben** | Aufgaben anlegen, zuweisen und erledigen; Badge für offene Aufgaben |
 | **Verein** | Vereinsinfo, Dokumente und Zugangsdaten (rollengeschützt) |
 | **Projekte** | Projektübersicht des Vereins |
 | **Vorstandsbereich** | Einstiegsbereich für Vorstandsrollen (CRM und weitere Vorstandsfunktionen) |
 | **Partner & Sponsoren (CRM)** | Potentielle und aktive Partner verwalten, Kontaktpersonen hinterlegen, Kontakthistorie mit Kanal und Reaktion pflegen (Vorstand) |
-| **Adminbereich** | Zentraler Einstieg für Admin-Funktionen: Nutzerverwaltung, Kalender-Einstellungen, Ablageorte, Feedback-Verwaltung, Test-Benachrichtigungen, Thumbnail-Generierung |
+| **Adminbereich** | Zentraler Einstieg für Admin-Funktionen: Nutzerverwaltung, Kalender-Einstellungen, Ablageorte, Feedback-Verwaltung, Test-Benachrichtigungen, Thumbnail-Generierung, Leerzeichen bereinigen |
 | **Push-Benachrichtigungen** | Web-Push-Abonnement für Nutzer, Test-Versand durch Admin |
 | **Profil** | Anzeigename und Kontaktdaten setzen |
 

@@ -32,12 +32,19 @@ public class GoogleCalendarService : ICalendarService
 
         try
         {
-            var credential = GoogleCredential.FromJson(serviceAccountJson)
-                .CreateScoped(CalendarService.Scope.Calendar);
+            using var doc = System.Text.Json.JsonDocument.Parse(serviceAccountJson);
+            var email = doc.RootElement.GetProperty("client_email").GetString()!;
+            var key   = doc.RootElement.GetProperty("private_key").GetString()!;
+
+            var saCredential = new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer(email)
+                {
+                    Scopes = [CalendarService.Scope.Calendar]
+                }.FromPrivateKey(key));
 
             _calendarService = new CalendarService(new BaseClientService.Initializer
             {
-                HttpClientInitializer = credential,
+                HttpClientInitializer = saCredential,
                 ApplicationName = "AkaKraft Workshop"
             });
         }

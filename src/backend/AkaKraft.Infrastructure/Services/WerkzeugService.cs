@@ -81,7 +81,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         {
             Id = Guid.NewGuid(),
             Name = dto.Name.Trim(),
-            Description = dto.Description?.Trim(),
+            Description = dto.Description.Trim(),
             Category = dto.Category.Trim(),
             ImageUrl = dto.ImageUrl,
             ThumbnailUrl = dto.ThumbnailUrl,
@@ -117,7 +117,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             await uploadService.DeleteAsync(werkzeug.ImageUrl, werkzeug.ThumbnailUrl);
 
         werkzeug.Name = dto.Name.Trim();
-        werkzeug.Description = dto.Description?.Trim();
+        werkzeug.Description = dto.Description.Trim();
         werkzeug.Category = dto.Category.Trim();
         werkzeug.ImageUrl = dto.ImageUrl;
         werkzeug.ThumbnailUrl = dto.ThumbnailUrl;

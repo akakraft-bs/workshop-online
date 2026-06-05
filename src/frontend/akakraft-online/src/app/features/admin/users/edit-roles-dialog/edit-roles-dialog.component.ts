@@ -68,7 +68,7 @@ export class EditRolesDialogComponent {
   toggle(role: Role): void {
     this.selectedRoles.update(set => {
       const next = new Set(set);
-      next.has(role) ? next.delete(role) : next.add(role);
+      if (next.has(role)) { next.delete(role); } else { next.add(role); }
       return next;
     });
   }

@@ -38,9 +38,14 @@ public static class DependencyInjection
         var firebaseJson = configuration["Firebase:AdminSdkJson"];
         if (!string.IsNullOrWhiteSpace(firebaseJson))
         {
+            using var firebaseDoc = System.Text.Json.JsonDocument.Parse(firebaseJson);
+            var fbEmail = firebaseDoc.RootElement.GetProperty("client_email").GetString()!;
+            var fbKey   = firebaseDoc.RootElement.GetProperty("private_key").GetString()!;
+            var fbSaCredential = new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer(fbEmail).FromPrivateKey(fbKey));
             var firebaseApp = FirebaseApp.DefaultInstance ?? FirebaseApp.Create(new AppOptions
             {
-                Credential = GoogleCredential.FromJson(firebaseJson),
+                Credential = GoogleCredential.FromServiceAccountCredential(fbSaCredential),
             });
             services.AddSingleton(firebaseApp);
             services.AddScoped<IPushNotificationService, FcmPushNotificationService>();

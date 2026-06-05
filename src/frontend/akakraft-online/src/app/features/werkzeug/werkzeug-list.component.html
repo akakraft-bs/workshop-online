@@ -115,7 +115,7 @@
   </div>
 } @else if (viewMode() === 'card') {
   <div class="card-grid">
-    @for (item of filteredItems(); track item.id) {
+    @for (item of pagedItems(); track item.id) {
       <mat-card class="werkzeug-card" appearance="outlined"
         [class.overdue]="isOverdue(item)"
         (click)="openDetailDialog(item)">
@@ -165,7 +165,7 @@
   </div>
 } @else {
   <div class="table-wrapper">
-    <table mat-table [dataSource]="filteredItems()" class="werkzeug-table">
+    <table mat-table [dataSource]="pagedItems()" class="werkzeug-table">
 
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Name</th>
@@ -234,3 +234,12 @@
     </table>
   </div>
 }
+
+<mat-paginator
+  [length]="filteredItems().length"
+  [pageSize]="pageSize()"
+  [pageIndex]="pageIndex()"
+  [pageSizeOptions]="[10, 25, 50]"
+  (page)="onPage($event)"
+  showFirstLastButtons>
+</mat-paginator>

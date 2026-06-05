@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule, MatIconButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -167,7 +167,7 @@ export class CreateUmfrageDialogComponent implements OnInit {
     }
 
     // getRawValue() for a FormArray<FormGroup> yields { [key: string]: any }[]
-    const rawOptions = v.options as Array<{ id: string | null; text: string }>;
+    const rawOptions = v.options as { id: string | null; text: string }[];
 
     const linkedEvent = this.veranstaltungen().find(e => e.id === v.linkedEventId) ?? null;
     const linkedEventId = linkedEvent?.id ?? null;

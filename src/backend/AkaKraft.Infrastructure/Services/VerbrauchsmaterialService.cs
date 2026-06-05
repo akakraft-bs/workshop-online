@@ -51,7 +51,7 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
         {
             Id = Guid.NewGuid(),
             Name = dto.Name.Trim(),
-            Description = dto.Description?.Trim(),
+            Description = dto.Description.Trim(),
             Category = dto.Category.Trim(),
             Unit = dto.Unit.Trim(),
             Quantity = dto.Quantity,
@@ -76,7 +76,7 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
             await uploadService.DeleteAsync(item.ImageUrl, item.ThumbnailUrl);
 
         item.Name            = dto.Name.Trim();
-        item.Description     = dto.Description?.Trim();
+        item.Description     = dto.Description.Trim();
         item.Category        = dto.Category.Trim();
         item.Unit            = dto.Unit.Trim();
         item.Quantity        = dto.Quantity;

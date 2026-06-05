@@ -99,7 +99,7 @@
   </div>
 } @else {
   <div class="table-container mat-elevation-z1">
-    <table mat-table [dataSource]="filteredItems()">
+    <table mat-table [dataSource]="pagedItems()">
 
       <!-- Bild -->
       <ng-container matColumnDef="image">
@@ -162,7 +162,7 @@
           } @else {
             {{ item.quantity }} {{ item.unit }}
           }
-          @if (item.minQuantity != null) {
+          @if (item.minQuantity !== null) {
             <small class="min-qty">(Min: {{ item.minQuantity }})</small>
           }
         </td>
@@ -213,3 +213,12 @@
     </table>
   </div>
 }
+
+<mat-paginator
+  [length]="filteredItems().length"
+  [pageSize]="pageSize()"
+  [pageIndex]="pageIndex()"
+  [pageSizeOptions]="[10, 25, 50]"
+  (page)="onPage($event)"
+  showFirstLastButtons>
+</mat-paginator>

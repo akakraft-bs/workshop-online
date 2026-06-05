@@ -86,7 +86,7 @@ internal static class UserEndpoints
                 .CountAsync(m => m.Status == MangelStatus.Offen || m.Status == MangelStatus.Kenntnisgenommen);
 
             var lowStock = await db.Verbrauchsmaterialien
-                .CountAsync(v => v.MinQuantity != null && v.Quantity <= v.MinQuantity);
+                .CountAsync(v => v.MinQuantity != null && v.Quantity < v.MinQuantity);
 
             var unseenFeedback = isAdmin
                 ? await db.Feedbacks.CountAsync(f => f.Status == FeedbackStatus.New)

@@ -180,7 +180,7 @@ export class DashboardComponent implements OnInit {
 
     this.api.get<Verbrauchsmaterial[]>('/verbrauchsmaterial').subscribe({
       next: items => this.lowStockItems.set(
-        items.filter(v => v.minQuantity != null && v.quantity <= v.minQuantity && !v.isNachbestellt)
+        items.filter(v => v.minQuantity != null && v.quantity < v.minQuantity && !v.isNachbestellt)
       ),
       error: () => {},
     });

@@ -8,8 +8,8 @@ internal static class HallenbuchEndpoints
 {
     internal static void MapHallenbuchEndpoints(this WebApplication app)
     {
-        app.MapGet("/hallenbuch", async (IHallenbuchService service) =>
-            Results.Ok(await service.GetAllAsync()))
+        app.MapGet("/hallenbuch", async (IHallenbuchService service, int page = 0, int pageSize = 20) =>
+            Results.Ok(await service.GetPageAsync(page, pageSize)))
             .RequireAuthorization("AnyRole");
 
         app.MapPost("/hallenbuch", async (

@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, OnInit, signal, untracked, ViewChild } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { DatePipe } from '@angular/common';
 
 type SortOrder = 'name' | 'createdAt' | 'category' | 'storageLocation';
@@ -27,7 +28,7 @@ import { WerkzeugDetailDialogComponent, WerkzeugDetailResult } from './werkzeug-
     MatFormFieldModule, MatInputModule, MatIconModule,
     MatButtonModule, MatButtonToggleModule, MatCardModule, MatChipsModule,
     MatProgressSpinnerModule, MatTableModule, MatSelectModule, MatTooltipModule,
-    DatePipe,
+    MatPaginatorModule, DatePipe,
   ],
   templateUrl: './werkzeug-list.component.html',
   styleUrl: './werkzeug-list.component.scss',
@@ -52,6 +53,7 @@ export class WerkzeugListComponent implements OnInit {
 
   private readonly VIEW_MODE_KEY  = 'werkzeug-view-mode';
   private readonly SORT_ORDER_KEY = 'werkzeug-sort-order';
+  private readonly PAGE_SIZE_KEY  = 'werkzeug-page-size';
   readonly mobilePanel = signal<'search' | 'sort' | null>(null);
   readonly viewMode  = signal<'card' | 'table'>(
     (localStorage.getItem(this.VIEW_MODE_KEY) as 'card' | 'table') ?? 'card'
@@ -100,6 +102,30 @@ export class WerkzeugListComponent implements OnInit {
   });
 
   readonly borrowedCount = computed(() => this.items().filter(w => !w.isAvailable).length);
+
+  readonly pageIndex = signal(0);
+  readonly pageSize  = signal<number>(Number(localStorage.getItem(this.PAGE_SIZE_KEY)) || 25);
+
+  readonly pagedItems = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filteredItems().slice(start, start + this.pageSize());
+  });
+
+  constructor() {
+    effect(() => {
+      this.searchQuery();
+      this.selectedCategory();
+      this.showOnlyBorrowed();
+      this.sortOrder();
+      untracked(() => this.pageIndex.set(0));
+    });
+  }
+
+  onPage(e: PageEvent): void {
+    this.pageSize.set(e.pageSize);
+    this.pageIndex.set(e.pageIndex);
+    localStorage.setItem(this.PAGE_SIZE_KEY, String(e.pageSize));
+  }
 
   ngOnInit(): void { this.load(); }
 
