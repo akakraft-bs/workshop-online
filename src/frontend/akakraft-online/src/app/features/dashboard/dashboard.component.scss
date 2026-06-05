@@ -197,6 +197,22 @@
   flex-shrink: 0;
 }
 
+.nachbestellen-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 28px;
+  height: 28px;
+  padding: 0 8px 0 14px;
+
+  .mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+  }
+}
+
 .mangel-icon-known {
   color: var(--mat-sys-tertiary) !important;
 }

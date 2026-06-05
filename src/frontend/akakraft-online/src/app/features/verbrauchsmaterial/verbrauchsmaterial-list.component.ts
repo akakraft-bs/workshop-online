@@ -185,6 +185,13 @@ export class VerbrauchsmaterialListComponent implements OnInit {
   }
 
   isLowStock(item: Verbrauchsmaterial): boolean {
-    return item.minQuantity != null && item.quantity <= item.minQuantity;
+    return item.minQuantity != null && item.quantity <= item.minQuantity && !item.isNachbestellt;
+  }
+
+  markNachbestellt(item: Verbrauchsmaterial): void {
+    this.api.post<Verbrauchsmaterial>(`/verbrauchsmaterial/${item.id}/nachbestellen`, {}).subscribe({
+      next: updated => this.items.update(list => list.map(v => v.id === updated.id ? updated : v)),
+      error: () => this.snackBar.open('Konnte nicht als nachbestellt markiert werden.', 'OK', { duration: 3000 }),
+    });
   }
 }

@@ -10,4 +10,7 @@ export interface Verbrauchsmaterial {
   thumbnailUrl?: string;
   storageLocation?: string;
   createdAt: string;
+  isNachbestellt: boolean;
+  nachbestelltVonName?: string;
+  nachbestelltAt?: string;
 }

@@ -15,5 +15,8 @@ public record WerkzeugDto(
     DateTime? BorrowedAt,
     DateTime? ExpectedReturnAt,
     DateTime? ReturnedAt,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    Guid? AnleitungDokumentId,
+    string? AnleitungFileName,
+    string? AnleitungFileUrl
 );

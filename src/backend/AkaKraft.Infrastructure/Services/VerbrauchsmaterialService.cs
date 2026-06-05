@@ -24,7 +24,10 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
                 v.ImageUrl,
                 v.ThumbnailUrl,
                 v.StorageLocation,
-                v.CreatedAt))
+                v.CreatedAt,
+                v.IsNachbestellt,
+                v.NachbestelltVonName,
+                v.NachbestelltAt))
             .ToListAsync();
     }
 
@@ -61,10 +64,7 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
         db.Verbrauchsmaterialien.Add(item);
         await db.SaveChangesAsync();
 
-        return new VerbrauchsmaterialDto(
-            item.Id, item.Name, item.Description, item.Category,
-            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation,
-            item.CreatedAt);
+        return ToDto(item);
     }
 
     public async Task<VerbrauchsmaterialDto?> UpdateAsync(Guid id, UpdateVerbrauchsmaterialDto dto)
@@ -87,10 +87,7 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
 
         await db.SaveChangesAsync();
 
-        return new VerbrauchsmaterialDto(
-            item.Id, item.Name, item.Description, item.Category,
-            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation,
-            item.CreatedAt);
+        return ToDto(item);
     }
 
     public async Task<VerbrauchsmaterialDto?> AdjustQuantityAsync(Guid id, int delta)
@@ -99,12 +96,29 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
         if (item is null) return null;
 
         item.Quantity = Math.Max(0, item.Quantity + delta);
-        await db.SaveChangesAsync();
 
-        return new VerbrauchsmaterialDto(
-            item.Id, item.Name, item.Description, item.Category,
-            item.Unit, item.Quantity, item.MinQuantity, item.ImageUrl, item.ThumbnailUrl, item.StorageLocation,
-            item.CreatedAt);
+        // Reset Nachbestellt when stock is replenished above minimum
+        if (item.IsNachbestellt && (item.MinQuantity is null || item.Quantity > item.MinQuantity))
+        {
+            item.IsNachbestellt = false;
+            item.NachbestelltVonName = null;
+            item.NachbestelltAt = null;
+        }
+
+        await db.SaveChangesAsync();
+        return ToDto(item);
+    }
+
+    public async Task<VerbrauchsmaterialDto?> SetNachbestelltAsync(Guid id, string userName)
+    {
+        var item = await db.Verbrauchsmaterialien.FindAsync(id);
+        if (item is null) return null;
+
+        item.IsNachbestellt = true;
+        item.NachbestelltVonName = userName;
+        item.NachbestelltAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return ToDto(item);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
@@ -117,4 +131,9 @@ public class VerbrauchsmaterialService(ApplicationDbContext db, IUploadService u
         await db.SaveChangesAsync();
         return true;
     }
+
+    private static VerbrauchsmaterialDto ToDto(Verbrauchsmaterial v) => new(
+        v.Id, v.Name, v.Description, v.Category,
+        v.Unit, v.Quantity, v.MinQuantity, v.ImageUrl, v.ThumbnailUrl, v.StorageLocation,
+        v.CreatedAt, v.IsNachbestellt, v.NachbestelltVonName, v.NachbestelltAt);
 }

@@ -3,6 +3,7 @@ using System;
 using AkaKraft.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AkaKraft.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260605195203_AddWerkzeugAnleitung")]
+    partial class AddWerkzeugAnleitung
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -952,17 +955,8 @@ namespace AkaKraft.Infrastructure.Migrations
                         .HasMaxLength(1024)
                         .HasColumnType("character varying(1024)");
 
-                    b.Property<bool>("IsNachbestellt")
-                        .HasColumnType("boolean");
-
                     b.Property<int?>("MinQuantity")
                         .HasColumnType("integer");
-
-                    b.Property<DateTime?>("NachbestelltAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("NachbestelltVonName")
-                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()

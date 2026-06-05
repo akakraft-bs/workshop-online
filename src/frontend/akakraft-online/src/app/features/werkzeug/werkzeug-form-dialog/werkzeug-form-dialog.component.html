@@ -92,6 +92,50 @@
       </mat-autocomplete>
     </mat-form-field>
 
+    <mat-divider />
+
+    <!-- Anleitung -->
+    <p class="section-label">Anleitung (optional)</p>
+
+    @if (anleitungSelected(); as dok) {
+      <div class="anleitung-chip">
+        <mat-icon>description</mat-icon>
+        <a [href]="dok.fileUrl" target="_blank" rel="noopener" class="anleitung-name">{{ dok.fileName }}</a>
+        <button type="button" mat-icon-button matTooltip="Anleitung entfernen" (click)="clearAnleitung()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    } @else {
+      @if (anleitungDokumente().length > 0) {
+        <mat-form-field appearance="outline">
+          <mat-label>Aus vorhandenen Anleitungen wählen</mat-label>
+          <mat-icon matPrefix>folder_open</mat-icon>
+          <mat-select [value]="null" (selectionChange)="onAnleitungSelect($event.value)">
+            <mat-option [value]="null">– Keine –</mat-option>
+            @for (dok of anleitungDokumente(); track dok.id) {
+              <mat-option [value]="dok.id">{{ dok.fileName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <div class="upload-btns">
+        <input #anleitungInput type="file" accept=".pdf,application/pdf"
+          (change)="onAnleitungFileSelected($event)" hidden>
+        <button type="button" mat-stroked-button
+          (click)="anleitungInput.click()"
+          [disabled]="anleitungUploading()">
+          @if (anleitungUploading()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <mat-icon>upload_file</mat-icon>
+          }
+          PDF hochladen
+        </button>
+      </div>
+      <p class="upload-hint">PDF · max. 50 MB · wird unter Verein → Dokumente → Anleitungen abgelegt</p>
+    }
+
   </form>
 </mat-dialog-content>
 

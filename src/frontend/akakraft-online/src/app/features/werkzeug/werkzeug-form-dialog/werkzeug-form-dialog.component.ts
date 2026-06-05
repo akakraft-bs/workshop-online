@@ -9,11 +9,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, switchMap, of, map, startWith } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { ApiService } from '../../../core/api/api.service';
 import { Werkzeug } from '../../../models/werkzeug.model';
+import { DokumentDto, DokumentOrdnerDto } from '../../../models/verein.models';
 
 export interface WerkzeugFormDialogData {
   werkzeug: Werkzeug | null;
@@ -26,7 +28,7 @@ export interface WerkzeugFormDialogData {
     MatDialogModule, MatButtonModule, MatFormFieldModule,
     MatInputModule, MatProgressSpinnerModule, MatIconModule,
     MatDividerModule, MatTooltipModule,
-    MatAutocompleteModule,
+    MatAutocompleteModule, MatSelectModule,
   ],
   templateUrl: './werkzeug-form-dialog.component.html',
   styleUrl: './werkzeug-form-dialog.component.scss',
@@ -42,8 +44,14 @@ export class WerkzeugFormDialogComponent implements OnInit {
   readonly isEdit = this.data.werkzeug !== null;
 
   readonly selectedFile = signal<File | null>(null);
-  readonly previewUrl    = signal<string | null>(this.data.werkzeug?.imageUrl     ?? null);
+  readonly previewUrl    = signal<string | null>(this.data.werkzeug?.imageUrl ?? null);
   private thumbnailUrl   = this.data.werkzeug?.thumbnailUrl ?? null;
+
+  // Anleitung
+  readonly anleitungDokumente  = signal<DokumentDto[]>([]);
+  readonly anleitungFolderId   = signal<string | null>(null);
+  readonly anleitungSelected   = signal<DokumentDto | null>(null);
+  readonly anleitungUploading  = signal(false);
 
   allCategories: string[] = [];
   allStorageLocations: { name: string; color?: string }[] = [];
@@ -62,9 +70,9 @@ export class WerkzeugFormDialogComponent implements OnInit {
   onPaste(event: ClipboardEvent): void {
     const items = event.clipboardData?.items;
     if (!items) return;
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.startsWith('image/')) {
-        const file = items[i].getAsFile();
+    for (const clipItem of Array.from(items)) {
+      if (clipItem.type.startsWith('image/')) {
+        const file = clipItem.getAsFile();
         if (file) { this.setFile(file); event.preventDefault(); }
         return;
       }
@@ -77,6 +85,32 @@ export class WerkzeugFormDialogComponent implements OnInit {
     });
     this.api.get<{ name: string; color?: string }[]>('/storage-locations').subscribe(locs => {
       this.allStorageLocations = locs;
+    });
+
+    // Anleitungen-Ordner laden
+    this.api.get<DokumentOrdnerDto[]>('/verein/dokumente').subscribe(ordner => {
+      const anleitungen = ordner.find(o => o.name.toLowerCase() === 'anleitungen');
+      if (anleitungen) {
+        this.anleitungFolderId.set(anleitungen.id);
+        this.anleitungDokumente.set(anleitungen.dokumente);
+        // Vorhandene Anleitung vorauswählen
+        const existing = anleitungen.dokumente.find(
+          d => d.id === this.data.werkzeug?.anleitungDokumentId
+        );
+        if (existing) this.anleitungSelected.set(existing);
+      }
+      // Fallback: Anleitung ist bekannt aber nicht im Ordner (z. B. Ordner fehlt)
+      if (!this.anleitungSelected() && this.data.werkzeug?.anleitungDokumentId && this.data.werkzeug.anleitungFileName) {
+        this.anleitungSelected.set({
+          id: this.data.werkzeug.anleitungDokumentId,
+          folderId: '',
+          fileName: this.data.werkzeug.anleitungFileName,
+          fileUrl: this.data.werkzeug.anleitungFileUrl ?? '',
+          uploadedByName: '',
+          uploadedAt: '',
+          fileSizeBytes: null,
+        });
+      }
     });
 
     this.filteredCategories$ = this.form.controls.category.valueChanges.pipe(
@@ -96,6 +130,56 @@ export class WerkzeugFormDialogComponent implements OnInit {
           .map(l => l.name);
       }),
     );
+  }
+
+  onAnleitungSelect(dokId: string | null): void {
+    if (!dokId) { this.anleitungSelected.set(null); return; }
+    const dok = this.anleitungDokumente().find(d => d.id === dokId) ?? null;
+    this.anleitungSelected.set(dok);
+  }
+
+  clearAnleitung(): void {
+    this.anleitungSelected.set(null);
+  }
+
+  onAnleitungFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    this.anleitungUploading.set(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.api.postFormData<{ url: string }>('/uploads/dokument', formData).pipe(
+      switchMap(upload => {
+        const folderId = this.anleitungFolderId();
+        const folder$ = folderId
+          ? of({ id: folderId } as { id: string })
+          : this.api.post<DokumentOrdnerDto>('/verein/dokumente/ordner', { name: 'Anleitungen' });
+
+        return folder$.pipe(
+          switchMap(folder => {
+            if (!this.anleitungFolderId()) this.anleitungFolderId.set(folder.id);
+            return this.api.post<DokumentDto>('/verein/dokumente', {
+              folderId: folder.id,
+              fileName: file.name,
+              fileUrl: upload.url,
+              fileSizeBytes: file.size,
+            });
+          })
+        );
+      })
+    ).subscribe({
+      next: dok => {
+        this.anleitungSelected.set(dok);
+        this.anleitungDokumente.update(list => [...list, dok]);
+        this.anleitungUploading.set(false);
+      },
+      error: () => {
+        this.anleitungUploading.set(false);
+        this.snackBar.open('Fehler beim Hochladen der Anleitung.', 'OK', { duration: 3000 });
+      },
+    });
   }
 
   onFileSelected(event: Event): void {
@@ -152,17 +236,18 @@ export class WerkzeugFormDialogComponent implements OnInit {
 
     upload$.pipe(
       switchMap((uploadResult: { imageUrl: string; thumbnailUrl: string } | null) => {
-        const imageUrl    = uploadResult?.imageUrl    ?? existingImageUrl;
+        const imageUrl     = uploadResult?.imageUrl    ?? existingImageUrl;
         const thumbnailUrl = uploadResult?.thumbnailUrl ?? this.thumbnailUrl;
 
         const body = {
-          name:            value.name,
-          description:     value.description,
-          category:        value.category,
+          name:                 value.name,
+          description:          value.description,
+          category:             value.category,
           imageUrl,
           thumbnailUrl,
-          dimensions:      value.dimensions || null,
-          storageLocation: value.storageLocation || null,
+          dimensions:           value.dimensions || null,
+          storageLocation:      value.storageLocation || null,
+          anleitungDokumentId:  this.anleitungSelected()?.id ?? null,
         };
 
         return this.isEdit
