@@ -20,4 +20,7 @@ public class Werkzeug : IAuditable
     public DateTime? BorrowedAt { get; set; }
     public DateTime? ExpectedReturnAt { get; set; }
     public DateTime? ReturnedAt { get; set; }
+
+    public Guid? AnleitungDokumentId { get; set; }
+    public Dokument? AnleitungDokument { get; set; }
 }

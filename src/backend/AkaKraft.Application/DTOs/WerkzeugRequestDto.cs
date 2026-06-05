@@ -7,7 +7,8 @@ public record CreateWerkzeugDto(
     string? ImageUrl,
     string? ThumbnailUrl,
     string? Dimensions,
-    string? StorageLocation
+    string? StorageLocation,
+    Guid? AnleitungDokumentId
 );
 
 public record UpdateWerkzeugDto(
@@ -17,7 +18,8 @@ public record UpdateWerkzeugDto(
     string? ImageUrl,
     string? ThumbnailUrl,
     string? Dimensions,
-    string? StorageLocation
+    string? StorageLocation,
+    Guid? AnleitungDokumentId
 );
 
 public record AusleihenRequestDto(DateTime ExpectedReturnAt);

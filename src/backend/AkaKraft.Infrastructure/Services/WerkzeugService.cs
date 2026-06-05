@@ -33,7 +33,14 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
                 w.BorrowedAt,
                 w.ExpectedReturnAt,
                 w.ReturnedAt,
-                w.CreatedAt))
+                w.CreatedAt,
+                w.AnleitungDokumentId,
+                w.AnleitungDokumentId != null
+                    ? db.Dokumente.Where(d => d.Id == w.AnleitungDokumentId).Select(d => d.FileName).FirstOrDefault()
+                    : null,
+                w.AnleitungDokumentId != null
+                    ? db.Dokumente.Where(d => d.Id == w.AnleitungDokumentId).Select(d => d.FileUrl).FirstOrDefault()
+                    : null))
             .ToListAsync();
     }
 
@@ -81,6 +88,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             Dimensions = dto.Dimensions?.Trim(),
             StorageLocation = dto.StorageLocation?.Trim(),
             IsAvailable = true,
+            AnleitungDokumentId = dto.AnleitungDokumentId,
         };
 
         db.Werkzeuge.Add(werkzeug);
@@ -91,13 +99,14 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             werkzeug.Category, werkzeug.ImageUrl, werkzeug.ThumbnailUrl,
             werkzeug.Dimensions, werkzeug.StorageLocation,
             werkzeug.IsAvailable, null, null, null, null, null,
-            werkzeug.CreatedAt);
+            werkzeug.CreatedAt, werkzeug.AnleitungDokumentId, null, null);
     }
 
     public async Task<WerkzeugDto?> UpdateAsync(Guid id, UpdateWerkzeugDto dto)
     {
         var werkzeug = await db.Werkzeuge
             .Include(w => w.BorrowedBy)
+            .Include(w => w.AnleitungDokument)
             .FirstOrDefaultAsync(w => w.Id == id);
 
         if (werkzeug is null)
@@ -114,8 +123,13 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         werkzeug.ThumbnailUrl = dto.ThumbnailUrl;
         werkzeug.Dimensions = dto.Dimensions?.Trim();
         werkzeug.StorageLocation = dto.StorageLocation?.Trim();
+        werkzeug.AnleitungDokumentId = dto.AnleitungDokumentId;
 
         await db.SaveChangesAsync();
+
+        // Reload AnleitungDokument if ID changed
+        if (werkzeug.AnleitungDokumentId != null && werkzeug.AnleitungDokument?.Id != werkzeug.AnleitungDokumentId)
+            await db.Entry(werkzeug).Reference(w => w.AnleitungDokument).LoadAsync();
 
         return ToDto(werkzeug);
     }
@@ -136,6 +150,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
     {
         var werkzeug = await db.Werkzeuge
             .Include(w => w.BorrowedBy)
+            .Include(w => w.AnleitungDokument)
             .FirstOrDefaultAsync(w => w.Id == id);
 
         if (werkzeug is null || !werkzeug.IsAvailable)
@@ -158,6 +173,7 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
     {
         var werkzeug = await db.Werkzeuge
             .Include(w => w.BorrowedBy)
+            .Include(w => w.AnleitungDokument)
             .FirstOrDefaultAsync(w => w.Id == id);
 
         if (werkzeug is null || werkzeug.IsAvailable)
@@ -191,5 +207,6 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         w.Id, w.Name, w.Description, w.Category,
         w.ImageUrl, w.ThumbnailUrl, w.Dimensions, w.StorageLocation, w.IsAvailable,
         w.BorrowedByUserId, ResolveDisplayName(w),
-        w.BorrowedAt, w.ExpectedReturnAt, w.ReturnedAt, w.CreatedAt);
+        w.BorrowedAt, w.ExpectedReturnAt, w.ReturnedAt, w.CreatedAt,
+        w.AnleitungDokumentId, w.AnleitungDokument?.FileName, w.AnleitungDokument?.FileUrl);
 }

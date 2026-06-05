@@ -47,6 +47,15 @@
     </div>
   }
 
+  @if (item().anleitungFileUrl) {
+    <div class="detail-row">
+      <mat-icon class="row-icon">description</mat-icon>
+      <a [href]="item().anleitungFileUrl" target="_blank" rel="noopener" class="anleitung-link">
+        {{ item().anleitungFileName || 'Anleitung' }}
+      </a>
+    </div>
+  }
+
   @if (!item().isAvailable) {
     <mat-divider />
     <div class="borrow-section">
