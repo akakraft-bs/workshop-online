@@ -16,4 +16,7 @@ public class Verbrauchsmaterial : IAuditable
     public string? StorageLocation { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+    public bool IsNachbestellt { get; set; }
+    public string? NachbestelltVonName { get; set; }
+    public DateTime? NachbestelltAt { get; set; }
 }

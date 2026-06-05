@@ -160,6 +160,32 @@ td.mat-mdc-cell {
   white-space: nowrap;
 }
 
+.status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.nachbestellt-von {
+  font-size: 11px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.nachbestellen-btn {
+  font-size: 12px;
+  line-height: 28px;
+  height: 28px;
+  padding: 0 8px 0 14px;
+
+  .mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+  }
+}
+
 .quantity-stepper {
   display: inline-flex;
   align-items: center;

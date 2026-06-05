@@ -126,9 +126,18 @@ internal static class CalendarEndpoints
 
             if (config.CalendarType == nameof(CalendarType.Veranstaltungen))
             {
-                var datePart = dto.IsAllDay
-                    ? dto.Start.ToString("dd.MM.yyyy")
-                    : dto.Start.ToString("dd.MM.yyyy, HH:mm") + " Uhr";
+                string datePart;
+                if (dto.IsAllDay)
+                {
+                    datePart = dto.Start.ToString("dd.MM.yyyy");
+                }
+                else
+                {
+                    var berlinZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
+                    var localStart = TimeZoneInfo.ConvertTimeFromUtc(
+                        DateTime.SpecifyKind(dto.Start, DateTimeKind.Utc), berlinZone);
+                    datePart = localStart.ToString("dd.MM.yyyy, HH:mm") + " Uhr";
+                }
                 _ = pushService.SendToAllSubscribedAsync(
                     "Neue Veranstaltung 📅",
                     $"{dto.Title} · {datePart}",

@@ -1,5 +1,6 @@
 using AkaKraft.Application.DTOs;
 using AkaKraft.Application.Interfaces;
+using AkaKraft.WebApi.Endpoints;
 
 namespace AkaKraft.WebApi;
 
@@ -38,6 +39,21 @@ internal static class VerbrauchsmaterialEndlpoints
         app.MapPatch("/verbrauchsmaterial/{id:guid}/quantity", async (Guid id, AdjustQuantityDto dto, IVerbrauchsmaterialService verbrauchsmaterialService) =>
         {
             var updated = await verbrauchsmaterialService.AdjustQuantityAsync(id, dto.Delta);
+            return updated is null ? Results.NotFound() : Results.Ok(updated);
+        }).RequireAuthorization("VorstandOrAdmin");
+
+        app.MapPost("/verbrauchsmaterial/{id:guid}/nachbestellen", async (
+            Guid id, HttpContext ctx,
+            IVerbrauchsmaterialService verbrauchsmaterialService,
+            IUserService userService, IUserPreferencesService prefsService) =>
+        {
+            if (!ctx.TryGetCurrentUserId(out var userId)) return Results.Unauthorized();
+            var user = await userService.GetByIdAsync(userId);
+            if (user is null) return Results.Unauthorized();
+            var prefs = await prefsService.GetAsync(userId);
+            var displayName = !string.IsNullOrWhiteSpace(prefs.DisplayName) ? prefs.DisplayName : user.Name;
+
+            var updated = await verbrauchsmaterialService.SetNachbestelltAsync(id, displayName);
             return updated is null ? Results.NotFound() : Results.Ok(updated);
         }).RequireAuthorization("VorstandOrAdmin");
 

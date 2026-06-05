@@ -35,5 +35,10 @@ public class WerkzeugConfiguration : IEntityTypeConfiguration<Werkzeug>
             .WithMany()
             .HasForeignKey(w => w.BorrowedByUserId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(w => w.AnleitungDokument)
+            .WithMany()
+            .HasForeignKey(w => w.AnleitungDokumentId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -163,3 +163,10 @@
     justify-content: flex-end;
   }
 }
+
+.anleitung-link {
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+  font-size: 14px;
+  &:hover { text-decoration: underline; }
+}

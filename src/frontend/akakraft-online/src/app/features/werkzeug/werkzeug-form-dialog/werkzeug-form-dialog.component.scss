@@ -156,3 +156,37 @@ mat-dialog-content {
     justify-content: flex-start;
   }
 }
+
+.section-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 4px 0 8px;
+}
+
+.anleitung-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--mat-sys-secondary-container);
+  border-radius: 8px;
+  padding: 8px 8px 8px 12px;
+  margin-bottom: 4px;
+
+  mat-icon {
+    color: var(--mat-sys-on-secondary-container);
+    flex-shrink: 0;
+  }
+
+  .anleitung-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    color: var(--mat-sys-on-secondary-container);
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+}
