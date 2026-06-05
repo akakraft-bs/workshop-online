@@ -126,6 +126,7 @@ export class DashboardComponent implements OnInit {
 
   readonly motd = signal<MotdDto | null>(null);
   readonly canEditMotd = computed(() => this.auth.isVorstand() || this.auth.isAdmin());
+  readonly canManage = computed(() => this.auth.isPrivileged());
 
   readonly upcomingEvents = signal<CalendarEvent[]>([]);
   readonly loadingEvents = signal(true);
@@ -179,7 +180,7 @@ export class DashboardComponent implements OnInit {
 
     this.api.get<Verbrauchsmaterial[]>('/verbrauchsmaterial').subscribe({
       next: items => this.lowStockItems.set(
-        items.filter(v => v.minQuantity != null && v.quantity <= v.minQuantity)
+        items.filter(v => v.minQuantity != null && v.quantity <= v.minQuantity && !v.isNachbestellt)
       ),
       error: () => {},
     });
@@ -207,6 +208,15 @@ export class DashboardComponent implements OnInit {
         this.loadedAddress = prefs.address;
       },
       error: () => {},
+    });
+  }
+
+  markNachbestellt(item: Verbrauchsmaterial, e: MouseEvent): void {
+    e.preventDefault();
+    e.stopPropagation();
+    this.api.post<Verbrauchsmaterial>(`/verbrauchsmaterial/${item.id}/nachbestellen`, {}).subscribe({
+      next: updated => this.lowStockItems.update(list => list.filter(v => v.id !== updated.id)),
+      error: () => this.snackBar.open('Konnte nicht als nachbestellt markiert werden.', 'OK', { duration: 3000 }),
     });
   }
 

@@ -10,5 +10,6 @@ public interface IVerbrauchsmaterialService
     Task<VerbrauchsmaterialDto> CreateAsync(CreateVerbrauchsmaterialDto dto);
     Task<VerbrauchsmaterialDto?> UpdateAsync(Guid id, UpdateVerbrauchsmaterialDto dto);
     Task<VerbrauchsmaterialDto?> AdjustQuantityAsync(Guid id, int delta);
+    Task<VerbrauchsmaterialDto?> SetNachbestelltAsync(Guid id, string userName);
     Task<bool> DeleteAsync(Guid id);
 }

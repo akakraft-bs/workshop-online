@@ -171,9 +171,20 @@
       <!-- Status -->
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let item">
-          @if (isLowStock(item)) {
+        <td mat-cell *matCellDef="let item" class="status-cell">
+          @if (item.isNachbestellt) {
+            <mat-chip highlighted>Nachbestellt</mat-chip>
+            <small class="nachbestellt-von">von {{ item.nachbestelltVonName }}</small>
+          } @else if (isLowStock(item)) {
             <mat-chip color="warn" highlighted>Niedrig</mat-chip>
+            @if (canManage()) {
+              <button mat-stroked-button class="nachbestellen-btn"
+                (click)="markNachbestellt(item); $event.stopPropagation()"
+                matTooltip="Als nachbestellt markieren">
+                <mat-icon>shopping_cart</mat-icon>
+                Nachbestellt
+              </button>
+            }
           } @else {
             <mat-chip color="primary" highlighted>OK</mat-chip>
           }

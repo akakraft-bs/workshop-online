@@ -100,6 +100,14 @@
                 }
               </span>
             </div>
+            @if (canManage()) {
+              <button mat-stroked-button class="nachbestellen-btn"
+                (click)="markNachbestellt(item, $event)"
+                matTooltip="Als nachbestellt markieren">
+                <mat-icon>shopping_cart</mat-icon>
+                Nachbestellt
+              </button>
+            }
           </a>
         }
       </div>

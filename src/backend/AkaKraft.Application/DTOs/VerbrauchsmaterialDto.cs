@@ -11,7 +11,10 @@ public record VerbrauchsmaterialDto(
     string? ImageUrl,
     string? ThumbnailUrl,
     string? StorageLocation,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    bool IsNachbestellt,
+    string? NachbestelltVonName,
+    DateTime? NachbestelltAt
 );
 
 public record CreateVerbrauchsmaterialDto(
