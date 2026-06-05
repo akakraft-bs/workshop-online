@@ -54,13 +54,13 @@ export class KalenderPageComponent implements OnInit {
     const evs = this.events();
     return Array.from({ length: 7 }, (_, i) => {
       const date = addDays(start, i);
-      const dayEvs = evs.filter(e => isSameDay(e, date));
+      const dayEvs = evs.filter(e => eventOccursOnDay(e, date));
       return {
         date,
         label: formatDayLabel(date),
         isToday: isToday(date),
         allDayEvents: dayEvs.filter(e => e.isAllDay),
-        events: layoutDayEvents(dayEvs.filter(e => !e.isAllDay).map(e => toPositionedEvent(e, i))),
+        events: layoutDayEvents(dayEvs.filter(e => !e.isAllDay).map(e => toPositionedEvent(e, i, date))),
       };
     });
   });
@@ -270,23 +270,30 @@ function isToday(d: Date): boolean {
     && d.getDate() === today.getDate();
 }
 
-function isSameDay(event: CalendarEvent, date: Date): boolean {
+function eventOccursOnDay(event: CalendarEvent, date: Date): boolean {
   if (!event.start) return false;
-  const evDate = new Date(event.start);
-  return evDate.getFullYear() === date.getFullYear()
-    && evDate.getMonth() === date.getMonth()
-    && evDate.getDate() === date.getDate();
+  const dayStart = new Date(date); dayStart.setHours(0, 0, 0, 0);
+  const dayEnd   = new Date(date); dayEnd.setHours(24, 0, 0, 0);
+  const evStart  = new Date(event.start);
+  const evEnd    = event.end ? new Date(event.end) : evStart;
+  // All-day events use inclusive end (backend converts Google's exclusive end → inclusive)
+  // so midnight-to-midnight equality must match (>= instead of >)
+  return evStart < dayEnd && (event.isAllDay ? evEnd >= dayStart : evEnd > dayStart);
 }
 
-function toPositionedEvent(event: CalendarEvent, dayIndex: number): PositionedEvent {
-  const start = new Date(event.start!);
-  const end = new Date(event.end ?? event.start!);
-  const startMinutes = start.getHours() * 60 + start.getMinutes();
-  const durationMinutes = Math.max((end.getTime() - start.getTime()) / 60000, 30);
+function toPositionedEvent(event: CalendarEvent, dayIndex: number, date: Date): PositionedEvent {
+  const dayStart     = new Date(date); dayStart.setHours(0, 0, 0, 0);
+  const dayEnd       = new Date(date); dayEnd.setHours(24, 0, 0, 0);
+  const evStart      = new Date(event.start!);
+  const evEnd        = event.end ? new Date(event.end) : evStart;
+  const clippedStart = evStart < dayStart ? dayStart : evStart;
+  const clippedEnd   = evEnd   > dayEnd   ? dayEnd   : evEnd;
+  const startMinutes = clippedStart.getHours() * 60 + clippedStart.getMinutes();
+  const durationMinutes = Math.max((clippedEnd.getTime() - clippedStart.getTime()) / 60000, 30);
   return {
     event,
     dayIndex,
-    topPx: (startMinutes / 60) * PX_PER_HOUR,
+    topPx:    (startMinutes / 60) * PX_PER_HOUR,
     heightPx: (durationMinutes / 60) * PX_PER_HOUR,
     colIndex: 0,
     colCount: 1,
