@@ -12,4 +12,5 @@ public interface IWerkzeugService
     Task<bool> DeleteAsync(Guid id);
     Task<WerkzeugDto?> AusleihenAsync(Guid id, Guid userId, DateTime expectedReturnAt);
     Task<(WerkzeugDto? Dto, bool Forbidden)> ZurueckgebenAsync(Guid id, Guid userId, bool isPrivileged);
+    Task<(WerkzeugDto? Dto, bool Forbidden)> UpdateReturnDateAsync(Guid id, Guid userId, bool isPrivileged, DateTime expectedReturnAt);
 }

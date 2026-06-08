@@ -193,6 +193,26 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         return (ToDto(werkzeug), false);
     }
 
+    public async Task<(WerkzeugDto? Dto, bool Forbidden)> UpdateReturnDateAsync(
+        Guid id, Guid userId, bool isPrivileged, DateTime expectedReturnAt)
+    {
+        var werkzeug = await db.Werkzeuge
+            .Include(w => w.BorrowedBy)
+            .Include(w => w.AnleitungDokument)
+            .FirstOrDefaultAsync(w => w.Id == id);
+
+        if (werkzeug is null || werkzeug.IsAvailable)
+            return (null, false);
+
+        if (!isPrivileged && werkzeug.BorrowedByUserId != userId)
+            return (null, true);
+
+        werkzeug.ExpectedReturnAt = expectedReturnAt.ToUniversalTime();
+        await db.SaveChangesAsync();
+
+        return (ToDto(werkzeug), false);
+    }
+
     private string? ResolveDisplayName(Werkzeug w)
     {
         if (w.BorrowedBy is null) return null;
