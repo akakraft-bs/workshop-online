@@ -80,6 +80,27 @@ internal static class WerkzeugEndpoints
                 : Results.Ok(dto);
         }).RequireAuthorization("AnyRole");
 
+        app.MapPatch("/werkzeug/{id:guid}/rueckgabedatum", async (
+            Guid id, UpdateReturnDateDto dto, HttpContext ctx, IWerkzeugService werkzeugService) =>
+        {
+            var userId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? ctx.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userId, out var parsedUserId))
+                return Results.Unauthorized();
+
+            var isPrivileged = ctx.User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Any(c => RoleGroups.Vorstand.Select(r => r.ToString()).Contains(c.Value)
+                       || c.Value == Role.Admin.ToString());
+
+            var (result, forbidden) = await werkzeugService.UpdateReturnDateAsync(id, parsedUserId, isPrivileged, dto.ExpectedReturnAt);
+
+            if (forbidden) return Results.Forbid();
+            return result is null
+                ? Results.BadRequest("Werkzeug nicht gefunden oder nicht ausgeliehen.")
+                : Results.Ok(result);
+        }).RequireAuthorization("AnyRole");
+
         return app;
     }
 }

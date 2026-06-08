@@ -49,6 +49,9 @@ export class WerkzeugDetailDialogComponent {
   readonly canReturn = computed(() =>
     !this.item().isAvailable && (this.isMyBorrow() || this.canManage())
   );
+  readonly canEditReturnDate = computed(() =>
+    !this.item().isAvailable && (this.isMyBorrow() || this.canManage())
+  );
   readonly isOverdue = computed(() => {
     const ret = this.item().expectedReturnAt;
     return ret ? new Date(ret) < new Date() : false;
@@ -61,6 +64,16 @@ export class WerkzeugDetailDialogComponent {
       .afterClosed()
       .subscribe((updated: Werkzeug | undefined) => {
         if (updated) this.dialogRef.close({ action: 'updated', item: updated });
+      });
+  }
+
+  editReturnDate(): void {
+    const data: AusleihenDialogData = { werkzeug: this.item(), editMode: true };
+    this.dialog
+      .open(AusleihenDialogComponent, { data, width: '400px' })
+      .afterClosed()
+      .subscribe((updated: Werkzeug | undefined) => {
+        if (updated) this.item.set(updated);
       });
   }
 

@@ -23,3 +23,4 @@ public record UpdateWerkzeugDto(
 );
 
 public record AusleihenRequestDto(DateTime ExpectedReturnAt);
+public record UpdateReturnDateDto(DateTime ExpectedReturnAt);

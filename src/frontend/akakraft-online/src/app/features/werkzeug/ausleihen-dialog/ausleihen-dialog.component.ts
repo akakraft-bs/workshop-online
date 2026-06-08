@@ -11,6 +11,7 @@ import { Werkzeug } from '../../../models/werkzeug.model';
 
 export interface AusleihenDialogData {
   werkzeug: Werkzeug;
+  editMode?: boolean;
 }
 
 @Component({
@@ -31,16 +32,23 @@ export class AusleihenDialogComponent {
   readonly data: AusleihenDialogData = inject(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);
+  readonly editMode = this.data.editMode ?? false;
 
-  // Minimum: morgen
   readonly minDate = (() => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
     return d.toISOString().slice(0, 10);
   })();
 
+  private readonly initialDate = (() => {
+    if (this.editMode && this.data.werkzeug.expectedReturnAt) {
+      return new Date(this.data.werkzeug.expectedReturnAt).toISOString().slice(0, 10);
+    }
+    return this.minDate;
+  })();
+
   readonly form = this.fb.nonNullable.group({
-    expectedReturnAt: [this.minDate, Validators.required],
+    expectedReturnAt: [this.initialDate, Validators.required],
   });
 
   confirm(): void {
@@ -51,18 +59,25 @@ export class AusleihenDialogComponent {
 
     this.saving.set(true);
     const dateValue = this.form.getRawValue().expectedReturnAt;
-    // Datum in UTC-Mitternacht umwandeln
     const expectedReturnAt = new Date(dateValue + 'T00:00:00Z').toISOString();
 
-    this.api
-      .post<Werkzeug>(`/werkzeug/${this.data.werkzeug.id}/ausleihen`, { expectedReturnAt })
-      .subscribe({
-        next: result => this.dialogRef.close(result),
-        error: () => {
-          this.snackBar.open('Ausleihe fehlgeschlagen.', 'OK', { duration: 3000 });
-          this.saving.set(false);
-        },
-      });
+    const endpoint = this.editMode
+      ? `/werkzeug/${this.data.werkzeug.id}/rueckgabedatum`
+      : `/werkzeug/${this.data.werkzeug.id}/ausleihen`;
+    const request = this.editMode
+      ? this.api.patch<Werkzeug>(endpoint, { expectedReturnAt })
+      : this.api.post<Werkzeug>(endpoint, { expectedReturnAt });
+
+    request.subscribe({
+      next: result => this.dialogRef.close(result),
+      error: () => {
+        this.snackBar.open(
+          this.editMode ? 'Datum konnte nicht gespeichert werden.' : 'Ausleihe fehlgeschlagen.',
+          'OK', { duration: 3000 }
+        );
+        this.saving.set(false);
+      },
+    });
   }
 
   cancel(): void {

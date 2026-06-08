@@ -1,7 +1,9 @@
-<h2 mat-dialog-title>{{ data.werkzeug.name }} ausleihen</h2>
+<h2 mat-dialog-title>{{ editMode ? 'Rückgabedatum ändern' : (data.werkzeug.name + ' ausleihen') }}</h2>
 
 <mat-dialog-content>
-  <p class="subtitle">Bitte gib an, wann du das Werkzeug voraussichtlich zurückbringst.</p>
+  <p class="subtitle">
+    {{ editMode ? 'Bitte gib das neue voraussichtliche Rückgabedatum an.' : 'Bitte gib an, wann du das Werkzeug voraussichtlich zurückbringst.' }}
+  </p>
 
   <form [formGroup]="form" class="form">
     <mat-form-field appearance="outline">
@@ -20,7 +22,7 @@
     @if (saving()) {
       <mat-spinner diameter="18" />
     } @else {
-      Ausleihen
+      {{ editMode ? 'Speichern' : 'Ausleihen' }}
     }
   </button>
 </mat-dialog-actions>

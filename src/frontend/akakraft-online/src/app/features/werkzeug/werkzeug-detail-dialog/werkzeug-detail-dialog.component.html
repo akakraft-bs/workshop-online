@@ -118,6 +118,12 @@
       Ausleihen
     </button>
   } @else if (canReturn()) {
+    @if (canEditReturnDate()) {
+      <button mat-stroked-button (click)="editReturnDate()" matTooltip="Rückgabedatum ändern">
+        <mat-icon>edit_calendar</mat-icon>
+        Datum ändern
+      </button>
+    }
     <button mat-flat-button color="accent" (click)="returnItem()" [disabled]="returning()"
             [class.is-loading]="returning()" class="return-btn">
       <mat-icon>assignment_return</mat-icon>

@@ -11,8 +11,8 @@ public class KontakteintragConfiguration : IEntityTypeConfiguration<Kontakteintr
         builder.HasKey(k => k.Id);
         builder.Property(k => k.Kanal).HasConversion<string>();
         builder.Property(k => k.Reaktion).HasConversion<string>();
-        builder.Property(k => k.Zusammenfassung).IsRequired().HasMaxLength(2000);
-        builder.Property(k => k.NaechsteSchritte).HasMaxLength(2000);
+        builder.Property(k => k.Zusammenfassung).IsRequired();
+        builder.Property(k => k.NaechsteSchritte);
 
         builder.HasOne(k => k.Ansprechpartner)
             .WithMany()
