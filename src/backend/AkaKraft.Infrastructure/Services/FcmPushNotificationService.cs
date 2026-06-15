@@ -63,8 +63,6 @@ public class FcmPushNotificationService(
 
     private async Task SendToTokensAsync(ApplicationDbContext db, List<string> tokens, string title, string body, string? url)
     {
-        var messaging = FirebaseMessaging.GetMessaging(firebaseApp);
-
         // Relative URLs mit /app/-Prefix versehen
         var normalizedUrl = url is not null && url.StartsWith('/') && !url.StartsWith("/app/")
             ? "/app" + url
@@ -73,9 +71,6 @@ public class FcmPushNotificationService(
         // FCM erlaubt max. 500 Tokens pro Batch
         foreach (var batch in tokens.Chunk(500))
         {
-            // Data-only: kein Notification-Objekt, damit der Browser die Benachrichtigung
-            // nicht automatisch zeigt UND der Service Worker sie nicht nochmal anzeigt.
-            // onBackgroundMessage im SW übernimmt die Darstellung genau einmal.
             var data = new Dictionary<string, string>
             {
                 ["title"] = title,
@@ -92,6 +87,7 @@ public class FcmPushNotificationService(
 
             try
             {
+                var messaging = FirebaseMessaging.GetMessaging(firebaseApp);
                 var response = await messaging.SendEachForMulticastAsync(message);
                 await CleanupInvalidTokensAsync(db, batch, response);
             }
