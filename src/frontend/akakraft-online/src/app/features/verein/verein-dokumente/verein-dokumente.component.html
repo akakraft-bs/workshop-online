@@ -50,14 +50,16 @@
             @for (dok of o.dokumente; track dok.id) {
               <div class="dok-row">
                 <mat-icon class="dok-icon">description</mat-icon>
-                <a [href]="dok.fileUrl" target="_blank" rel="noopener" class="dok-name">
-                  {{ dok.fileName }}
-                </a>
-                <span class="dok-meta">
-                  {{ formatSize(dok.fileSizeBytes) }}
-                  · {{ dok.uploadedByName }}
-                  · {{ dok.uploadedAt | date:'dd.MM.yyyy' }}
-                </span>
+                <div class="dok-content">
+                  <a [href]="dok.fileUrl" target="_blank" rel="noopener" class="dok-name">
+                    {{ dok.fileName }}
+                  </a>
+                  <span class="dok-meta">
+                    {{ formatSize(dok.fileSizeBytes) }}
+                    · {{ dok.uploadedByName }}
+                    · {{ dok.uploadedAt | date:'dd.MM.yyyy' }}
+                  </span>
+                </div>
                 @if (canEdit()) {
                   <button mat-icon-button matTooltip="Löschen" class="delete-btn"
                           (click)="deleteDokument(o, dok)">
