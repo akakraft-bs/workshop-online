@@ -7,7 +7,6 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Minio;
 
 
@@ -39,13 +38,21 @@ public static class DependencyInjection
         if (!string.IsNullOrWhiteSpace(firebaseJson))
         {
             using var firebaseDoc = System.Text.Json.JsonDocument.Parse(firebaseJson);
-            var fbEmail = firebaseDoc.RootElement.GetProperty("client_email").GetString()!;
-            var fbKey   = firebaseDoc.RootElement.GetProperty("private_key").GetString()!;
-            var fbSaCredential = new ServiceAccountCredential(
-                new ServiceAccountCredential.Initializer(fbEmail).FromPrivateKey(fbKey));
+            var root = firebaseDoc.RootElement;
+            var projectId   = root.TryGetProperty("project_id",  out var pidEl) ? pidEl.GetString()! : null;
+            var clientEmail = root.TryGetProperty("client_email", out var ceEl)  ? ceEl.GetString()! : throw new InvalidOperationException("Firebase JSON: client_email fehlt.");
+            var privateKey  = root.TryGetProperty("private_key",  out var pkEl)  ? pkEl.GetString()! : throw new InvalidOperationException("Firebase JSON: private_key fehlt.");
+
+            var saCredential = new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer(clientEmail)
+                {
+                    ProjectId = projectId,
+                }.FromPrivateKey(privateKey));
+            var credential = saCredential.ToGoogleCredential();
             var firebaseApp = FirebaseApp.DefaultInstance ?? FirebaseApp.Create(new AppOptions
             {
-                Credential = GoogleCredential.FromServiceAccountCredential(fbSaCredential),
+                Credential = credential,
+                ProjectId = projectId,
             });
             services.AddSingleton(firebaseApp);
             services.AddScoped<IPushNotificationService, FcmPushNotificationService>();
