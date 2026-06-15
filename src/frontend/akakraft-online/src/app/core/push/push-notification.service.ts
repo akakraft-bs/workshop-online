@@ -120,16 +120,38 @@ export class PushNotificationService {
     );
   }
 
+  /**
+   * Stilles Token-Refresh beim App-Start: erneuert den FCM-Token im Backend wenn Push
+   * vorher aktiviert war. Fängt alle Fehler still ab — darf niemals etwas werfen.
+   */
+  silentRefresh(): void {
+    if (!this.isSubscribed() || !this.isSupported() || !this.messaging) return;
+
+    if (Notification.permission !== 'granted') {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      this.isSubscribed.set(false);
+      return;
+    }
+
+    this.getFreshToken().then(token => {
+      if (!token) return;
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      this.api.post<unknown>('/push/tokens', { token }).subscribe({ error: () => {} });
+    }).catch(() => {});
+  }
+
   /** Lauscht auf Vordergrund-Nachrichten und zeigt sie als Browser-Notification. */
   listenForeground(): void {
     if (!this.messaging) return;
 
     onMessage(this.messaging, payload => {
-      const { title, body, icon } = payload.notification ?? {};
+      const title = payload.data?.['title'] ?? payload.notification?.title ?? 'AkaKraft';
+      const body  = payload.data?.['body']  ?? payload.notification?.body  ?? '';
       if (Notification.permission === 'granted') {
-        new Notification(title ?? 'AkaKraft', {
-          body: body ?? '',
-          icon: icon ?? '/app/android-chrome-192x192.png',
+        new Notification(title, {
+          body,
+          icon: '/app/android-chrome-192x192.png',
+          data: { url: payload.data?.['url'] },
         });
       }
     });

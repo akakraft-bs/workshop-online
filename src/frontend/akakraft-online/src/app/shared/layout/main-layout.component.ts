@@ -91,6 +91,7 @@ export class MainLayoutComponent implements OnInit {
 
     this.badges.refresh();
 
+    this.push.silentRefresh();
     setTimeout(() => this.checkPushPrompt(), 1200);
   }
 
