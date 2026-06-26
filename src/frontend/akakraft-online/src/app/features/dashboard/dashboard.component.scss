@@ -62,12 +62,84 @@
 
 .dashboard {
   max-width: 600px;
+}
 
-  h1.greeting {
+.greeting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+
+  .greeting {
     font-size: 26px;
     font-weight: 500;
-    margin: 0 0 28px;
+    margin: 0;
   }
+
+  .reorder-btn {
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.5;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+
+    &:hover, &.active {
+      opacity: 1;
+      color: var(--mat-sys-primary);
+    }
+  }
+}
+
+// ---- Reihenfolge anpassen ---------------------------------------------------
+
+.reorder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  &.cdk-drop-list-dragging .reorder-item:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.reorder-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--mat-sys-surface-container-high);
+  border-radius: 12px;
+
+  span {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  &.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  &.cdk-drag-preview {
+    box-shadow: var(--mat-sys-level3);
+    border-radius: 12px;
+    opacity: 0.95;
+  }
+
+  &.cdk-drag-placeholder {
+    opacity: 0.3;
+  }
+}
+
+.drag-handle {
+  color: var(--mat-sys-on-surface-variant);
+  cursor: grab;
+  touch-action: none;
+
+  &:active { cursor: grabbing; }
+}
+
+.reorder-section-icon {
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .section {
@@ -167,6 +239,53 @@
 .event-date {
   font-size: 12px;
   color: var(--mat-sys-on-surface-variant);
+}
+
+// ---- Einklappbare Sektionen ------------------------------------------------
+
+.section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+
+  .section-title { margin: 0; }
+
+  &:hover .chevron { opacity: 1; }
+}
+
+.section-count {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+  color: var(--mat-sys-error);
+  vertical-align: middle;
+  margin-left: 6px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.chevron {
+  color: var(--mat-sys-on-surface-variant);
+  opacity: 0.5;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, opacity 0.15s;
+
+  &.rotated { transform: rotate(-90deg); }
+}
+
+.section-body {
+  margin-top: 12px;
 }
 
 // ---- Niedriger Bestand -----------------------------------------------------

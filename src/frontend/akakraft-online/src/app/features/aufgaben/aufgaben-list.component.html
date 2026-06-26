@@ -36,10 +36,15 @@
       <div class="aufgabe-card" [class.erledigt]="aufgabe.status === 'Erledigt'">
 
         <div class="card-header">
-          <span class="status-chip status-{{ aufgabe.status.toLowerCase() }}">
-            <mat-icon class="chip-icon">{{ statusIcon(aufgabe.status) }}</mat-icon>
-            {{ aufgabe.status }}
-          </span>
+          <div class="header-left">
+            <span class="ampel-dot"
+                  [style.background]="priorityColor(aufgabe.priority)"
+                  [matTooltip]="priorityLabel(aufgabe.priority)"></span>
+            <span class="status-chip status-{{ aufgabe.status.toLowerCase() }}">
+              <mat-icon class="chip-icon">{{ statusIcon(aufgabe.status) }}</mat-icon>
+              {{ aufgabe.status }}
+            </span>
+          </div>
           @if (canEdit()) {
             <div class="card-actions">
               <button mat-icon-button matTooltip="Bearbeiten" (click)="openEdit(aufgabe)">

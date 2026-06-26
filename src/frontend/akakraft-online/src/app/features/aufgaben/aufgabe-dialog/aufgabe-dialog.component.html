@@ -39,6 +39,23 @@
       <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)">
     </div>
 
+    <!-- Priorität -->
+    <div class="section-label">Priorität</div>
+    <mat-button-toggle-group formControlName="priority" class="priority-toggle">
+      <mat-button-toggle [value]="1" class="prio-1">
+        <span class="ampel-dot red"></span>
+        Hoch
+      </mat-button-toggle>
+      <mat-button-toggle [value]="2" class="prio-2">
+        <span class="ampel-dot yellow"></span>
+        Mittel
+      </mat-button-toggle>
+      <mat-button-toggle [value]="3" class="prio-3">
+        <span class="ampel-dot green"></span>
+        Niedrig
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+
     <!-- Zuweisung -->
     <div class="section-label">Zuweisung</div>
     <mat-radio-group class="assign-radio" [value]="assignMode()"

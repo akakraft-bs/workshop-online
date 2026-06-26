@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,7 +23,7 @@ type AssignMode = 'none' | 'member' | 'extern';
     ReactiveFormsModule,
     MatDialogModule, MatFormFieldModule, MatInputModule,
     MatSelectModule, MatRadioModule, MatCheckboxModule,
-    MatButtonModule, MatIconModule, MatProgressSpinnerModule,
+    MatButtonModule, MatButtonToggleModule, MatIconModule, MatProgressSpinnerModule,
   ],
   templateUrl: './aufgabe-dialog.component.html',
   styleUrl: './aufgabe-dialog.component.scss',
@@ -48,6 +49,7 @@ export class AufgabeDialogComponent implements OnInit {
   readonly form = this.fb.nonNullable.group({
     titel:          [this.data?.titel        ?? '', [Validators.required, Validators.maxLength(200)]],
     beschreibung:   [this.data?.beschreibung ?? '', Validators.required],
+    priority:       [this.data?.priority     ?? 3],
     assignedUserId: [this.data?.assignedUserId ?? null as string | null],
     assignedName:   [this.data?.assignedName   ?? ''],
     erledigt:       [this.data?.status === 'Erledigt'],
@@ -91,7 +93,7 @@ export class AufgabeDialogComponent implements OnInit {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
 
-    const { titel, beschreibung, assignedUserId, assignedName, erledigt } = this.form.getRawValue();
+    const { titel, beschreibung, priority, assignedUserId, assignedName, erledigt } = this.form.getRawValue();
     const mode = this.assignMode();
     const file = this.selectedFile();
 
@@ -110,6 +112,7 @@ export class AufgabeDialogComponent implements OnInit {
           titel,
           beschreibung,
           fotoUrl,
+          priority,
           assignedUserId: mode === 'member' ? (assignedUserId || null) : null,
           assignedName:   mode === 'extern' ? (assignedName.trim() || null) : null,
           erledigt,

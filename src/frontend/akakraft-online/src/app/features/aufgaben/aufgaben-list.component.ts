@@ -41,10 +41,15 @@ export class AufgabenListComponent implements OnInit {
 
   readonly filtered = computed(() => {
     const f = this.statusFilter();
-    return this.items().filter(a =>
-      f === 'offen'    ? a.status !== 'Erledigt' :
-      f === 'erledigt' ? a.status === 'Erledigt' : true
-    );
+    return this.items()
+      .filter(a =>
+        f === 'offen'    ? a.status !== 'Erledigt' :
+        f === 'erledigt' ? a.status === 'Erledigt' : true
+      )
+      .sort((a, b) => {
+        const statusDiff = (a.status === 'Erledigt' ? 1 : 0) - (b.status === 'Erledigt' ? 1 : 0);
+        return statusDiff !== 0 ? statusDiff : a.priority - b.priority;
+      });
   });
 
   ngOnInit(): void { this.load(); }
@@ -85,6 +90,18 @@ export class AufgabenListComponent implements OnInit {
   statusIcon(status: AufgabeStatus): string {
     return status === 'Neu' ? 'radio_button_unchecked' :
            status === 'Zugewiesen' ? 'person' : 'check_circle';
+  }
+
+  priorityColor(priority: number): string {
+    if (priority === 1) return '#ef4444';
+    if (priority === 2) return '#f59e0b';
+    return '#22c55e';
+  }
+
+  priorityLabel(priority: number): string {
+    if (priority === 1) return 'Hohe Priorität – sofort erledigen';
+    if (priority === 2) return 'Mittlere Priorität – bald erledigen';
+    return 'Niedrige Priorität – eilt nicht';
   }
 
   assignedLabel(a: Aufgabe): string | null {

@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,6 +24,40 @@ import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
 import { Mangel } from '../../models/mangel.model';
 import { Umfrage } from '../../models/umfrage.model';
 import { Role, VORSTAND_ROLES } from '../../models/user.model';
+
+type SectionId = 'umfragen' | 'veranstaltungen' | 'maengel' | 'bestand' | 'schnellzugriff';
+
+const SECTION_LABELS: Record<SectionId, string> = {
+  umfragen: 'Offene Umfragen',
+  veranstaltungen: 'Nächste Veranstaltungen',
+  maengel: 'Offene Mängel',
+  bestand: 'Niedriger Bestand',
+  schnellzugriff: 'Schnellzugriff',
+};
+
+const SECTION_ICONS: Record<SectionId, string> = {
+  umfragen: 'poll',
+  veranstaltungen: 'celebration',
+  maengel: 'report_problem',
+  bestand: 'warning',
+  schnellzugriff: 'apps',
+};
+
+const DEFAULT_SECTION_ORDER: SectionId[] = ['umfragen', 'veranstaltungen', 'maengel', 'bestand', 'schnellzugriff'];
+const SECTION_ORDER_KEY = 'dashboard-section-order';
+
+function loadSectionOrder(): SectionId[] {
+  try {
+    const stored = localStorage.getItem(SECTION_ORDER_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as SectionId[];
+      const valid = parsed.filter((id): id is SectionId => DEFAULT_SECTION_ORDER.includes(id as SectionId));
+      const missing = DEFAULT_SECTION_ORDER.filter(id => !valid.includes(id));
+      return [...valid, ...missing];
+    }
+  } catch { /* ignore */ }
+  return [...DEFAULT_SECTION_ORDER];
+}
 
 type MotdSeverity = 'Info' | 'Warning' | 'Critical';
 
@@ -111,6 +146,7 @@ const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial', '/hallenbuch'];
   imports: [
     RouterLink, MatCardModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, MatChipsModule, MatTooltipModule, MatBadgeModule,
+    CdkDropList, CdkDrag, CdkDragHandle,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -137,6 +173,21 @@ export class DashboardComponent implements OnInit {
   readonly favoriteRoutes = signal<string[]>(DEFAULT_FAVORITES);
   readonly editMode = signal(false);
   readonly savingPrefs = signal(false);
+  readonly maengelCollapsed = signal(true);
+  readonly stockCollapsed = signal(true);
+  readonly sectionOrder = signal<SectionId[]>(loadSectionOrder());
+  readonly reorderMode = signal(false);
+  readonly sectionLabels = SECTION_LABELS;
+  readonly sectionIcons = SECTION_ICONS;
+
+  readonly visibleSections = computed(() =>
+    this.sectionOrder().filter(id => {
+      if (id === 'umfragen') return this.pendingUmfragen().length > 0;
+      if (id === 'maengel') return this.openMaengel().length > 0;
+      if (id === 'bestand') return this.lowStockItems().length > 0;
+      return true;
+    })
+  );
 
   private loadedPhone: string | null = null;
   private loadedAddress: string | null = null;
@@ -209,6 +260,13 @@ export class DashboardComponent implements OnInit {
       },
       error: () => {},
     });
+  }
+
+  onSectionDrop(event: CdkDragDrop<string[]>): void {
+    const order = [...this.sectionOrder()];
+    moveItemInArray(order, event.previousIndex, event.currentIndex);
+    this.sectionOrder.set(order);
+    localStorage.setItem(SECTION_ORDER_KEY, JSON.stringify(order));
   }
 
   markNachbestellt(item: Verbrauchsmaterial, e: MouseEvent): void {

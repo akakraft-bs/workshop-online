@@ -15,6 +15,7 @@ public class AufgabeConfiguration : IEntityTypeConfiguration<Aufgabe>
         builder.Property(a => a.FotoUrl).HasMaxLength(2048);
         builder.Property(a => a.Status).IsRequired().HasMaxLength(20);
         builder.Property(a => a.AssignedName).HasMaxLength(200);
+        builder.Property(a => a.Priority).IsRequired().HasDefaultValue(3);
 
         builder.HasOne(a => a.CreatedBy)
             .WithMany()
