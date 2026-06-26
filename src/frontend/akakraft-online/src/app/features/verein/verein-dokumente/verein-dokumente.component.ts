@@ -12,6 +12,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { DokumentDto, DokumentOrdnerDto } from '../../../models/verein.models';
 import { OrdnerDialogComponent } from './ordner-dialog.component';
 import { DokumentUploadDialogComponent } from './dokument-upload-dialog.component';
+import { DeleteConfirmDialogComponent, DeleteConfirmDialogData } from './delete-confirm-dialog.component';
 
 @Component({
   selector: 'app-verein-dokumente',
@@ -71,14 +72,23 @@ export class VereinDokumenteComponent implements OnInit {
   }
 
   deleteDokument(ordner: DokumentOrdnerDto, dok: DokumentDto): void {
-    this.api.delete(`/verein/dokumente/${dok.id}`).subscribe({
-      next: () => this.ordner.update(list =>
-        list.map(o => o.id === ordner.id
-          ? { ...o, dokumente: o.dokumente.filter(d => d.id !== dok.id) }
-          : o)
-      ),
-      error: () => this.snackBar.open('Löschen fehlgeschlagen.', 'OK', { duration: 3000 }),
-    });
+    const data: DeleteConfirmDialogData = { fileName: dok.fileName };
+    this.dialog
+      .open<DeleteConfirmDialogComponent, DeleteConfirmDialogData, boolean>(
+        DeleteConfirmDialogComponent, { data, width: '420px', maxWidth: '95vw' }
+      )
+      .afterClosed()
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        this.api.delete(`/verein/dokumente/${dok.id}`).subscribe({
+          next: () => this.ordner.update(list =>
+            list.map(o => o.id === ordner.id
+              ? { ...o, dokumente: o.dokumente.filter(d => d.id !== dok.id) }
+              : o)
+          ),
+          error: () => this.snackBar.open('Löschen fehlgeschlagen.', 'OK', { duration: 3000 }),
+        });
+      });
   }
 
   formatSize(bytes?: number | null): string {
