@@ -24,193 +24,218 @@
     </button>
   }
 
-  <h1 class="greeting">
-    Hallo, {{ auth.currentUser()?.displayName || (auth.currentUser()?.name ?? 'Mitglied').split(' ')[0] }}!
-  </h1>
+  <div class="greeting-row">
+    <h1 class="greeting">
+      Hallo, {{ auth.currentUser()?.displayName || (auth.currentUser()?.name ?? 'Mitglied').split(' ')[0] }}!
+    </h1>
+    <button mat-icon-button class="reorder-btn"
+            [class.active]="reorderMode()"
+            (click)="reorderMode.set(!reorderMode())"
+            [matTooltip]="reorderMode() ? 'Fertig' : 'Reihenfolge anpassen'">
+      <mat-icon>{{ reorderMode() ? 'check' : 'reorder' }}</mat-icon>
+    </button>
+  </div>
 
-  <!-- Offene Umfragen -->
-  @if (pendingUmfragen().length > 0) {
-    <section class="section">
-      <h2 class="section-title">
-        <mat-icon class="section-title-icon umfrage-icon">poll</mat-icon>
-        Offene Umfragen
-      </h2>
-      <div class="events-list">
-        @for (umfrage of pendingUmfragen(); track umfrage.id) {
-          <a class="event-item stock-item" routerLink="/umfrage">
-            <mat-icon class="stock-warn-icon umfrage-poll-icon">how_to_vote</mat-icon>
-            <div class="event-info">
-              <span class="event-title">{{ umfrage.question }}</span>
-              @if (formatUmfrageDeadline(umfrage.deadline); as frist) {
-                <span class="event-date umfrage-deadline">Frist: {{ frist }}</span>
-              } @else {
-                <span class="event-date">Noch nicht abgestimmt</span>
+  <!-- Reihenfolge anpassen -->
+  @if (reorderMode()) {
+    <div cdkDropList class="reorder-list" (cdkDropListDropped)="onSectionDrop($event)">
+      @for (id of sectionOrder(); track id) {
+        <div cdkDrag class="reorder-item">
+          <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
+          <mat-icon class="reorder-section-icon">{{ sectionIcons[id] }}</mat-icon>
+          <span>{{ sectionLabels[id] }}</span>
+        </div>
+      }
+    </div>
+  } @else {
+
+    @for (id of visibleSections(); track id) {
+      @switch (id) {
+
+        @case ('umfragen') {
+          <section class="section">
+            <h2 class="section-title">
+              <mat-icon class="section-title-icon umfrage-icon">poll</mat-icon>
+              Offene Umfragen
+            </h2>
+            <div class="events-list">
+              @for (umfrage of pendingUmfragen(); track umfrage.id) {
+                <a class="event-item stock-item" routerLink="/umfrage">
+                  <mat-icon class="stock-warn-icon umfrage-poll-icon">how_to_vote</mat-icon>
+                  <div class="event-info">
+                    <span class="event-title">{{ umfrage.question }}</span>
+                    @if (formatUmfrageDeadline(umfrage.deadline); as frist) {
+                      <span class="event-date umfrage-deadline">Frist: {{ frist }}</span>
+                    } @else {
+                      <span class="event-date">Noch nicht abgestimmt</span>
+                    }
+                  </div>
+                </a>
               }
             </div>
-          </a>
+          </section>
         }
-      </div>
-    </section>
-  }
 
-  <!-- Nächste Veranstaltungen -->
-  <section class="section">
-    <h2 class="section-title">Nächste Veranstaltungen</h2>
-
-    @if (loadingEvents()) {
-      <div class="events-loading">
-        <mat-spinner diameter="28"></mat-spinner>
-      </div>
-    } @else if (upcomingEvents().length === 0) {
-      <p class="events-empty">Keine bevorstehenden Veranstaltungen gefunden.</p>
-    } @else {
-      <div class="events-list">
-        @for (event of upcomingEvents(); track event.id) {
-          <a class="event-item event-item-link"
-             routerLink="/veranstaltungen"
-             [queryParams]="{event: event.id}">
-            <span class="event-dot" [style.background]="event.calendarColor"></span>
-            <div class="event-info">
-              <span class="event-title">{{ event.title }}</span>
-              <span class="event-date">{{ formatEventDate(event) }}</span>
-            </div>
-          </a>
+        @case ('veranstaltungen') {
+          <section class="section">
+            <h2 class="section-title">Nächste Veranstaltungen</h2>
+            @if (loadingEvents()) {
+              <div class="events-loading">
+                <mat-spinner diameter="28"></mat-spinner>
+              </div>
+            } @else if (upcomingEvents().length === 0) {
+              <p class="events-empty">Keine bevorstehenden Veranstaltungen gefunden.</p>
+            } @else {
+              <div class="events-list">
+                @for (event of upcomingEvents(); track event.id) {
+                  <a class="event-item event-item-link"
+                     routerLink="/veranstaltungen"
+                     [queryParams]="{event: event.id}">
+                    <span class="event-dot" [style.background]="event.calendarColor"></span>
+                    <div class="event-info">
+                      <span class="event-title">{{ event.title }}</span>
+                      <span class="event-date">{{ formatEventDate(event) }}</span>
+                    </div>
+                  </a>
+                }
+              </div>
+            }
+          </section>
         }
-      </div>
-    }
-  </section>
 
-  <!-- Niedriger Bestand -->
-  @if (lowStockItems().length > 0) {
-    <section class="section">
-      <button class="section-toggle" (click)="stockCollapsed.set(!stockCollapsed())">
-        <h2 class="section-title">
-          <mat-icon class="section-title-icon">warning</mat-icon>
-          Niedriger Bestand
-          <span class="section-count">{{ lowStockItems().length }}</span>
-        </h2>
-        <mat-icon class="chevron" [class.rotated]="stockCollapsed()">expand_more</mat-icon>
-      </button>
-      @if (!stockCollapsed()) {
-        <div class="section-body">
-          <div class="events-list">
-            @for (item of lowStockItems(); track item.id) {
-              <a class="event-item stock-item" routerLink="/verbrauchsmaterial">
-                <mat-icon class="stock-warn-icon">inventory_2</mat-icon>
-                <div class="event-info">
-                  <span class="event-title">{{ item.name }}</span>
-                  <span class="event-date">
-                    {{ item.quantity }} {{ item.unit }} vorhanden
-                    @if (item.minQuantity !== null) {
-                      · Mindestbestand: {{ item.minQuantity }} {{ item.unit }}
-                    }
-                  </span>
+        @case ('bestand') {
+          <section class="section">
+            <button class="section-toggle" (click)="stockCollapsed.set(!stockCollapsed())">
+              <h2 class="section-title">
+                <mat-icon class="section-title-icon">warning</mat-icon>
+                Niedriger Bestand
+                <span class="section-count">{{ lowStockItems().length }}</span>
+              </h2>
+              <mat-icon class="chevron" [class.rotated]="stockCollapsed()">expand_more</mat-icon>
+            </button>
+            @if (!stockCollapsed()) {
+              <div class="section-body">
+                <div class="events-list">
+                  @for (item of lowStockItems(); track item.id) {
+                    <a class="event-item stock-item" routerLink="/verbrauchsmaterial">
+                      <mat-icon class="stock-warn-icon">inventory_2</mat-icon>
+                      <div class="event-info">
+                        <span class="event-title">{{ item.name }}</span>
+                        <span class="event-date">
+                          {{ item.quantity }} {{ item.unit }} vorhanden
+                          @if (item.minQuantity !== null) {
+                            · Mindestbestand: {{ item.minQuantity }} {{ item.unit }}
+                          }
+                        </span>
+                      </div>
+                      @if (canManage()) {
+                        <button mat-stroked-button class="nachbestellen-btn"
+                          (click)="markNachbestellt(item, $event)"
+                          matTooltip="Als nachbestellt markieren">
+                          <mat-icon>shopping_cart</mat-icon>
+                          Nachbestellt
+                        </button>
+                      }
+                    </a>
+                  }
                 </div>
-                @if (canManage()) {
-                  <button mat-stroked-button class="nachbestellen-btn"
-                    (click)="markNachbestellt(item, $event)"
-                    matTooltip="Als nachbestellt markieren">
-                    <mat-icon>shopping_cart</mat-icon>
-                    Nachbestellt
+              </div>
+            }
+          </section>
+        }
+
+        @case ('maengel') {
+          <section class="section">
+            <button class="section-toggle" (click)="maengelCollapsed.set(!maengelCollapsed())">
+              <h2 class="section-title">
+                <mat-icon class="section-title-icon">report_problem</mat-icon>
+                Offene Mängel
+                <span class="section-count">{{ openMaengel().length }}</span>
+              </h2>
+              <mat-icon class="chevron" [class.rotated]="maengelCollapsed()">expand_more</mat-icon>
+            </button>
+            @if (!maengelCollapsed()) {
+              <div class="section-body">
+                <div class="events-list">
+                  @for (mangel of openMaengel(); track mangel.id) {
+                    <a class="event-item stock-item" routerLink="/mangel">
+                      <mat-icon class="stock-warn-icon mangel-icon-{{ mangel.status === 'Kenntnisgenommen' ? 'known' : 'open' }}">
+                        {{ mangel.status === 'Kenntnisgenommen' ? 'visibility' : 'report_problem' }}
+                      </mat-icon>
+                      <div class="event-info">
+                        <span class="event-title">{{ mangel.title }}</span>
+                        <span class="event-date">{{ mangel.kategorie }} · {{ mangel.status === 'Kenntnisgenommen' ? 'Kenntnisgenommen' : 'Offen' }}</span>
+                      </div>
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+          </section>
+        }
+
+        @case ('schnellzugriff') {
+          <section class="section">
+            <div class="section-header">
+              <h2 class="section-title">Schnellzugriff</h2>
+              <button mat-icon-button
+                      class="edit-btn"
+                      [class.active]="editMode()"
+                      (click)="editMode.set(!editMode())"
+                      [matTooltip]="editMode() ? 'Fertig' : 'Anpassen'">
+                <mat-icon>{{ editMode() ? 'check' : 'edit' }}</mat-icon>
+              </button>
+            </div>
+
+            @if (editMode()) {
+              <p class="edit-hint">Wähle die Seiten, die hier angezeigt werden sollen.</p>
+              <div class="chip-list">
+                @for (item of availableItems(); track item.route) {
+                  <button mat-flat-button
+                          class="choice-chip"
+                          [class.chosen]="isFavorite(item.route)"
+                          (click)="toggleFavorite(item.route)">
+                    <mat-icon>{{ item.icon }}</mat-icon>
+                    {{ item.label }}
+                    @if (isFavorite(item.route)) {
+                      <mat-icon class="check-icon">check</mat-icon>
+                    }
                   </button>
                 }
-              </a>
-            }
-          </div>
-        </div>
-      }
-    </section>
-  }
-
-  <!-- Offene Mängel -->
-  @if (openMaengel().length > 0) {
-    <section class="section">
-      <button class="section-toggle" (click)="maengelCollapsed.set(!maengelCollapsed())">
-        <h2 class="section-title">
-          <mat-icon class="section-title-icon">report_problem</mat-icon>
-          Offene Mängel
-          <span class="section-count">{{ openMaengel().length }}</span>
-        </h2>
-        <mat-icon class="chevron" [class.rotated]="maengelCollapsed()">expand_more</mat-icon>
-      </button>
-      @if (!maengelCollapsed()) {
-        <div class="section-body">
-          <div class="events-list">
-            @for (mangel of openMaengel(); track mangel.id) {
-              <a class="event-item stock-item" routerLink="/mangel">
-                <mat-icon class="stock-warn-icon mangel-icon-{{ mangel.status === 'Kenntnisgenommen' ? 'known' : 'open' }}">
-                  {{ mangel.status === 'Kenntnisgenommen' ? 'visibility' : 'report_problem' }}
-                </mat-icon>
-                <div class="event-info">
-                  <span class="event-title">{{ mangel.title }}</span>
-                  <span class="event-date">{{ mangel.kategorie }} · {{ mangel.status === 'Kenntnisgenommen' ? 'Kenntnisgenommen' : 'Offen' }}</span>
+              </div>
+            } @else {
+              @if (quickLinks().length === 0) {
+                <p class="events-empty">
+                  Keine Favoriten ausgewählt.
+                  <button mat-button color="primary" (click)="editMode.set(true)">Jetzt anpassen</button>
+                </p>
+              } @else {
+                <div class="quick-links">
+                  @for (link of quickLinks(); track link.route) {
+                    <mat-card class="quick-link-card" appearance="outlined" [routerLink]="link.route">
+                      <mat-card-content>
+                        <div class="card-icon">
+                          <mat-icon
+                            [matBadge]="link.badge && link.badge() > 0 ? link.badge() : null"
+                            matBadgeColor="warn"
+                            matBadgeSize="medium">{{ link.icon }}</mat-icon>
+                        </div>
+                        <div class="card-text">
+                          <strong>{{ link.label }}</strong>
+                          <span>{{ link.description }}</span>
+                        </div>
+                        <mat-icon class="arrow-icon">chevron_right</mat-icon>
+                      </mat-card-content>
+                    </mat-card>
+                  }
                 </div>
-              </a>
+              }
             }
-          </div>
-        </div>
-      }
-    </section>
-  }
-
-  <!-- Schnellzugriff -->
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Schnellzugriff</h2>
-      <button mat-icon-button
-              class="edit-btn"
-              [class.active]="editMode()"
-              (click)="editMode.set(!editMode())"
-              [matTooltip]="editMode() ? 'Fertig' : 'Anpassen'">
-        <mat-icon>{{ editMode() ? 'check' : 'edit' }}</mat-icon>
-      </button>
-    </div>
-
-    @if (editMode()) {
-      <!-- Edit mode: show all accessible items as toggleable chips -->
-      <p class="edit-hint">Wähle die Seiten, die hier angezeigt werden sollen.</p>
-      <div class="chip-list">
-        @for (item of availableItems(); track item.route) {
-          <button mat-flat-button
-                  class="choice-chip"
-                  [class.chosen]="isFavorite(item.route)"
-                  (click)="toggleFavorite(item.route)">
-            <mat-icon>{{ item.icon }}</mat-icon>
-            {{ item.label }}
-            @if (isFavorite(item.route)) {
-              <mat-icon class="check-icon">check</mat-icon>
-            }
-          </button>
+          </section>
         }
-      </div>
-    } @else {
-      <!-- Normal mode: show quick-link cards -->
-      @if (quickLinks().length === 0) {
-        <p class="events-empty">
-          Keine Favoriten ausgewählt.
-          <button mat-button color="primary" (click)="editMode.set(true)">Jetzt anpassen</button>
-        </p>
-      } @else {
-        <div class="quick-links">
-          @for (link of quickLinks(); track link.route) {
-            <mat-card class="quick-link-card" appearance="outlined" [routerLink]="link.route">
-              <mat-card-content>
-                <div class="card-icon">
-                  <mat-icon
-                    [matBadge]="link.badge && link.badge() > 0 ? link.badge() : null"
-                    matBadgeColor="warn"
-                    matBadgeSize="medium">{{ link.icon }}</mat-icon>
-                </div>
-                <div class="card-text">
-                  <strong>{{ link.label }}</strong>
-                  <span>{{ link.description }}</span>
-                </div>
-                <mat-icon class="arrow-icon">chevron_right</mat-icon>
-              </mat-card-content>
-            </mat-card>
-          }
-        </div>
+
       }
     }
-  </section>
+
+  }
 </div>
