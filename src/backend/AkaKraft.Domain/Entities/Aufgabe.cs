@@ -12,6 +12,9 @@ public class Aufgabe : IAuditable
     /// <summary>"Neu" | "Zugewiesen" | "Erledigt"</summary>
     public string Status { get; set; } = "Neu";
 
+    /// <summary>1 = rot (dringend), 2 = gelb (bald), 3 = grün (eilt nicht)</summary>
+    public int Priority { get; set; } = 3;
+
     public Guid? AssignedUserId { get; set; }
     public User? AssignedUser { get; set; }
 

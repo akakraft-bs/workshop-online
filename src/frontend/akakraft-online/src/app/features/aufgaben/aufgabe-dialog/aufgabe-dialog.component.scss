@@ -17,6 +17,31 @@
   margin: 8px 0 4px;
 }
 
+.priority-toggle {
+  margin-bottom: 12px;
+  width: 100%;
+
+  mat-button-toggle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.ampel-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+
+  &.red    { background: #ef4444; }
+  &.yellow { background: #f59e0b; }
+  &.green  { background: #22c55e; }
+}
+
 .assign-radio {
   display: flex;
   flex-direction: column;

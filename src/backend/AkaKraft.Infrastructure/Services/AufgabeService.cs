@@ -13,6 +13,7 @@ public class AufgabeService(ApplicationDbContext db) : IAufgabeService
             .Include(a => a.CreatedBy)
             .Include(a => a.AssignedUser)
             .OrderBy(a => a.Status == "Erledigt" ? 1 : 0)
+            .ThenBy(a => a.Priority)
             .ThenByDescending(a => a.CreatedAt)
             .Select(a => new AufgabeDto(
                 a.Id,
@@ -20,6 +21,7 @@ public class AufgabeService(ApplicationDbContext db) : IAufgabeService
                 a.Beschreibung,
                 a.FotoUrl,
                 a.Status,
+                a.Priority,
                 a.AssignedUserId,
                 a.AssignedUserId == null ? null :
                     db.UserPreferences
@@ -36,6 +38,7 @@ public class AufgabeService(ApplicationDbContext db) : IAufgabeService
 
     public async Task<AufgabeDto> CreateAsync(Guid creatorId, CreateAufgabeDto dto)
     {
+        var priority = Math.Clamp(dto.Priority, 1, 3);
         var aufgabe = new Aufgabe
         {
             Id              = Guid.NewGuid(),
@@ -43,6 +46,7 @@ public class AufgabeService(ApplicationDbContext db) : IAufgabeService
             Beschreibung    = dto.Beschreibung.Trim(),
             FotoUrl         = dto.FotoUrl,
             Status          = "Neu",
+            Priority        = priority,
             CreatedByUserId = creatorId,
             CreatedAt       = DateTime.UtcNow,
         };
@@ -53,7 +57,7 @@ public class AufgabeService(ApplicationDbContext db) : IAufgabeService
         var createdByName = await GetDisplayNameAsync(creatorId) ?? aufgabe.CreatedBy.Name;
 
         return new AufgabeDto(aufgabe.Id, aufgabe.Titel, aufgabe.Beschreibung,
-            aufgabe.FotoUrl, aufgabe.Status, null, null, null, createdByName, aufgabe.CreatedAt);
+            aufgabe.FotoUrl, aufgabe.Status, aufgabe.Priority, null, null, null, createdByName, aufgabe.CreatedAt);
     }
 
     public async Task<AufgabeDto?> UpdateAsync(Guid id, UpdateAufgabeDto dto)
@@ -67,6 +71,7 @@ public class AufgabeService(ApplicationDbContext db) : IAufgabeService
         aufgabe.Titel        = dto.Titel.Trim();
         aufgabe.Beschreibung = dto.Beschreibung.Trim();
         aufgabe.FotoUrl      = dto.FotoUrl;
+        aufgabe.Priority     = Math.Clamp(dto.Priority, 1, 3);
 
         aufgabe.AssignedUserId = null;
         aufgabe.AssignedName   = null;
@@ -105,7 +110,7 @@ public class AufgabeService(ApplicationDbContext db) : IAufgabeService
         var createdByName = await GetDisplayNameAsync(aufgabe.CreatedByUserId) ?? aufgabe.CreatedBy.Name;
 
         return new AufgabeDto(aufgabe.Id, aufgabe.Titel, aufgabe.Beschreibung, aufgabe.FotoUrl,
-            aufgabe.Status, aufgabe.AssignedUserId, assignedDisplayName, aufgabe.AssignedName,
+            aufgabe.Status, aufgabe.Priority, aufgabe.AssignedUserId, assignedDisplayName, aufgabe.AssignedName,
             createdByName, aufgabe.CreatedAt);
     }
 

@@ -6,6 +6,7 @@ export interface Aufgabe {
   beschreibung: string;
   fotoUrl?: string | null;
   status: AufgabeStatus;
+  priority: number;
   assignedUserId?: string | null;
   assignedDisplayName?: string | null;
   assignedName?: string | null;
