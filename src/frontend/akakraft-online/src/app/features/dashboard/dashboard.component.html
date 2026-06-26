@@ -83,57 +83,73 @@
   <!-- Niedriger Bestand -->
   @if (lowStockItems().length > 0) {
     <section class="section">
-      <h2 class="section-title">
-        <mat-icon class="section-title-icon">warning</mat-icon>
-        Niedriger Bestand
-      </h2>
-      <div class="events-list">
-        @for (item of lowStockItems(); track item.id) {
-          <a class="event-item stock-item" routerLink="/verbrauchsmaterial">
-            <mat-icon class="stock-warn-icon">inventory_2</mat-icon>
-            <div class="event-info">
-              <span class="event-title">{{ item.name }}</span>
-              <span class="event-date">
-                {{ item.quantity }} {{ item.unit }} vorhanden
-                @if (item.minQuantity !== null) {
-                  · Mindestbestand: {{ item.minQuantity }} {{ item.unit }}
+      <button class="section-toggle" (click)="stockCollapsed.set(!stockCollapsed())">
+        <h2 class="section-title">
+          <mat-icon class="section-title-icon">warning</mat-icon>
+          Niedriger Bestand
+          <span class="section-count">{{ lowStockItems().length }}</span>
+        </h2>
+        <mat-icon class="chevron" [class.rotated]="stockCollapsed()">expand_more</mat-icon>
+      </button>
+      @if (!stockCollapsed()) {
+        <div class="section-body">
+          <div class="events-list">
+            @for (item of lowStockItems(); track item.id) {
+              <a class="event-item stock-item" routerLink="/verbrauchsmaterial">
+                <mat-icon class="stock-warn-icon">inventory_2</mat-icon>
+                <div class="event-info">
+                  <span class="event-title">{{ item.name }}</span>
+                  <span class="event-date">
+                    {{ item.quantity }} {{ item.unit }} vorhanden
+                    @if (item.minQuantity !== null) {
+                      · Mindestbestand: {{ item.minQuantity }} {{ item.unit }}
+                    }
+                  </span>
+                </div>
+                @if (canManage()) {
+                  <button mat-stroked-button class="nachbestellen-btn"
+                    (click)="markNachbestellt(item, $event)"
+                    matTooltip="Als nachbestellt markieren">
+                    <mat-icon>shopping_cart</mat-icon>
+                    Nachbestellt
+                  </button>
                 }
-              </span>
-            </div>
-            @if (canManage()) {
-              <button mat-stroked-button class="nachbestellen-btn"
-                (click)="markNachbestellt(item, $event)"
-                matTooltip="Als nachbestellt markieren">
-                <mat-icon>shopping_cart</mat-icon>
-                Nachbestellt
-              </button>
+              </a>
             }
-          </a>
-        }
-      </div>
+          </div>
+        </div>
+      }
     </section>
   }
 
   <!-- Offene Mängel -->
   @if (openMaengel().length > 0) {
     <section class="section">
-      <h2 class="section-title">
-        <mat-icon class="section-title-icon">report_problem</mat-icon>
-        Offene Mängel
-      </h2>
-      <div class="events-list">
-        @for (mangel of openMaengel(); track mangel.id) {
-          <a class="event-item stock-item" routerLink="/mangel">
-            <mat-icon class="stock-warn-icon mangel-icon-{{ mangel.status === 'Kenntnisgenommen' ? 'known' : 'open' }}">
-              {{ mangel.status === 'Kenntnisgenommen' ? 'visibility' : 'report_problem' }}
-            </mat-icon>
-            <div class="event-info">
-              <span class="event-title">{{ mangel.title }}</span>
-              <span class="event-date">{{ mangel.kategorie }} · {{ mangel.status === 'Kenntnisgenommen' ? 'Kenntnisgenommen' : 'Offen' }}</span>
-            </div>
-          </a>
-        }
-      </div>
+      <button class="section-toggle" (click)="maengelCollapsed.set(!maengelCollapsed())">
+        <h2 class="section-title">
+          <mat-icon class="section-title-icon">report_problem</mat-icon>
+          Offene Mängel
+          <span class="section-count">{{ openMaengel().length }}</span>
+        </h2>
+        <mat-icon class="chevron" [class.rotated]="maengelCollapsed()">expand_more</mat-icon>
+      </button>
+      @if (!maengelCollapsed()) {
+        <div class="section-body">
+          <div class="events-list">
+            @for (mangel of openMaengel(); track mangel.id) {
+              <a class="event-item stock-item" routerLink="/mangel">
+                <mat-icon class="stock-warn-icon mangel-icon-{{ mangel.status === 'Kenntnisgenommen' ? 'known' : 'open' }}">
+                  {{ mangel.status === 'Kenntnisgenommen' ? 'visibility' : 'report_problem' }}
+                </mat-icon>
+                <div class="event-info">
+                  <span class="event-title">{{ mangel.title }}</span>
+                  <span class="event-date">{{ mangel.kategorie }} · {{ mangel.status === 'Kenntnisgenommen' ? 'Kenntnisgenommen' : 'Offen' }}</span>
+                </div>
+              </a>
+            }
+          </div>
+        </div>
+      }
     </section>
   }
 

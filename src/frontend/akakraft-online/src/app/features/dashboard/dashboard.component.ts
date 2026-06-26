@@ -137,6 +137,8 @@ export class DashboardComponent implements OnInit {
   readonly favoriteRoutes = signal<string[]>(DEFAULT_FAVORITES);
   readonly editMode = signal(false);
   readonly savingPrefs = signal(false);
+  readonly maengelCollapsed = signal(true);
+  readonly stockCollapsed = signal(true);
 
   private loadedPhone: string | null = null;
   private loadedAddress: string | null = null;

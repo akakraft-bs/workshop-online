@@ -169,6 +169,53 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
+// ---- Einklappbare Sektionen ------------------------------------------------
+
+.section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+
+  .section-title { margin: 0; }
+
+  &:hover .chevron { opacity: 1; }
+}
+
+.section-count {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+  color: var(--mat-sys-error);
+  vertical-align: middle;
+  margin-left: 6px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.chevron {
+  color: var(--mat-sys-on-surface-variant);
+  opacity: 0.5;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, opacity 0.15s;
+
+  &.rotated { transform: rotate(-90deg); }
+}
+
+.section-body {
+  margin-top: 12px;
+}
+
 // ---- Niedriger Bestand -----------------------------------------------------
 
 .section-title-icon {
