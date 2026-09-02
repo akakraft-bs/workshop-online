@@ -1,0 +1,36 @@
+<div class="parkplatz-widget">
+  <h2 class="section-title">
+    <mat-icon class="section-title-icon parkplatz-icon">local_parking</mat-icon>
+    Campus-Parken
+    @if (!loading()) {
+      <span class="section-count" [class.none]="freieAnzahl() === 0">{{ freieAnzahl() }}/2 frei</span>
+    }
+  </h2>
+
+  @if (loading()) {
+    <div class="loading-row"><mat-spinner diameter="24" /></div>
+  } @else if (overview(); as ov) {
+    <div class="account-rows">
+      @for (acc of ov.accounts; track acc.id) {
+        <a class="account-row" routerLink="/parkplatz"
+           [class.frei]="acc.istFrei"
+           [class.mine]="acc.id === meinClaimAccountId()">
+          <span class="dot"></span>
+          <span class="label">{{ acc.label }}</span>
+          @if (acc.belegung; as b) {
+            <span class="detail">
+              {{ b.userId === myUserId() ? 'Du' : b.displayName }} · noch {{ restzeit(b.autoExpiresAt) }}
+            </span>
+          } @else {
+            <span class="detail frei-text">frei</span>
+          }
+        </a>
+      }
+    </div>
+
+    <a mat-stroked-button class="widget-link" routerLink="/parkplatz">
+      <mat-icon>local_parking</mat-icon>
+      Parkkonten verwalten
+    </a>
+  }
+</div>

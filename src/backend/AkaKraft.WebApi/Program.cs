@@ -28,6 +28,7 @@ public static class Program
         builder.Services.AddHostedService<UmfrageDeadlineBackgroundService>();
         builder.Services.AddHostedService<CalendarUserResolutionBackgroundService>();
         builder.Services.AddHostedService<HallenbuchReminderBackgroundService>();
+        builder.Services.AddHostedService<ParkplatzErinnerungBackgroundService>();
 
         builder.Services.ConfigureHttpJsonOptions(options =>
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -106,6 +107,9 @@ public static class Program
         app.MapProjektEndpoints();
         app.MapVereinZugangEndpoints();
         app.MapAufgabeEndpoints();
+        app.MapHallenCheckEndpoints();
+        app.MapFahrzeugEndpoints();
+        app.MapParkplatzEndpoints();
         app.MapAdminEndpoints();
         app.MapMotdEndpoints();
         app.MapCrmEndpoints();

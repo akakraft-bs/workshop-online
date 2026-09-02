@@ -1,0 +1,98 @@
+.page-title {
+  margin: 0 0 8px;
+}
+
+.hint {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 14px;
+  margin: 0 0 16px;
+  max-width: 640px;
+}
+
+.page-search-and-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 16px;
+  gap: 16px;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.fz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fz-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.fz-icon {
+  color: var(--mat-sys-primary);
+  flex-shrink: 0;
+}
+
+.fz-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.fz-name {
+  font-weight: 600;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fz-standard {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mat-sys-primary) 18%, transparent);
+  color: var(--mat-sys-primary);
+}
+
+.fz-kennzeichen {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.fz-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.delete-btn:hover {
+  color: var(--mat-sys-error);
+}

@@ -24,10 +24,14 @@ import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
 import { Mangel } from '../../models/mangel.model';
 import { Umfrage } from '../../models/umfrage.model';
 import { Role, VORSTAND_ROLES } from '../../models/user.model';
+import { HallenWidgetComponent } from './hallen-widget/hallen-widget.component';
+import { ParkplatzWidgetComponent } from './parkplatz-widget/parkplatz-widget.component';
 
-type SectionId = 'umfragen' | 'veranstaltungen' | 'maengel' | 'bestand' | 'schnellzugriff';
+type SectionId = 'halle' | 'parkplatz' | 'umfragen' | 'veranstaltungen' | 'maengel' | 'bestand' | 'schnellzugriff';
 
 const SECTION_LABELS: Record<SectionId, string> = {
+  halle: 'An der Halle',
+  parkplatz: 'Campus-Parken',
   umfragen: 'Offene Umfragen',
   veranstaltungen: 'Nächste Veranstaltungen',
   maengel: 'Offene Mängel',
@@ -36,6 +40,8 @@ const SECTION_LABELS: Record<SectionId, string> = {
 };
 
 const SECTION_ICONS: Record<SectionId, string> = {
+  halle: 'sports_handball',
+  parkplatz: 'local_parking',
   umfragen: 'poll',
   veranstaltungen: 'celebration',
   maengel: 'report_problem',
@@ -43,8 +49,12 @@ const SECTION_ICONS: Record<SectionId, string> = {
   schnellzugriff: 'apps',
 };
 
-const DEFAULT_SECTION_ORDER: SectionId[] = ['umfragen', 'veranstaltungen', 'maengel', 'bestand', 'schnellzugriff'];
+const DEFAULT_SECTION_ORDER: SectionId[] = ['halle', 'parkplatz', 'umfragen', 'veranstaltungen', 'maengel', 'bestand', 'schnellzugriff'];
 const SECTION_ORDER_KEY = 'dashboard-section-order';
+
+// Temporär deaktivierte Sections – Feature vorübergehend komplett ausgeblendet.
+// Zum Reaktivieren einfach den Eintrag hier entfernen.
+const DISABLED_SECTIONS: readonly SectionId[] = ['halle'];
 
 function loadSectionOrder(): SectionId[] {
   try {
@@ -147,6 +157,8 @@ const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial', '/hallenbuch'];
     RouterLink, MatCardModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, MatChipsModule, MatTooltipModule, MatBadgeModule,
     CdkDropList, CdkDrag, CdkDragHandle,
+    HallenWidgetComponent,
+    ParkplatzWidgetComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -180,12 +192,17 @@ export class DashboardComponent implements OnInit {
   readonly sectionLabels = SECTION_LABELS;
   readonly sectionIcons = SECTION_ICONS;
 
+  readonly reorderableSections = computed(() =>
+    this.sectionOrder().filter(id => !DISABLED_SECTIONS.includes(id))
+  );
+
   readonly visibleSections = computed(() =>
     this.sectionOrder().filter(id => {
+      if (DISABLED_SECTIONS.includes(id)) return false;
       if (id === 'umfragen') return this.pendingUmfragen().length > 0;
       if (id === 'maengel') return this.openMaengel().length > 0;
       if (id === 'bestand') return this.lowStockItems().length > 0;
-      return true;
+      return true; // 'parkplatz', 'veranstaltungen', 'schnellzugriff' immer sichtbar
     })
   );
 
@@ -201,6 +218,7 @@ export class DashboardComponent implements OnInit {
     { label: 'Wunschliste', description: 'Neuanschaffungen vorschlagen', icon: 'playlist_add', route: '/wunsch' },
     { label: 'Umfragen', description: 'Umfragen erstellen und abstimmen', icon: 'poll', route: '/umfrage', badge: () => this.badges.pendingUmfragen() },
     { label: 'Hallenbuch', description: 'Hallenbuchzeiten eintragen und einsehen', icon: 'menu_book', route: '/hallenbuch' },
+    { label: 'Campus-Parken', description: 'Uni-Parkkonten einsehen und übernehmen', icon: 'local_parking', route: '/parkplatz' },
     { label: 'Vorstandsbereich', description: 'Vorstandsbereich öffnen', icon: 'verified_user', route: '/vorstand', requiredRoles: [...VORSTAND_ROLES, Role.Admin] },
     { label: 'Nutzerverwaltung', description: 'Nutzer und Rollen verwalten', icon: 'manage_accounts', route: '/admin/users', requiredRoles: [Role.Admin] },
     { label: 'Kalender-Einstellungen', description: 'Kalender konfigurieren', icon: 'tune', route: '/admin/kalender', requiredRoles: [Role.Admin] },
@@ -263,8 +281,10 @@ export class DashboardComponent implements OnInit {
   }
 
   onSectionDrop(event: CdkDragDrop<string[]>): void {
-    const order = [...this.sectionOrder()];
-    moveItemInArray(order, event.previousIndex, event.currentIndex);
+    const reordered = [...this.reorderableSections()];
+    moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+    // Deaktivierte Sections behalten ihre gespeicherte Position (am Ende angehängt).
+    const order = [...reordered, ...this.sectionOrder().filter(id => DISABLED_SECTIONS.includes(id))];
     this.sectionOrder.set(order);
     localStorage.setItem(SECTION_ORDER_KEY, JSON.stringify(order));
   }

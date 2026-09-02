@@ -153,6 +153,7 @@ export class HallenbuchListComponent implements OnInit {
       startTime:   toTimeStr(new Date(event.start)),
       endTime:     toTimeStr(endDate),
       description: (event.description || event.title).substring(0, 256),
+      fahrzeugId:  event.fahrzeugId ?? null,
     };
   }
 

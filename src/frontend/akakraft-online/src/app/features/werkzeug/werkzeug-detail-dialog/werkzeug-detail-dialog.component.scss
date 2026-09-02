@@ -164,6 +164,87 @@
   }
 }
 
+// ---- Ausleih-Historie ----------------------------------------------------
+
+.history-section {
+  padding-top: 8px;
+}
+
+.history-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface);
+
+  .chevron {
+    margin-left: auto;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.history-loading {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.history-empty {
+  margin: 4px 0 8px;
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.history-list {
+  list-style: none;
+  margin: 4px 0 8px;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.history-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+
+  & + .history-entry {
+    border-top: 1px solid var(--mat-sys-outline-variant);
+  }
+}
+
+.history-entry-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.history-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.history-dates {
+  font-size: 12px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.history-open {
+  color: var(--mat-sys-primary);
+  font-weight: 500;
+}
+
 .anleitung-link {
   color: var(--mat-sys-primary);
   text-decoration: none;

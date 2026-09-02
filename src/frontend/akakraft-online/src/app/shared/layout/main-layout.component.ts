@@ -65,6 +65,7 @@ export class MainLayoutComponent implements OnInit {
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
     { label: 'Hallenbelegung', icon: 'calendar_month', route: '/kalender' },
     { label: 'Hallenbuch', icon: 'menu_book', route: '/hallenbuch' },
+    { label: 'Campus-Parken', icon: 'local_parking', route: '/parkplatz' },
     { label: 'Mängelmelder', icon: 'report_problem', route: '/mangel', badge: () => this.badges.openMaengel() },
     { label: 'Veranstaltungen', icon: 'celebration', route: '/veranstaltungen' },
     { label: 'Werkzeug', icon: 'build', route: '/werkzeug' },

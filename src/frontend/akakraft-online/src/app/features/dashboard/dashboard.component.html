@@ -39,7 +39,7 @@
   <!-- Reihenfolge anpassen -->
   @if (reorderMode()) {
     <div cdkDropList class="reorder-list" (cdkDropListDropped)="onSectionDrop($event)">
-      @for (id of sectionOrder(); track id) {
+      @for (id of reorderableSections(); track id) {
         <div cdkDrag class="reorder-item">
           <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
           <mat-icon class="reorder-section-icon">{{ sectionIcons[id] }}</mat-icon>
@@ -51,6 +51,18 @@
 
     @for (id of visibleSections(); track id) {
       @switch (id) {
+
+        @case ('halle') {
+          <section class="section">
+            <app-hallen-widget />
+          </section>
+        }
+
+        @case ('parkplatz') {
+          <section class="section">
+            <app-parkplatz-widget />
+          </section>
+        }
 
         @case ('umfragen') {
           <section class="section">

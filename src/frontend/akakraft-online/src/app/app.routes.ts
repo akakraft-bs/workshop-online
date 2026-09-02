@@ -89,6 +89,16 @@ export const routes: Routes = [
           import('./features/hallenbuch/hallenbuch-list.component').then(m => m.HallenbuchListComponent),
       },
       {
+        path: 'parkplatz',
+        loadComponent: () =>
+          import('./features/parkplatz/parkplatz-page.component').then(m => m.ParkplatzPageComponent),
+      },
+      {
+        path: 'fahrzeuge',
+        loadComponent: () =>
+          import('./features/fahrzeuge/fahrzeuge-page.component').then(m => m.FahrzeugePageComponent),
+      },
+      {
         path: 'aufgaben',
         loadComponent: () =>
           import('./features/aufgaben/aufgaben-list.component').then(m => m.AufgabenListComponent),
@@ -172,6 +182,13 @@ export const routes: Routes = [
         path: 'admin/kalender',
         loadComponent: () =>
           import('./features/admin/kalender/admin-kalender.component').then(m => m.AdminKalenderComponent),
+        canActivate: [roleGuard],
+        data: { roles: [Role.Admin] },
+      },
+      {
+        path: 'admin/parkplatz',
+        loadComponent: () =>
+          import('./features/admin/parkplatz/admin-parkplatz.component').then(m => m.AdminParkplatzComponent),
         canActivate: [roleGuard],
         data: { roles: [Role.Admin] },
       },

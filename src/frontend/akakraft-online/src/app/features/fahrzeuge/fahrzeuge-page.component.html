@@ -1,0 +1,46 @@
+<h1 class="page-title">Meine Fahrzeuge</h1>
+
+<p class="hint">
+  Hinterlegte Fahrzeuge werden beim Parkkonto-Check-in vorausgewählt. Das Standardfahrzeug ist automatisch vorbelegt.
+</p>
+
+<div class="page-search-and-actions">
+  <div class="page-actions">
+    <button mat-flat-button color="primary" (click)="openDialog(null)">
+      <mat-icon>add</mat-icon>
+      Fahrzeug hinzufügen
+    </button>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading-state"><mat-spinner diameter="48" /></div>
+} @else if (fahrzeuge().length === 0) {
+  <div class="empty-state">
+    <mat-icon>directions_car</mat-icon>
+    <p>Noch keine Fahrzeuge hinterlegt.</p>
+  </div>
+} @else {
+  <div class="fz-list">
+    @for (fz of fahrzeuge(); track fz.id) {
+      <div class="fz-card">
+        <mat-icon class="fz-icon">directions_car</mat-icon>
+        <div class="fz-info">
+          <span class="fz-name">
+            {{ fz.marke }}@if (fz.modell) { {{ ' ' + fz.modell }} }
+            @if (fz.istStandard) { <span class="fz-standard">Standard</span> }
+          </span>
+          <span class="fz-kennzeichen">{{ fz.kennzeichen }}</span>
+        </div>
+        <div class="fz-actions">
+          <button mat-icon-button matTooltip="Bearbeiten" (click)="openDialog(fz)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Löschen" class="delete-btn" (click)="remove(fz)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}

@@ -41,22 +41,37 @@ public class CalendarConfigService(ApplicationDbContext db) : ICalendarConfigSer
         config.SortOrder = dto.SortOrder;
         config.CalendarType = Enum.TryParse<CalendarType>(dto.CalendarType, ignoreCase: true, out var ct)
             ? ct : CalendarType.Hallenbelegung;
+        config.GrantsParkplatzBerechtigung = dto.GrantsParkplatzBerechtigung;
 
-        // Replace write roles
-        db.CalendarWriteRoles.RemoveRange(config.WriteRoles);
-        config.WriteRoles.Clear();
+        // Schreibrollen differenziell anpassen: nur wirklich entfernte löschen,
+        // nur neue hinzufügen. Unveränderte Rollen bleiben mit ihrer PK bestehen.
+        // Wichtig: neue Rollen über db.CalendarWriteRoles.Add hinzufügen – beim
+        // Anfügen an config.WriteRoles würde EF Core wegen des gesetzten Guid-Keys
+        // (ValueGeneratedOnAdd) fälschlich State = Modified annehmen → UPDATE mit
+        // nicht existierender ID → "0 rows affected".
+        var gewuenschteRollen = dto.WriteRoles
+            .Select(r => Enum.TryParse<Role>(r, ignoreCase: true, out var role) ? role : Role.None)
+            .Where(r => r != Role.None)
+            .ToHashSet();
 
-        foreach (var roleStr in dto.WriteRoles)
+        foreach (var r in config.WriteRoles.Where(r => !gewuenschteRollen.Contains(r.Role)).ToList())
         {
-            if (Enum.TryParse<Role>(roleStr, ignoreCase: true, out var role) && role != Role.None)
+            config.WriteRoles.Remove(r);
+            db.CalendarWriteRoles.Remove(r);
+        }
+
+        var vorhandeneRollen = config.WriteRoles.Select(r => r.Role).ToHashSet();
+        foreach (var role in gewuenschteRollen.Where(r => !vorhandeneRollen.Contains(r)))
+        {
+            // Nur über den DbSet anfügen; EF-Fixup trägt die Rolle selbst in
+            // config.WriteRoles ein. Ein zusätzliches config.WriteRoles.Add würde
+            // dieselbe Instanz doppelt in die Antwort-DTO bringen.
+            db.CalendarWriteRoles.Add(new CalendarWriteRole
             {
-                config.WriteRoles.Add(new CalendarWriteRole
-                {
-                    Id = Guid.NewGuid(),
-                    CalendarConfigId = config.Id,
-                    Role = role
-                });
-            }
+                Id = Guid.NewGuid(),
+                CalendarConfigId = config.Id,
+                Role = role,
+            });
         }
 
         await db.SaveChangesAsync();
@@ -71,6 +86,7 @@ public class CalendarConfigService(ApplicationDbContext db) : ICalendarConfigSer
         c.IsVisible,
         c.SortOrder,
         c.CalendarType.ToString(),
+        c.GrantsParkplatzBerechtigung,
         c.WriteRoles.Select(r => r.Role.ToString())
     );
 }

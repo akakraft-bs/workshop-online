@@ -63,6 +63,25 @@
 
   <mat-card appearance="outlined">
     <mat-card-header>
+      <mat-icon mat-card-avatar>local_parking</mat-icon>
+      <mat-card-title>Campus-Parken</mat-card-title>
+      <mat-card-subtitle>Parkkonten &amp; Portal-Zugang</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="card-description">
+        Bezeichnung, Notiz und die Portal-Zugangsdaten der beiden Uni-Parkkonten verwalten.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button color="primary" routerLink="/admin/parkplatz">
+        <mat-icon>arrow_forward</mat-icon>
+        Verwalten
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
       <mat-icon mat-card-avatar>feedback</mat-icon>
       <mat-card-title>Feedback</mat-card-title>
       <mat-card-subtitle>Eingegangenes Feedback verwalten</mat-card-subtitle>

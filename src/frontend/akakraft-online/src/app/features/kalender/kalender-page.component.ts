@@ -162,6 +162,7 @@ export class KalenderPageComponent implements OnInit {
         description: result.description,
         location: result.location,
         url: result.url,
+        fahrzeugId: result.fahrzeugId,
       }).subscribe(() => this.loadEvents());
     });
   }
@@ -187,6 +188,7 @@ export class KalenderPageComponent implements OnInit {
         description: result.description,
         location: result.location,
         url: result.url,
+        fahrzeugId: result.fahrzeugId,
       }).subscribe(() => this.loadEvents());
     });
   }

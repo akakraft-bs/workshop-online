@@ -96,6 +96,7 @@ export class AdminKalenderComponent implements OnInit {
       isVisible: !!v.isVisible,
       sortOrder: v.sortOrder ?? 0,
       calendarType: v.calendarType ?? 'Hallenbelegung',
+      grantsParkplatzBerechtigung: !!v.grantsParkplatzBerechtigung,
       writeRoles: (v.writeRoles as string[]) ?? [],
     }).subscribe({
       next: () => {
@@ -141,6 +142,7 @@ export class AdminKalenderComponent implements OnInit {
       isVisible: [cfg?.isVisible ?? true],
       sortOrder: [cfg?.sortOrder ?? 0],
       calendarType: [cfg?.calendarType ?? 'Hallenbelegung'],
+      grantsParkplatzBerechtigung: [cfg?.grantsParkplatzBerechtigung ?? false],
       writeRoles: [cfg?.writeRoles ?? []],
     });
   }

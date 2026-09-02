@@ -45,6 +45,12 @@ internal static class WerkzeugEndpoints
             return deleted ? Results.NoContent() : Results.NotFound();
         }).RequireAuthorization("VorstandOrAdmin");
 
+        app.MapGet("/werkzeug/{id:guid}/historie", async (Guid id, IWerkzeugService werkzeugService) =>
+        {
+            var historie = await werkzeugService.GetHistorieAsync(id);
+            return historie is null ? Results.NotFound() : Results.Ok(historie);
+        }).RequireAuthorization("AnyRole");
+
         app.MapPost("/werkzeug/{id:guid}/ausleihen", async (
             Guid id, AusleihenRequestDto dto, HttpContext ctx, IWerkzeugService werkzeugService) =>
         {

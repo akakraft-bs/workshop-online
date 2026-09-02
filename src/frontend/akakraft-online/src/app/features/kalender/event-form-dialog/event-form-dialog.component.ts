@@ -9,6 +9,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { CalendarConfig, CalendarEvent } from '../../../models/calendar.model';
+import { Fahrzeug } from '../../../models/fahrzeug.model';
+import { FahrzeugService } from '../../../core/fahrzeug/fahrzeug.service';
 import { ConflictConfirmDialogComponent } from './conflict-confirm-dialog.component';
 
 export interface EventFormDialogData {
@@ -31,6 +33,7 @@ export interface EventFormDialogResult {
   description?: string;
   location?: string;
   url?: string;
+  fahrzeugId?: string | null;
 }
 
 @Component({
@@ -54,12 +57,14 @@ export class EventFormDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<EventFormDialogComponent>);
   private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
+  private readonly fahrzeugService = inject(FahrzeugService);
 
   readonly writableConfigs = this.data.configs.filter(c =>
     this.data.writableCalendarIds.includes(c.googleCalendarId)
   );
 
   readonly conflicts = signal<CalendarEvent[]>([]);
+  readonly fahrzeuge = signal<Fahrzeug[]>([]);
 
   readonly form = this.fb.group({
     calendarId: [this.writableConfigs[0]?.googleCalendarId ?? '', Validators.required],
@@ -72,12 +77,24 @@ export class EventFormDialogComponent implements OnInit {
     description: [''],
     location: [''],
     url: [''],
+    fahrzeugId: [''],
   });
 
+  /** Fahrzeug-Auswahl nur bei Hallenbelegungs-Kalendern anbieten. */
+  zeigtFahrzeugFeld(): boolean {
+    const calId = this.form.get('calendarId')!.value;
+    return this.data.configs.find(c => c.googleCalendarId === calId)?.calendarType === 'Hallenbelegung';
+  }
+
   ngOnInit(): void {
+    this.fahrzeugService.list().subscribe({
+      next: list => this.fahrzeuge.set(list),
+      error: () => {},
+    });
+
     const ev = this.data.event;
     if (ev) {
-      this.form.patchValue({ calendarId: ev.calendarId });
+      this.form.patchValue({ calendarId: ev.calendarId, fahrzeugId: ev.fahrzeugId ?? '' });
       this.form.get('calendarId')!.disable();
 
       const start = ev.start ? new Date(ev.start) : new Date();
@@ -211,6 +228,7 @@ export class EventFormDialogComponent implements OnInit {
       description: v.description || undefined,
       location: v.location || undefined,
       url: v.url || undefined,
+      fahrzeugId: this.zeigtFahrzeugFeld() ? (v.fahrzeugId || null) : null,
     } satisfies EventFormDialogResult);
   }
 }

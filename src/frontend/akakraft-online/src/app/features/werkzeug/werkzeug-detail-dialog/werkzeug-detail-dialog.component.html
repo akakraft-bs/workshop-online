@@ -83,6 +83,48 @@
     </div>
   }
 
+  <mat-divider />
+  <div class="history-section">
+    <button type="button" class="history-toggle" (click)="toggleHistory()">
+      <mat-icon class="row-icon">history</mat-icon>
+      <span>Ausleih-Historie</span>
+      <mat-icon class="chevron">{{ showHistory() ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </button>
+
+    @if (showHistory()) {
+      @if (historyLoading()) {
+        <div class="history-loading"><mat-spinner diameter="24" /></div>
+      } @else if (history().length === 0) {
+        <p class="history-empty">Noch keine Ausleihen erfasst.</p>
+      } @else {
+        <ul class="history-list">
+          @for (entry of history(); track entry.id) {
+            <li class="history-entry">
+              <mat-icon class="row-icon">person</mat-icon>
+              <div class="history-entry-body">
+                <span class="history-name">
+                  {{ entry.userName }}
+                  @if (entry.userId === currentUserId()) {
+                    <span class="you-badge">Du</span>
+                  }
+                </span>
+                <span class="history-dates">
+                  {{ entry.borrowedAt | date:'dd.MM.yyyy' }}
+                  &ndash;
+                  @if (entry.returnedAt) {
+                    {{ entry.returnedAt | date:'dd.MM.yyyy' }}
+                  } @else {
+                    <span class="history-open">noch ausgeliehen</span>
+                  }
+                </span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+
   @if (showDeleteConfirm()) {
     <div class="delete-confirm-box">
       <p>Werkzeug wirklich löschen?</p>

@@ -12,6 +12,8 @@ export interface HallenbuchEintrag {
   gastschraubenBezahlt: boolean | null;
   hatFamiliegeschraubt: boolean;
   createdAt: string;
+  fahrzeugId?: string | null;
+  fahrzeugLabel?: string | null;
 }
 
 export interface CreateHallenbuchEintragDto {
@@ -22,6 +24,7 @@ export interface CreateHallenbuchEintragDto {
   gastschraubenArt: GastschraubenArt | null;
   gastschraubenBezahlt: boolean | null;
   hatFamiliegeschraubt: boolean;
+  fahrzeugId?: string | null;
 }
 
 export interface UpdateHallenbuchEintragDto {
@@ -32,4 +35,5 @@ export interface UpdateHallenbuchEintragDto {
   gastschraubenArt: GastschraubenArt | null;
   gastschraubenBezahlt: boolean | null;
   hatFamiliegeschraubt: boolean;
+  fahrzeugId?: string | null;
 }

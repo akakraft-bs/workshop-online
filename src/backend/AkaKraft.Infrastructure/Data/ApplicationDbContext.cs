@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<User> Users => Set<User>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<Werkzeug> Werkzeuge => Set<Werkzeug>();
+    public DbSet<WerkzeugAusleihe> WerkzeugAusleihen => Set<WerkzeugAusleihe>();
     public DbSet<Verbrauchsmaterial> Verbrauchsmaterialien => Set<Verbrauchsmaterial>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
     public DbSet<CalendarConfig> CalendarConfigs => Set<CalendarConfig>();
@@ -38,6 +39,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Partner> Partner => Set<Partner>();
     public DbSet<Ansprechpartner> Ansprechpartner => Set<Ansprechpartner>();
     public DbSet<Kontakteintrag> Kontakteintraege => Set<Kontakteintrag>();
+    public DbSet<HallenCheck> HallenChecks => Set<HallenCheck>();
+    public DbSet<Fahrzeug> Fahrzeuge => Set<Fahrzeug>();
+    public DbSet<ParkAccount> ParkAccounts => Set<ParkAccount>();
+    public DbSet<ParkClaim> ParkClaims => Set<ParkClaim>();
+    public DbSet<ParkKennzeichenAudit> ParkKennzeichenAudits => Set<ParkKennzeichenAudit>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -58,6 +64,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
         modelBuilder.ApplyConfiguration(new WerkzeugConfiguration());
+        modelBuilder.ApplyConfiguration(new WerkzeugAusleiheConfiguration());
         modelBuilder.ApplyConfiguration(new VerbrauchsmaterialConfiguration());
         modelBuilder.ApplyConfiguration(new FeedbackConfiguration());
         modelBuilder.ApplyConfiguration(new CalendarConfigConfiguration());
@@ -86,5 +93,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new PartnerConfiguration());
         modelBuilder.ApplyConfiguration(new AnsprechpartnerConfiguration());
         modelBuilder.ApplyConfiguration(new KontakteintragConfiguration());
+        modelBuilder.ApplyConfiguration(new HallenCheckConfiguration());
+        modelBuilder.ApplyConfiguration(new FahrzeugConfiguration());
+        modelBuilder.ApplyConfiguration(new ParkAccountConfiguration());
+        modelBuilder.ApplyConfiguration(new ParkClaimConfiguration());
+        modelBuilder.ApplyConfiguration(new ParkKennzeichenAuditConfiguration());
     }
 }

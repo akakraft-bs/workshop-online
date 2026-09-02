@@ -20,3 +20,12 @@ public record WerkzeugDto(
     string? AnleitungFileName,
     string? AnleitungFileUrl
 );
+
+public record WerkzeugAusleiheDto(
+    Guid Id,
+    Guid UserId,
+    string UserName,
+    DateTime BorrowedAt,
+    DateTime ExpectedReturnAt,
+    DateTime? ReturnedAt
+);

@@ -21,6 +21,10 @@ public class HallenbuchEintrag : IAuditable
 
     public bool HatFamiliegeschraubt { get; set; }
 
+    /// <summary>Optionales Fahrzeug des Nutzers (für die Parkkonto-Vorauswahl).</summary>
+    public Guid? FahrzeugId { get; set; }
+    public string? FahrzeugLabel { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 }

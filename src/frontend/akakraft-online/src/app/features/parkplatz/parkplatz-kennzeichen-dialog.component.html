@@ -1,0 +1,81 @@
+<h2 mat-dialog-title>Kennzeichen · {{ data.account.label }}</h2>
+
+<mat-dialog-content>
+  @if (loading()) {
+    <div class="loading-row"><mat-spinner diameter="28" /></div>
+  } @else if (liste(); as l) {
+
+    @if (l.fehler) {
+      <div class="fehler-box">
+        <mat-icon>error</mat-icon>
+        <span>{{ l.fehler }}</span>
+      </div>
+    }
+
+    <p class="zaehler">{{ l.kennzeichen.length }} / {{ l.max }} Kennzeichen im Portal</p>
+
+    @if (l.kennzeichen.length > 0) {
+      <ul class="kz-list">
+        @for (code of l.kennzeichen; track code) {
+          <li>
+            <span class="kz-code">{{ code }}</span>
+            <button mat-icon-button class="kz-del" [disabled]="busy()" (click)="remove(code)"
+                    matTooltip="Entfernen">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </li>
+        }
+      </ul>
+    } @else if (!l.fehler) {
+      <p class="leer">Noch keine Kennzeichen hinterlegt.</p>
+    }
+
+    <div class="add-row">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="add-field">
+        <mat-label>Kennzeichen</mat-label>
+        <input matInput [(ngModel)]="neuKennzeichen" placeholder="BS-XX1234"
+               style="text-transform: uppercase" maxlength="16"
+               (keydown.enter)="add()" [disabled]="voll() || busy()">
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="add()"
+              [disabled]="voll() || busy() || !neuKennzeichen.trim()">
+        @if (busy()) { <mat-spinner diameter="18" /> } @else { <mat-icon>add</mat-icon> }
+        Hinzufügen
+      </button>
+    </div>
+    @if (voll()) {
+      <p class="voll-hint">Maximal {{ l.max }} Kennzeichen – zum Hinzufügen zuerst eines entfernen.</p>
+    }
+
+    <!-- Historie -->
+    <button class="hist-toggle" (click)="toggleHistorie()">
+      <mat-icon>{{ historieOpen() ? 'expand_less' : 'expand_more' }}</mat-icon>
+      Änderungshistorie
+    </button>
+    @if (historieOpen()) {
+      @if (historieLoading()) {
+        <div class="loading-row"><mat-spinner diameter="22" /></div>
+      } @else if (historie().length === 0) {
+        <p class="leer">Noch keine Änderungen protokolliert.</p>
+      } @else {
+        <ul class="hist-list">
+          @for (h of historie(); track h.id) {
+            <li>
+              <mat-icon [class.add]="h.aktion === 'Hinzugefuegt'" [class.del]="h.aktion === 'Entfernt'">
+                {{ h.aktion === 'Hinzugefuegt' ? 'add_circle' : 'remove_circle' }}
+              </mat-icon>
+              <div class="hist-text">
+                <span><strong>{{ h.kennzeichen }}</strong> {{ h.aktion === 'Hinzugefuegt' ? 'hinzugefügt' : 'entfernt' }}</span>
+                <span class="hist-meta">{{ h.ausgefuehrtVon }} · {{ uhrzeit(h.createdAt) }}</span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Schließen</button>
+</mat-dialog-actions>

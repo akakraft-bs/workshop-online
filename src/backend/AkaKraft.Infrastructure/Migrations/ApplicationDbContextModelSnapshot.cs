@@ -167,6 +167,9 @@ namespace AkaKraft.Infrastructure.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)");
 
+                    b.Property<bool>("GrantsParkplatzBerechtigung")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsVisible")
                         .HasColumnType("boolean");
 
@@ -285,6 +288,45 @@ namespace AkaKraft.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Fahrzeug", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IstStandard")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Kennzeichen")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Marke")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Modell")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Fahrzeuge");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.FcmToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -350,6 +392,32 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.ToTable("Feedbacks");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.HallenCheck", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CheckedInAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("HallenChecks");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.HallenbuchEintrag", b =>
                 {
                     b.Property<Guid>("Id")
@@ -366,6 +434,13 @@ namespace AkaKraft.Infrastructure.Migrations
 
                     b.Property<DateTime>("End")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("FahrzeugId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FahrzeugLabel")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
 
                     b.Property<string>("GastschraubenArt")
                         .HasColumnType("text");
@@ -554,6 +629,167 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Motds");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.ParkAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Notiz")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("PortalPassword")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("PortalUrl")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<string>("PortalUsername")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ParkAccounts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a1a1a1a1-0000-0000-0000-0000000000a1"),
+                            Label = "Parkkonto A",
+                            SortOrder = 0
+                        },
+                        new
+                        {
+                            Id = new Guid("b2b2b2b2-0000-0000-0000-0000000000b2"),
+                            Label = "Parkkonto B",
+                            SortOrder = 1
+                        });
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.ParkClaim", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AutoExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("BerechtigungArt")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("BestaetigungHinweis")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("BookingEventId")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EinfahrtAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Erinnerung2hGesendet")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("ErinnerungAblaufGesendet")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("FahrzeugBezeichnung")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<DateTime?>("FreigegebenAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Kennzeichen")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<Guid>("ParkAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("VoraussichtlichBis")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ParkAccountId", "FreigegebenAt");
+
+                    b.ToTable("ParkClaims");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.ParkKennzeichenAudit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Aktion")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("AusgefuehrtVon")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Kennzeichen")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("KennzeichenNachher")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<Guid>("ParkAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ParkAccountId", "CreatedAt");
+
+                    b.ToTable("ParkKennzeichenAudits");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Partner", b =>
@@ -1134,6 +1370,36 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.ToTable("Werkzeuge");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.WerkzeugAusleihe", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("BorrowedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpectedReturnAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ReturnedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("WerkzeugId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WerkzeugId", "BorrowedAt");
+
+                    b.ToTable("WerkzeugAusleihen");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.Wunsch", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1273,6 +1539,17 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.Navigation("Folder");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Fahrzeug", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.FcmToken", b =>
                 {
                     b.HasOne("AkaKraft.Domain.Entities.User", "User")
@@ -1285,6 +1562,17 @@ namespace AkaKraft.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Feedback", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.HallenCheck", b =>
                 {
                     b.HasOne("AkaKraft.Domain.Entities.User", "User")
                         .WithMany()
@@ -1359,6 +1647,44 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Mangel");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.ParkClaim", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.ParkAccount", "ParkAccount")
+                        .WithMany("Claims")
+                        .HasForeignKey("ParkAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AkaKraft.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ParkAccount");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.ParkKennzeichenAudit", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.ParkAccount", "ParkAccount")
+                        .WithMany()
+                        .HasForeignKey("ParkAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AkaKraft.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ParkAccount");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Umfrage", b =>
@@ -1464,6 +1790,25 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.Navigation("BorrowedBy");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.WerkzeugAusleihe", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AkaKraft.Domain.Entities.Werkzeug", "Werkzeug")
+                        .WithMany("Ausleihen")
+                        .HasForeignKey("WerkzeugId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Werkzeug");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.Wunsch", b =>
                 {
                     b.HasOne("AkaKraft.Domain.Entities.User", "ClosedBy")
@@ -1516,6 +1861,11 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.Navigation("Anmerkungen");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.ParkAccount", b =>
+                {
+                    b.Navigation("Claims");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.Partner", b =>
                 {
                     b.Navigation("Ansprechpartner");
@@ -1540,6 +1890,11 @@ namespace AkaKraft.Infrastructure.Migrations
             modelBuilder.Entity("AkaKraft.Domain.Entities.User", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.Werkzeug", b =>
+                {
+                    b.Navigation("Ausleihen");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Wunsch", b =>

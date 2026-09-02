@@ -84,6 +84,9 @@ public static class DependencyInjection
         services.AddScoped<IProjektService, ProjektService>();
         services.AddScoped<IVereinZugangService, VereinZugangService>();
         services.AddScoped<IAufgabeService, AufgabeService>();
+        services.AddScoped<IParkplatzService, ParkplatzService>();
+        services.AddSingleton<ICampusParkenClient, CampusParkenClient>();
+        services.AddScoped<IParkKennzeichenService, ParkKennzeichenService>();
 
         return services;
     }
