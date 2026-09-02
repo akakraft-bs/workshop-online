@@ -23,4 +23,7 @@ public class Werkzeug : IAuditable
 
     public Guid? AnleitungDokumentId { get; set; }
     public Dokument? AnleitungDokument { get; set; }
+
+    /// <summary>Historie aller Ausleih-Vorgänge, neueste zuerst.</summary>
+    public ICollection<WerkzeugAusleihe> Ausleihen { get; set; } = [];
 }

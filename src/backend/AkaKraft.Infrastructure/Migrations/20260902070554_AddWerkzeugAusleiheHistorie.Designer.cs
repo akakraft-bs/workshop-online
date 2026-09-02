@@ -3,6 +3,7 @@ using System;
 using AkaKraft.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AkaKraft.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260902070554_AddWerkzeugAusleiheHistorie")]
+    partial class AddWerkzeugAusleiheHistorie
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -348,6 +351,32 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Feedbacks");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.HallenCheck", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CheckedInAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("HallenChecks");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.HallenbuchEintrag", b =>
@@ -1315,6 +1344,17 @@ namespace AkaKraft.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Feedback", b =>
+                {
+                    b.HasOne("AkaKraft.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.HallenCheck", b =>
                 {
                     b.HasOne("AkaKraft.Domain.Entities.User", "User")
                         .WithMany()

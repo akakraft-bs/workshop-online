@@ -156,11 +156,21 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         if (werkzeug is null || !werkzeug.IsAvailable)
             return null;
 
+        var now = DateTime.UtcNow;
         werkzeug.IsAvailable = false;
         werkzeug.BorrowedByUserId = userId;
-        werkzeug.BorrowedAt = DateTime.UtcNow;
+        werkzeug.BorrowedAt = now;
         werkzeug.ExpectedReturnAt = expectedReturnAt.ToUniversalTime();
         werkzeug.ReturnedAt = null;
+
+        db.WerkzeugAusleihen.Add(new WerkzeugAusleihe
+        {
+            Id = Guid.NewGuid(),
+            WerkzeugId = werkzeug.Id,
+            UserId = userId,
+            BorrowedAt = now,
+            ExpectedReturnAt = werkzeug.ExpectedReturnAt.Value,
+        });
 
         await db.SaveChangesAsync();
         await db.Entry(werkzeug).Reference(w => w.BorrowedBy).LoadAsync();
@@ -182,11 +192,19 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
         if (!isPrivileged && werkzeug.BorrowedByUserId != userId)
             return (null, true);
 
+        var now = DateTime.UtcNow;
         werkzeug.IsAvailable = true;
-        werkzeug.ReturnedAt = DateTime.UtcNow;
+        werkzeug.ReturnedAt = now;
         werkzeug.BorrowedByUserId = null;
         werkzeug.BorrowedAt = null;
         werkzeug.ExpectedReturnAt = null;
+
+        var offeneAusleihe = await db.WerkzeugAusleihen
+            .Where(a => a.WerkzeugId == id && a.ReturnedAt == null)
+            .OrderByDescending(a => a.BorrowedAt)
+            .FirstOrDefaultAsync();
+        if (offeneAusleihe is not null)
+            offeneAusleihe.ReturnedAt = now;
 
         await db.SaveChangesAsync();
 
@@ -208,9 +226,39 @@ public class WerkzeugService(ApplicationDbContext db, IUploadService uploadServi
             return (null, true);
 
         werkzeug.ExpectedReturnAt = expectedReturnAt.ToUniversalTime();
+
+        var offeneAusleihe = await db.WerkzeugAusleihen
+            .Where(a => a.WerkzeugId == id && a.ReturnedAt == null)
+            .OrderByDescending(a => a.BorrowedAt)
+            .FirstOrDefaultAsync();
+        if (offeneAusleihe is not null)
+            offeneAusleihe.ExpectedReturnAt = werkzeug.ExpectedReturnAt.Value;
+
         await db.SaveChangesAsync();
 
         return (ToDto(werkzeug), false);
+    }
+
+    public async Task<IEnumerable<WerkzeugAusleiheDto>?> GetHistorieAsync(Guid id)
+    {
+        if (!await db.Werkzeuge.AnyAsync(w => w.Id == id))
+            return null;
+
+        return await db.WerkzeugAusleihen
+            .Where(a => a.WerkzeugId == id)
+            .OrderByDescending(a => a.BorrowedAt)
+            .Select(a => new WerkzeugAusleiheDto(
+                a.Id,
+                a.UserId,
+                db.UserPreferences
+                    .Where(p => p.UserId == a.UserId && p.DisplayName != null)
+                    .Select(p => p.DisplayName!)
+                    .FirstOrDefault()
+                    ?? (a.User != null ? a.User.Name : "Unbekannt"),
+                a.BorrowedAt,
+                a.ExpectedReturnAt,
+                a.ReturnedAt))
+            .ToListAsync();
     }
 
     private string? ResolveDisplayName(Werkzeug w)

@@ -10,7 +10,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../../../core/api/api.service';
 import { AuthService } from '../../../core/auth/auth.service';
-import { Werkzeug } from '../../../models/werkzeug.model';
+import { Werkzeug, WerkzeugAusleihe } from '../../../models/werkzeug.model';
 import { AusleihenDialogComponent, AusleihenDialogData } from '../ausleihen-dialog/ausleihen-dialog.component';
 import { WerkzeugFormDialogComponent, WerkzeugFormDialogData } from '../werkzeug-form-dialog/werkzeug-form-dialog.component';
 
@@ -41,6 +41,11 @@ export class WerkzeugDetailDialogComponent {
   readonly showDeleteConfirm = signal(false);
   readonly deleting         = signal(false);
 
+  readonly history          = signal<WerkzeugAusleihe[]>([]);
+  readonly historyLoading   = signal(false);
+  readonly historyLoaded    = signal(false);
+  readonly showHistory      = signal(false);
+
   readonly canManage    = computed(() => this.auth.isPrivileged());
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
   readonly isMyBorrow   = computed(() =>
@@ -56,6 +61,29 @@ export class WerkzeugDetailDialogComponent {
     const ret = this.item().expectedReturnAt;
     return ret ? new Date(ret) < new Date() : false;
   });
+
+  toggleHistory(): void {
+    const next = !this.showHistory();
+    this.showHistory.set(next);
+    if (next && !this.historyLoaded() && !this.historyLoading()) {
+      this.loadHistory();
+    }
+  }
+
+  private loadHistory(): void {
+    this.historyLoading.set(true);
+    this.api.get<WerkzeugAusleihe[]>(`/werkzeug/${this.item().id}/historie`).subscribe({
+      next: entries => {
+        this.history.set(entries);
+        this.historyLoaded.set(true);
+        this.historyLoading.set(false);
+      },
+      error: () => {
+        this.historyLoading.set(false);
+        this.snackBar.open('Historie konnte nicht geladen werden.', 'OK', { duration: 3000 });
+      },
+    });
+  }
 
   borrow(): void {
     const data: AusleihenDialogData = { werkzeug: this.item() };

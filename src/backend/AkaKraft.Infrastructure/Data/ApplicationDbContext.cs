@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<User> Users => Set<User>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<Werkzeug> Werkzeuge => Set<Werkzeug>();
+    public DbSet<WerkzeugAusleihe> WerkzeugAusleihen => Set<WerkzeugAusleihe>();
     public DbSet<Verbrauchsmaterial> Verbrauchsmaterialien => Set<Verbrauchsmaterial>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
     public DbSet<CalendarConfig> CalendarConfigs => Set<CalendarConfig>();
@@ -58,6 +59,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
         modelBuilder.ApplyConfiguration(new WerkzeugConfiguration());
+        modelBuilder.ApplyConfiguration(new WerkzeugAusleiheConfiguration());
         modelBuilder.ApplyConfiguration(new VerbrauchsmaterialConfiguration());
         modelBuilder.ApplyConfiguration(new FeedbackConfiguration());
         modelBuilder.ApplyConfiguration(new CalendarConfigConfiguration());

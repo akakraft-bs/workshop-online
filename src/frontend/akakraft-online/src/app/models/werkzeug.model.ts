@@ -18,3 +18,12 @@ export interface Werkzeug {
   anleitungFileName?: string;
   anleitungFileUrl?: string;
 }
+
+export interface WerkzeugAusleihe {
+  id: string;
+  userId: string;
+  userName: string;
+  borrowedAt: string;
+  expectedReturnAt: string;
+  returnedAt?: string;
+}
