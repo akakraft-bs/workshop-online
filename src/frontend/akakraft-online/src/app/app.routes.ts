@@ -186,6 +186,13 @@ export const routes: Routes = [
         data: { roles: [Role.Admin] },
       },
       {
+        path: 'admin/parkplatz',
+        loadComponent: () =>
+          import('./features/admin/parkplatz/admin-parkplatz.component').then(m => m.AdminParkplatzComponent),
+        canActivate: [roleGuard],
+        data: { roles: [Role.Admin] },
+      },
+      {
         path: 'vorstand',
         loadComponent: () =>
           import('./features/vorstand/vorstand-panel/vorstand-panel.component').then(m => m.VorstandPanelComponent),

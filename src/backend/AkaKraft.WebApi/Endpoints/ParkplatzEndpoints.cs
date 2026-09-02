@@ -18,7 +18,7 @@ internal static class ParkplatzEndpoints
             return Results.Ok(await svc.GetOverviewAsync(userId));
         }).RequireAuthorization("AnyRole");
 
-        // Historie aller Belegungen (neueste zuerst)
+        // Gemeinsamer Verlauf: Belegungen + Kennzeichen-Änderungen (neueste zuerst)
         app.MapGet("/parkplatz/historie", async (HttpContext ctx, ApplicationDbContext db, int? limit) =>
         {
             if (!ctx.TryGetCurrentUserId(out _)) return Results.Unauthorized();
@@ -33,12 +33,20 @@ internal static class ParkplatzEndpoints
                 .Take(take)
                 .ToListAsync();
 
+            var kennzeichenAudits = await db.ParkKennzeichenAudits
+                .Include(a => a.ParkAccount)
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(take)
+                .ToListAsync();
+
             var displayNames = await db.UserPreferences
                 .Where(p => claims.Select(c => c.UserId).Contains(p.UserId) && p.DisplayName != null)
                 .ToDictionaryAsync(p => p.UserId, p => p.DisplayName!);
 
-            var eintraege = claims.Select(c => new ParkHistorieEintragDto(
-                c.Id,
+            var belegungen = claims.Select(c => new ParkHistorieDto(
+                c.Id.ToString(),
+                "Belegung",
+                c.EinfahrtAt,
                 c.ParkAccount.Label,
                 displayNames.GetValueOrDefault(c.UserId) ?? c.User.Name,
                 c.Kennzeichen,
@@ -48,12 +56,25 @@ internal static class ParkplatzEndpoints
                 c.AutoExpiresAt,
                 c.BerechtigungArt.ToString(),
                 c.BestaetigungHinweis,
-                c.BookingEventId,
                 Status: c.FreigegebenAt != null ? "Freigegeben"
                       : c.AutoExpiresAt <= now ? "Abgelaufen"
                       : "Aktiv"));
 
-            return Results.Ok(eintraege);
+            var aenderungen = kennzeichenAudits.Select(a => new ParkHistorieDto(
+                a.Id.ToString(),
+                a.Aktion == ParkKennzeichenAktion.Hinzugefuegt ? "KennzeichenHinzugefuegt" : "KennzeichenEntfernt",
+                a.CreatedAt,
+                a.ParkAccount.Label,
+                a.AusgefuehrtVon,
+                a.Kennzeichen,
+                null, null, null, null, null, null, null));
+
+            var verlauf = belegungen.Concat(aenderungen)
+                .OrderByDescending(e => e.Zeitpunkt)
+                .Take(take)
+                .ToList();
+
+            return Results.Ok(verlauf);
         }).RequireAuthorization("AnyRole");
 
         // Parkkonto übernehmen (Check-in)
@@ -240,8 +261,83 @@ internal static class ParkplatzEndpoints
             await db.SaveChangesAsync();
 
             return Results.Ok(new ParkAccountStatusDto(
-                account.Id, account.Label, account.PortalUrl, account.Notiz, IstFrei: true, Belegung: null));
+                account.Id, account.Label, account.PortalUrl, account.Notiz, IstFrei: true, Belegung: null,
+                ZugangKonfiguriert: !string.IsNullOrWhiteSpace(account.PortalUsername) && !string.IsNullOrWhiteSpace(account.PortalPassword)));
         }).RequireAuthorization("VorstandOrAdmin");
+
+        // Konten inkl. Portal-Benutzername für die Admin-Verwaltung
+        app.MapGet("/parkplatz/accounts", async (ApplicationDbContext db) =>
+        {
+            var list = await db.ParkAccounts
+                .OrderBy(a => a.SortOrder).ThenBy(a => a.Label)
+                .Select(a => new ParkAccountAdminDto(
+                    a.Id, a.Label, a.PortalUrl, a.Notiz, a.PortalUsername,
+                    a.PortalUsername != null && a.PortalUsername != "" && a.PortalPassword != null && a.PortalPassword != "",
+                    a.SortOrder))
+                .ToListAsync();
+            return Results.Ok(list);
+        }).RequireAuthorization("VorstandOrAdmin");
+
+        // Portal-Zugangsdaten setzen (nur Vorstand/Admin)
+        app.MapPut("/parkplatz/accounts/{id:guid}/zugang", async (
+            Guid id, ParkZugangUpdateRequest req, ApplicationDbContext db) =>
+        {
+            var account = await db.ParkAccounts.FirstOrDefaultAsync(a => a.Id == id);
+            if (account is null) return Results.NotFound();
+
+            if (req.Username is not null)
+                account.PortalUsername = string.IsNullOrWhiteSpace(req.Username) ? null : req.Username.Trim();
+
+            // Password: null = unverändert, "" = löschen, sonst setzen
+            if (req.Password is not null)
+                account.PortalPassword = req.Password.Length == 0 ? null : req.Password;
+
+            await db.SaveChangesAsync();
+
+            var konfiguriert = !string.IsNullOrWhiteSpace(account.PortalUsername)
+                            && !string.IsNullOrWhiteSpace(account.PortalPassword);
+            return Results.Ok(new ParkZugangStatusDto(account.Id, konfiguriert, account.PortalUsername));
+        }).RequireAuthorization("VorstandOrAdmin");
+
+        // Aktuelle Kennzeichen im Portal
+        app.MapGet("/parkplatz/accounts/{id:guid}/kennzeichen", async (
+            Guid id, HttpContext ctx, IParkKennzeichenService svc) =>
+        {
+            if (!ctx.TryGetCurrentUserId(out _)) return Results.Unauthorized();
+            try { return Results.Ok(await svc.GetAsync(id)); }
+            catch (KeyNotFoundException) { return Results.NotFound(); }
+        }).RequireAuthorization("AnyRole");
+
+        // Kennzeichen hinzufügen
+        app.MapPost("/parkplatz/accounts/{id:guid}/kennzeichen", async (
+            Guid id, ParkKennzeichenAddRequest req, HttpContext ctx, IParkKennzeichenService svc) =>
+        {
+            if (!ctx.TryGetCurrentUserId(out var userId)) return Results.Unauthorized();
+            try { return Results.Ok(await svc.AddAsync(id, userId, req.Kennzeichen)); }
+            catch (KeyNotFoundException) { return Results.NotFound(); }
+            catch (InvalidOperationException ex) { return Results.BadRequest(ex.Message); }
+            catch (CampusParkenException ex) { return Results.Problem(ex.Message, statusCode: 502); }
+        }).RequireAuthorization("AnyRole");
+
+        // Kennzeichen entfernen (?code=BS-XX1234)
+        app.MapDelete("/parkplatz/accounts/{id:guid}/kennzeichen", async (
+            Guid id, string code, HttpContext ctx, IParkKennzeichenService svc) =>
+        {
+            if (!ctx.TryGetCurrentUserId(out var userId)) return Results.Unauthorized();
+            if (string.IsNullOrWhiteSpace(code)) return Results.BadRequest("Kennzeichen fehlt.");
+            try { return Results.Ok(await svc.RemoveAsync(id, userId, code)); }
+            catch (KeyNotFoundException) { return Results.NotFound(); }
+            catch (InvalidOperationException ex) { return Results.BadRequest(ex.Message); }
+            catch (CampusParkenException ex) { return Results.Problem(ex.Message, statusCode: 502); }
+        }).RequireAuthorization("AnyRole");
+
+        // Änderungshistorie der Kennzeichen
+        app.MapGet("/parkplatz/accounts/{id:guid}/kennzeichen/historie", async (
+            Guid id, HttpContext ctx, IParkKennzeichenService svc, int? limit) =>
+        {
+            if (!ctx.TryGetCurrentUserId(out _)) return Results.Unauthorized();
+            return Results.Ok(await svc.GetHistorieAsync(id, limit ?? 50));
+        }).RequireAuthorization("AnyRole");
 
         return app;
     }

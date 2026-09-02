@@ -43,6 +43,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Fahrzeug> Fahrzeuge => Set<Fahrzeug>();
     public DbSet<ParkAccount> ParkAccounts => Set<ParkAccount>();
     public DbSet<ParkClaim> ParkClaims => Set<ParkClaim>();
+    public DbSet<ParkKennzeichenAudit> ParkKennzeichenAudits => Set<ParkKennzeichenAudit>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -96,5 +97,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new FahrzeugConfiguration());
         modelBuilder.ApplyConfiguration(new ParkAccountConfiguration());
         modelBuilder.ApplyConfiguration(new ParkClaimConfiguration());
+        modelBuilder.ApplyConfiguration(new ParkKennzeichenAuditConfiguration());
     }
 }

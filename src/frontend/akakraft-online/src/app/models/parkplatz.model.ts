@@ -1,8 +1,5 @@
 export type ParkBerechtigungArt = 'Automatisch' | 'Selbstbestaetigt' | 'Spontan';
 
-/** Uni-Portal zur Kennzeichen-Verwaltung (Fallback, falls pro Konto keine URL hinterlegt ist). */
-export const PARKPORTAL_URL = 'https://tu-braunschweig.campusparken.de/portal';
-
 export interface ParkReservierung {
   eventId: string;
   titel: string;
@@ -34,6 +31,45 @@ export interface ParkAccountStatus {
   notiz: string | null;
   istFrei: boolean;
   belegung: ParkClaim | null;
+  zugangKonfiguriert: boolean;
+  kennzeichen: string[];
+  kennzeichenFehler: string | null;
+}
+
+export interface ParkAccountAdmin {
+  id: string;
+  label: string;
+  portalUrl: string | null;
+  notiz: string | null;
+  portalUsername: string | null;
+  zugangKonfiguriert: boolean;
+  sortOrder: number;
+}
+
+export interface ParkKennzeichenListe {
+  accountId: string;
+  accountLabel: string;
+  zugangKonfiguriert: boolean;
+  max: number;
+  kennzeichen: string[];
+  fehler: string | null;
+}
+
+export type ParkKennzeichenAktion = 'Hinzugefuegt' | 'Entfernt';
+
+export interface ParkKennzeichenAudit {
+  id: string;
+  ausgefuehrtVon: string;
+  aktion: ParkKennzeichenAktion;
+  kennzeichen: string;
+  kennzeichenNachher: string[];
+  createdAt: string;
+}
+
+export interface ParkZugangStatus {
+  accountId: string;
+  zugangKonfiguriert: boolean;
+  username: string | null;
 }
 
 export interface ParkBerechtigung {
@@ -71,17 +107,20 @@ export interface ParkAccountUpdateRequest {
 
 export type ParkHistorieStatus = 'Aktiv' | 'Freigegeben' | 'Abgelaufen';
 
+export type ParkHistorieTyp = 'Belegung' | 'KennzeichenHinzugefuegt' | 'KennzeichenEntfernt';
+
 export interface ParkHistorieEintrag {
   id: string;
+  typ: ParkHistorieTyp;
+  zeitpunkt: string;
   accountLabel: string;
   displayName: string;
-  kennzeichen: string;
-  fahrzeugBezeichnung: string;
-  einfahrtAt: string;
+  kennzeichen: string | null;
+  fahrzeugBezeichnung: string | null;
+  einfahrtAt: string | null;
   freigegebenAt: string | null;
-  autoExpiresAt: string;
-  berechtigungArt: ParkBerechtigungArt;
+  autoExpiresAt: string | null;
+  berechtigungArt: ParkBerechtigungArt | null;
   bestaetigungHinweis: string | null;
-  bookingEventId: string | null;
-  status: ParkHistorieStatus;
+  status: ParkHistorieStatus | null;
 }

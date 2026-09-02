@@ -14,7 +14,20 @@ public record ParkAccountStatusDto(
     string? PortalUrl,
     string? Notiz,
     bool IstFrei,
-    ParkClaimDto? Belegung
+    ParkClaimDto? Belegung,
+    bool ZugangKonfiguriert = false,
+    IReadOnlyList<string>? Kennzeichen = null,
+    string? KennzeichenFehler = null
+);
+
+public record ParkAccountAdminDto(
+    Guid Id,
+    string Label,
+    string? PortalUrl,
+    string? Notiz,
+    string? PortalUsername,
+    bool ZugangKonfiguriert,
+    int SortOrder
 );
 
 public record ParkClaimDto(
@@ -65,21 +78,54 @@ public record ParkCheckinRequest(
     string? BookingEventId
 );
 
-public record ParkHistorieEintragDto(
-    Guid Id,
+/// <summary>
+/// Ein Eintrag im gemeinsamen Verlauf: entweder eine Konto-Belegung oder eine
+/// Kennzeichen-Änderung. <see cref="Typ"/> = "Belegung" | "KennzeichenHinzugefuegt" | "KennzeichenEntfernt".
+/// </summary>
+public record ParkHistorieDto(
+    string Id,
+    string Typ,
+    DateTime Zeitpunkt,
     string AccountLabel,
     string DisplayName,
-    string Kennzeichen,
-    string FahrzeugBezeichnung,
-    DateTime EinfahrtAt,
+    // Belegung
+    string? Kennzeichen,
+    string? FahrzeugBezeichnung,
+    DateTime? EinfahrtAt,
     DateTime? FreigegebenAt,
-    DateTime AutoExpiresAt,
-    string BerechtigungArt,
+    DateTime? AutoExpiresAt,
+    string? BerechtigungArt,
     string? BestaetigungHinweis,
-    string? BookingEventId,
-    string Status
+    string? Status
 );
 
 public record ParkClaimUpdateRequest(DateTime? VoraussichtlichBis);
 
 public record ParkAccountUpdateRequest(string Label, string? PortalUrl, string? Notiz);
+
+// ---- Kennzeichen-Verwaltung über die Bewirtschafter-API ----
+
+public record ParkKennzeichenListeDto(
+    Guid AccountId,
+    string AccountLabel,
+    bool ZugangKonfiguriert,
+    int Max,
+    IReadOnlyList<string> Kennzeichen,
+    string? Fehler
+);
+
+public record ParkKennzeichenAddRequest(string Kennzeichen);
+
+public record ParkKennzeichenAuditDto(
+    Guid Id,
+    string AusgefuehrtVon,
+    string Aktion,
+    string Kennzeichen,
+    IReadOnlyList<string> KennzeichenNachher,
+    DateTime CreatedAt
+);
+
+/// <summary>Zugangsdaten setzen. Username null = unverändert; Password null = unverändert, "" = löschen.</summary>
+public record ParkZugangUpdateRequest(string? Username, string? Password);
+
+public record ParkZugangStatusDto(Guid AccountId, bool ZugangKonfiguriert, string? Username);

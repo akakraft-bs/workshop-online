@@ -7,7 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AkaKraft.Infrastructure.Services;
 
-public class ParkplatzService(ApplicationDbContext db, ICalendarService calendarService) : IParkplatzService
+public class ParkplatzService(
+    ApplicationDbContext db,
+    ICalendarService calendarService,
+    ICampusParkenClient portalClient) : IParkplatzService
 {
     // Berechtigungsfenster rund um eine Bühne-Halle-1-Reservierung.
     private static readonly TimeSpan VorlaufBerechtigung = TimeSpan.FromMinutes(30);
@@ -32,13 +35,22 @@ public class ParkplatzService(ApplicationDbContext db, ICalendarService calendar
 
         var displayNames = await LoadDisplayNamesAsync(aktiveClaims.Select(c => c.UserId), ct);
 
+        // Kennzeichenlisten pro Konto (aus dem Portal, kurzlebig gecacht) parallel laden.
+        var kennzeichenByAccount = await LadeKennzeichenAsync(accounts, ct);
+
         var accountDtos = accounts.Select(a =>
         {
             var claim = aktiveClaims.FirstOrDefault(c => c.ParkAccountId == a.Id);
+            var (codes, fehler) = kennzeichenByAccount.TryGetValue(a.Id, out var kz)
+                ? kz
+                : ((IReadOnlyList<string>)Array.Empty<string>(), (string?)null);
             return new ParkAccountStatusDto(
                 a.Id, a.Label, a.PortalUrl, a.Notiz,
                 IstFrei: claim is null,
-                Belegung: claim is null ? null : ToClaimDto(claim, displayNames));
+                Belegung: claim is null ? null : ToClaimDto(claim, displayNames),
+                ZugangKonfiguriert: HatZugang(a),
+                Kennzeichen: codes,
+                KennzeichenFehler: fehler);
         }).ToList();
 
         var parkCalendarIds = await GetParkCalendarIdsAsync(ct);
@@ -166,6 +178,29 @@ public class ParkplatzService(ApplicationDbContext db, ICalendarService calendar
             .Where(c => c.GrantsParkplatzBerechtigung)
             .Select(c => c.GoogleCalendarId)
             .ToListAsync(ct);
+
+    private static bool HatZugang(ParkAccount a) =>
+        !string.IsNullOrWhiteSpace(a.PortalUsername) && !string.IsNullOrWhiteSpace(a.PortalPassword);
+
+    private async Task<Dictionary<Guid, (IReadOnlyList<string> Codes, string? Fehler)>> LadeKennzeichenAsync(
+        List<ParkAccount> accounts, CancellationToken ct)
+    {
+        var mitZugang = accounts.Where(HatZugang).ToList();
+        var ergebnisse = await Task.WhenAll(mitZugang.Select(async a =>
+        {
+            try
+            {
+                var codes = await portalClient.ListAsync(a.Id, a.PortalUsername!, a.PortalPassword!, allowCache: true, ct);
+                return (a.Id, Codes: (IReadOnlyList<string>)codes, Fehler: (string?)null);
+            }
+            catch (CampusParkenException ex)
+            {
+                return (a.Id, Codes: (IReadOnlyList<string>)Array.Empty<string>(), Fehler: (string?)ex.Message);
+            }
+        }));
+
+        return ergebnisse.ToDictionary(r => r.Id, r => (r.Codes, r.Fehler));
+    }
 
     private async Task<Dictionary<Guid, string>> LoadDisplayNamesAsync(IEnumerable<Guid> userIds, CancellationToken ct)
     {

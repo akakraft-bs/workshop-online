@@ -1,0 +1,68 @@
+<h1 class="page-title">Campus-Parken – Konten</h1>
+
+<p class="hint">
+  Stammdaten und Portal-Zugangsdaten der beiden Uni-Parkkonten. Mit hinterlegten Zugangsdaten
+  können Mitglieder die Kennzeichen direkt aus der App verwalten (jede Änderung wird protokolliert).
+</p>
+
+@if (loading()) {
+  <div class="loading-center"><mat-spinner diameter="40" /></div>
+} @else {
+  @for (a of accounts(); track a.id) {
+    @if (forms[a.id]; as form) {
+      <mat-card appearance="outlined" class="konto-card">
+        <mat-card-header>
+          <mat-card-title>{{ form.get('label')?.value || a.label }}</mat-card-title>
+          <mat-card-subtitle>
+            @if (a.zugangKonfiguriert) {
+              <span class="ok"><mat-icon>check_circle</mat-icon> Zugang hinterlegt</span>
+            } @else {
+              <span class="missing"><mat-icon>error</mat-icon> Kein Portal-Zugang</span>
+            }
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <form [formGroup]="form" class="konto-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Bezeichnung</mat-label>
+              <input matInput formControlName="label">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Portal-URL (optional)</mat-label>
+              <input matInput formControlName="portalUrl" placeholder="https://tu-braunschweig.campusparken.de/portal">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Notiz (optional)</mat-label>
+              <input matInput formControlName="notiz">
+            </mat-form-field>
+
+            <div class="zugang-block">
+              <span class="block-label">Portal-Zugangsdaten</span>
+              <mat-form-field appearance="outline">
+                <mat-label>Benutzername</mat-label>
+                <input matInput formControlName="portalUsername" autocomplete="off">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Passwort</mat-label>
+                <input matInput type="password" formControlName="portalPassword" autocomplete="new-password"
+                       [placeholder]="a.zugangKonfiguriert ? 'unverändert lassen' : ''">
+                <mat-hint>Leer lassen = unverändert</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <div class="form-actions">
+              <button mat-flat-button color="primary" (click)="save(a)"
+                      [disabled]="form.invalid || saving() === a.id">
+                @if (saving() === a.id) { <mat-spinner diameter="18" /> } @else { <mat-icon>save</mat-icon> }
+                Speichern
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+}

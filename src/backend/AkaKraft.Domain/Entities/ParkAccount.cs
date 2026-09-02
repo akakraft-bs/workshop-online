@@ -17,6 +17,10 @@ public class ParkAccount
     /// <summary>Freitext-Hinweis (z. B. wo die Zugangsdaten liegen).</summary>
     public string? Notiz { get; set; }
 
+    /// <summary>Zugangsdaten für das Bewirtschafter-Portal (von einem Admin gepflegt).</summary>
+    public string? PortalUsername { get; set; }
+    public string? PortalPassword { get; set; }
+
     public int SortOrder { get; set; }
 
     public ICollection<ParkClaim> Claims { get; set; } = new List<ParkClaim>();

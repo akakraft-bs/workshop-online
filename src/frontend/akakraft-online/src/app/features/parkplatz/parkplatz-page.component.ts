@@ -8,10 +8,19 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/auth/auth.service';
 import { ParkplatzService } from '../../core/parkplatz/parkplatz.service';
-import { PARKPORTAL_URL, ParkAccountStatus, ParkClaim, ParkHistorieEintrag, ParkOverview } from '../../models/parkplatz.model';
+import { ParkAccountStatus, ParkClaim, ParkHistorieEintrag, ParkOverview } from '../../models/parkplatz.model';
 import { ParkplatzCheckinDialogComponent } from './parkplatz-checkin-dialog.component';
+import { ParkplatzKennzeichenDialogComponent } from './parkplatz-kennzeichen-dialog.component';
 
 const AVATAR_COLORS = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#0ea5e9'];
+
+type HistorieZeile =
+  | { key: string; kind: 'belegung'; belegung: ParkHistorieEintrag }
+  | {
+      key: string; kind: 'kennzeichen';
+      accountLabel: string; displayName: string; zeitpunkt: string;
+      hinzugefuegt: string[]; entfernt: string[];
+    };
 
 @Component({
   selector: 'app-parkplatz-page',
@@ -30,12 +39,41 @@ export class ParkplatzPageComponent implements OnInit, OnDestroy {
   readonly overview = signal<ParkOverview | null>(null);
   readonly loading = signal(true);
   readonly busyAccountId = signal<string | null>(null);
+  readonly registering = signal<string | null>(null);
   readonly editClaimId = signal<string | null>(null);
   editVoraussichtlichBis = '';
 
   readonly historieOpen = signal(false);
   readonly historieLoading = signal(false);
   readonly historie = signal<ParkHistorieEintrag[]>([]);
+
+  /** Aufeinanderfolgende Kennzeichen-Änderungen desselben Nutzers am selben Konto (≤ 2 Min.) zu einer Zeile zusammenfassen. */
+  readonly historieZeilen = computed<HistorieZeile[]>(() => {
+    const zeilen: HistorieZeile[] = [];
+    for (const h of this.historie()) {
+      if (h.typ === 'Belegung') {
+        zeilen.push({ key: h.id, kind: 'belegung', belegung: h });
+        continue;
+      }
+      const last = zeilen[zeilen.length - 1];
+      const nah = last?.kind === 'kennzeichen'
+        && last.accountLabel === h.accountLabel
+        && last.displayName === h.displayName
+        && Math.abs(new Date(last.zeitpunkt).getTime() - new Date(h.zeitpunkt).getTime()) <= 120_000;
+      const gruppe = nah
+        ? last as Extract<HistorieZeile, { kind: 'kennzeichen' }>
+        : (() => {
+            const z: HistorieZeile = {
+              key: h.id, kind: 'kennzeichen', accountLabel: h.accountLabel,
+              displayName: h.displayName, zeitpunkt: h.zeitpunkt, hinzugefuegt: [], entfernt: [],
+            };
+            zeilen.push(z);
+            return z;
+          })();
+      (h.typ === 'KennzeichenHinzugefuegt' ? gruppe.hinzugefuegt : gruppe.entfernt).push(h.kennzeichen ?? '');
+    }
+    return zeilen;
+  });
 
   private intervalId?: ReturnType<typeof setInterval>;
   private readonly now = signal(Date.now());
@@ -117,8 +155,38 @@ export class ParkplatzPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  portalLink(account: ParkAccountStatus): string {
-    return account.portalUrl || PARKPORTAL_URL;
+  openKennzeichen(account: ParkAccountStatus, vorschlag?: string): void {
+    this.dialog.open(ParkplatzKennzeichenDialogComponent, {
+      width: '460px', maxWidth: '95vw', data: { account, vorschlag },
+    }).afterClosed().subscribe(() => this.load(true));
+  }
+
+  /** "Jetzt registrieren": bei freiem Platz direkt hinzufügen, sonst Dialog zum Aufräumen. */
+  registriereKennzeichen(account: ParkAccountStatus, claim: ParkClaim): void {
+    if (account.kennzeichen.length >= 5) {
+      this.openKennzeichen(account, claim.kennzeichen);
+      return;
+    }
+    this.registering.set(account.id);
+    this.api.addKennzeichen(account.id, claim.kennzeichen).subscribe({
+      next: () => {
+        this.registering.set(null);
+        this.snackBar.open(`${claim.kennzeichen} auf ${account.label} registriert.`, undefined, { duration: 3000 });
+        this.load(true);
+      },
+      error: err => {
+        this.registering.set(null);
+        this.snackBar.open(
+          typeof err?.error === 'string' ? err.error : 'Registrieren fehlgeschlagen.', 'OK', { duration: 4000 });
+      },
+    });
+  }
+
+  /** true, wenn das Kennzeichen der Belegung (noch) nicht im Portal des Kontos registriert ist. */
+  fehltKennzeichen(account: ParkAccountStatus, claim: ParkClaim): boolean {
+    if (!account.zugangKonfiguriert || account.kennzeichenFehler) return false;
+    const norm = (s: string) => s.replace(/\s+/g, '').toUpperCase();
+    return !account.kennzeichen.some(c => norm(c) === norm(claim.kennzeichen));
   }
 
   problemMelden(account: ParkAccountStatus): void {
@@ -174,6 +242,14 @@ export class ParkplatzPageComponent implements OnInit, OnDestroy {
     const d = new Date(dateStr);
     const pad = (n: number) => n.toString().padStart(2, '0');
     return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}. ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  /** z. B. "Max hat Kennzeichen AB-CD1234 hinzugefügt und DC-BA4321 entfernt" */
+  satzKennzeichen(z: Extract<HistorieZeile, { kind: 'kennzeichen' }>): string {
+    const teile: string[] = [];
+    if (z.hinzugefuegt.length) teile.push(`Kennzeichen ${z.hinzugefuegt.join(', ')} hinzugefügt`);
+    if (z.entfernt.length) teile.push(`${z.hinzugefuegt.length ? '' : 'Kennzeichen '}${z.entfernt.join(', ')} entfernt`);
+    return `${z.displayName} hat ${teile.join(' und ')}`;
   }
 
   initials(name: string): string {

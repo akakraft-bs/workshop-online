@@ -221,6 +221,69 @@
   &:hover { color: #d97706; }
 }
 
+.portal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+// ---- Registrierte Kennzeichen ----
+
+.kz-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: -2px 0 2px;
+}
+
+.kz-tag {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--mat-sys-surface-container-high);
+  border: 1px solid var(--mat-sys-outline-variant);
+}
+
+.kz-muted {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.kz-err {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #d97706;
+
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+}
+
+.kz-warnung {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, #f59e0b 15%, transparent);
+  color: #b9770e;
+  font-size: 13px;
+  line-height: 1.45;
+
+  mat-icon { flex-shrink: 0; }
+}
+
+.kz-warnung-btn {
+  margin-top: 8px;
+}
+
 .hold-hint {
   font-size: 12.5px;
   color: var(--mat-sys-on-surface-variant);
@@ -324,6 +387,30 @@
     font-size: 11.5px;
     font-style: italic;
     color: var(--mat-sys-on-surface-variant);
+  }
+
+  .hist-kz {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+
+    > mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      &.add { color: #0f9d6c; }
+      &.del { color: #dc2626; }
+    }
+  }
+
+  .hist-kz-text {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+
+    .hist-meta { margin-top: 2px; }
   }
 }
 

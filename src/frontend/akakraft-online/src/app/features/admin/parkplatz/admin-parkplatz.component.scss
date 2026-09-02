@@ -1,0 +1,67 @@
+.page-title {
+  margin: 0 0 8px;
+}
+
+.hint {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 14px;
+  margin: 0 0 20px;
+  max-width: 680px;
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.konto-card {
+  max-width: 560px;
+  margin-bottom: 16px;
+}
+
+mat-card-subtitle {
+  .ok, .missing {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12.5px;
+  }
+  .ok { color: #0f9d6c; }
+  .missing { color: #d97706; }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+
+.konto-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+
+  mat-form-field { width: 100%; }
+}
+
+.zugang-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 10px;
+  background: var(--mat-sys-surface-container-high);
+}
+
+.block-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: 4px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}

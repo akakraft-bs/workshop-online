@@ -12,7 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { FahrzeugService } from '../../core/fahrzeug/fahrzeug.service';
 import { ParkplatzService } from '../../core/parkplatz/parkplatz.service';
 import { Fahrzeug } from '../../models/fahrzeug.model';
-import { PARKPORTAL_URL, ParkAccountStatus, ParkBerechtigung, ParkClaim } from '../../models/parkplatz.model';
+import { ParkAccountStatus, ParkBerechtigung, ParkClaim } from '../../models/parkplatz.model';
 
 export interface ParkCheckinDialogData {
   account: ParkAccountStatus;
@@ -43,7 +43,6 @@ export class ParkplatzCheckinDialogComponent implements OnInit {
   readonly data: ParkCheckinDialogData = inject(MAT_DIALOG_DATA);
 
   readonly MANUELL = MANUELL;
-  readonly portalUrl = this.data.account.portalUrl || PARKPORTAL_URL;
   readonly fahrzeuge = signal<Fahrzeug[]>([]);
   readonly loadingFahrzeuge = signal(true);
   readonly saving = signal(false);

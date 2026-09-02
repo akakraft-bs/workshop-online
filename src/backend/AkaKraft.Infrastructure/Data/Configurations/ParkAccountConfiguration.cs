@@ -16,6 +16,8 @@ public class ParkAccountConfiguration : IEntityTypeConfiguration<ParkAccount>
         builder.Property(a => a.Label).IsRequired().HasMaxLength(80);
         builder.Property(a => a.PortalUrl).HasMaxLength(512);
         builder.Property(a => a.Notiz).HasMaxLength(1000);
+        builder.Property(a => a.PortalUsername).HasMaxLength(128);
+        builder.Property(a => a.PortalPassword).HasMaxLength(256);
 
         builder.HasMany(a => a.Claims)
             .WithOne(c => c.ParkAccount)

@@ -2,12 +2,16 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../api/api.service';
 import {
+  ParkAccountAdmin,
   ParkAccountStatus,
   ParkAccountUpdateRequest,
   ParkCheckinRequest,
   ParkClaim,
   ParkHistorieEintrag,
+  ParkKennzeichenAudit,
+  ParkKennzeichenListe,
   ParkOverview,
+  ParkZugangStatus,
 } from '../../models/parkplatz.model';
 
 @Injectable({ providedIn: 'root' })
@@ -38,7 +42,32 @@ export class ParkplatzService {
     return this.api.post<void>(`/parkplatz/accounts/${accountId}/problem`, {});
   }
 
+  getAdminAccounts(): Observable<ParkAccountAdmin[]> {
+    return this.api.get<ParkAccountAdmin[]>('/parkplatz/accounts');
+  }
+
   updateAccount(id: string, dto: ParkAccountUpdateRequest): Observable<ParkAccountStatus> {
     return this.api.put<ParkAccountStatus>(`/parkplatz/accounts/${id}`, dto);
+  }
+
+  setZugang(id: string, username: string | null, password: string | null): Observable<ParkZugangStatus> {
+    return this.api.put<ParkZugangStatus>(`/parkplatz/accounts/${id}/zugang`, { username, password });
+  }
+
+  getKennzeichen(accountId: string): Observable<ParkKennzeichenListe> {
+    return this.api.get<ParkKennzeichenListe>(`/parkplatz/accounts/${accountId}/kennzeichen`);
+  }
+
+  addKennzeichen(accountId: string, kennzeichen: string): Observable<ParkKennzeichenListe> {
+    return this.api.post<ParkKennzeichenListe>(`/parkplatz/accounts/${accountId}/kennzeichen`, { kennzeichen });
+  }
+
+  removeKennzeichen(accountId: string, code: string): Observable<ParkKennzeichenListe> {
+    return this.api.delete<ParkKennzeichenListe>(
+      `/parkplatz/accounts/${accountId}/kennzeichen?code=${encodeURIComponent(code)}`);
+  }
+
+  getKennzeichenHistorie(accountId: string): Observable<ParkKennzeichenAudit[]> {
+    return this.api.get<ParkKennzeichenAudit[]>(`/parkplatz/accounts/${accountId}/kennzeichen/historie`);
   }
 }

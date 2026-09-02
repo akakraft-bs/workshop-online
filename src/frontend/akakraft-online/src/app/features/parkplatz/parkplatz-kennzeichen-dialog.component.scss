@@ -1,0 +1,121 @@
+.loading-row {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.fehler-box {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, #ef4444 14%, transparent);
+  color: #dc2626;
+  font-size: 12.5px;
+  margin-bottom: 12px;
+
+  mat-icon { flex-shrink: 0; font-size: 18px; width: 18px; height: 18px; }
+}
+
+.zaehler {
+  font-size: 12.5px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 8px;
+}
+
+.leer {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 8px 0;
+}
+
+.kz-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 12px;
+    border-radius: 8px;
+    background: var(--mat-sys-surface-container-high);
+  }
+}
+
+.kz-code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.kz-del:hover { color: var(--mat-sys-error); }
+
+.add-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.add-field { flex: 1; }
+
+.voll-hint {
+  font-size: 12px;
+  color: #b9770e;
+  margin: 6px 0 0;
+}
+
+.hist-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 12px 0 4px;
+  margin-top: 8px;
+  cursor: pointer;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hist-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    &.add { color: #0f9d6c; }
+    &.del { color: #dc2626; }
+  }
+}
+
+.hist-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.hist-meta {
+  font-size: 11.5px;
+  color: var(--mat-sys-on-surface-variant);
+}
