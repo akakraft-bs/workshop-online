@@ -52,6 +52,12 @@
     @for (id of visibleSections(); track id) {
       @switch (id) {
 
+        @case ('halle') {
+          <section class="section">
+            <app-hallen-widget />
+          </section>
+        }
+
         @case ('umfragen') {
           <section class="section">
             <h2 class="section-title">

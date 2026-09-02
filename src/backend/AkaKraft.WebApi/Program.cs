@@ -106,6 +106,7 @@ public static class Program
         app.MapProjektEndpoints();
         app.MapVereinZugangEndpoints();
         app.MapAufgabeEndpoints();
+        app.MapHallenCheckEndpoints();
         app.MapAdminEndpoints();
         app.MapMotdEndpoints();
         app.MapCrmEndpoints();

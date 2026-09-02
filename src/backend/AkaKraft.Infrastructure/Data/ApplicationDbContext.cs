@@ -39,6 +39,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Partner> Partner => Set<Partner>();
     public DbSet<Ansprechpartner> Ansprechpartner => Set<Ansprechpartner>();
     public DbSet<Kontakteintrag> Kontakteintraege => Set<Kontakteintrag>();
+    public DbSet<HallenCheck> HallenChecks => Set<HallenCheck>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -88,5 +89,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new PartnerConfiguration());
         modelBuilder.ApplyConfiguration(new AnsprechpartnerConfiguration());
         modelBuilder.ApplyConfiguration(new KontakteintragConfiguration());
+        modelBuilder.ApplyConfiguration(new HallenCheckConfiguration());
     }
 }

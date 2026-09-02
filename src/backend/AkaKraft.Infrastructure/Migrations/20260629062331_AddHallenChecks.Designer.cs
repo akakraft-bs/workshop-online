@@ -3,6 +3,7 @@ using System;
 using AkaKraft.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AkaKraft.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260629062331_AddHallenChecks")]
+    partial class AddHallenChecks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1160,36 +1163,6 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.ToTable("Werkzeuge");
                 });
 
-            modelBuilder.Entity("AkaKraft.Domain.Entities.WerkzeugAusleihe", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("BorrowedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("ExpectedReturnAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("ReturnedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("WerkzeugId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("WerkzeugId", "BorrowedAt");
-
-                    b.ToTable("WerkzeugAusleihen");
-                });
-
             modelBuilder.Entity("AkaKraft.Domain.Entities.Wunsch", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1531,25 +1504,6 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.Navigation("BorrowedBy");
                 });
 
-            modelBuilder.Entity("AkaKraft.Domain.Entities.WerkzeugAusleihe", b =>
-                {
-                    b.HasOne("AkaKraft.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AkaKraft.Domain.Entities.Werkzeug", "Werkzeug")
-                        .WithMany("Ausleihen")
-                        .HasForeignKey("WerkzeugId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-
-                    b.Navigation("Werkzeug");
-                });
-
             modelBuilder.Entity("AkaKraft.Domain.Entities.Wunsch", b =>
                 {
                     b.HasOne("AkaKraft.Domain.Entities.User", "ClosedBy")
@@ -1626,11 +1580,6 @@ namespace AkaKraft.Infrastructure.Migrations
             modelBuilder.Entity("AkaKraft.Domain.Entities.User", b =>
                 {
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("AkaKraft.Domain.Entities.Werkzeug", b =>
-                {
-                    b.Navigation("Ausleihen");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.Wunsch", b =>

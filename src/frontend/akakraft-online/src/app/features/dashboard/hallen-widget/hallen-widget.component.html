@@ -1,0 +1,91 @@
+<div class="hallen-widget">
+  <h2 class="section-title">
+    <mat-icon class="section-title-icon halle-icon">sports_handball</mat-icon>
+    An der Halle
+    @if (checks().length > 0) {
+      <span class="section-count halle-count">{{ checks().length }}</span>
+    }
+    @if (checks().length > 0) {
+      <span class="live-dot" matTooltip="Wird automatisch aktualisiert"></span>
+    }
+  </h2>
+
+  @if (loading()) {
+    <div class="loading-row">
+      <mat-spinner diameter="24" />
+    </div>
+  } @else {
+    @if (checks().length > 0) {
+      <div class="hallen-list">
+        @if (myCheck(); as mine) {
+          <div class="hallen-item own-item">
+            <div class="avatar" [style.background-color]="avatarColor(mine.displayName)">
+              {{ initials(mine.displayName) }}
+            </div>
+            <div class="item-info">
+              <span class="item-name">Du</span>
+              @if (mine.message) {
+                <span class="item-message">{{ mine.message }}</span>
+              }
+              <span class="item-time">{{ timeSince(mine.checkedInAt) }}</span>
+            </div>
+            <button mat-icon-button class="checkout-btn" (click)="checkOut()" matTooltip="Verlassen">
+              <mat-icon>logout</mat-icon>
+            </button>
+          </div>
+        }
+        @for (check of others(); track check.id) {
+          <div class="hallen-item">
+            @if (check.pictureUrl) {
+              <img [src]="check.pictureUrl" class="avatar avatar-img" [alt]="check.displayName">
+            } @else {
+              <div class="avatar" [style.background-color]="avatarColor(check.displayName)">
+                {{ initials(check.displayName) }}
+              </div>
+            }
+            <div class="item-info">
+              <span class="item-name">{{ check.displayName }}</span>
+              @if (check.message) {
+                <span class="item-message">{{ check.message }}</span>
+              }
+              <span class="item-time">{{ timeSince(check.checkedInAt) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!isCheckedIn()) {
+      @if (checks().length === 0) {
+        <p class="hallen-empty">Noch niemand an der Halle. Sei der Erste!</p>
+      }
+      @if (showForm()) {
+        <div class="checkin-form">
+          <input
+            class="message-input"
+            [(ngModel)]="message"
+            placeholder="Kurze Nachricht (optional)"
+            maxlength="200"
+            (keydown.enter)="checkIn()"
+            (keydown.escape)="cancelForm()"
+            autofocus>
+          <div class="checkin-actions">
+            <button mat-stroked-button (click)="cancelForm()">Abbrechen</button>
+            <button mat-flat-button color="primary" (click)="checkIn()" [disabled]="saving()">
+              @if (saving()) {
+                <mat-spinner diameter="16" />
+              } @else {
+                Ich bin da!
+              }
+            </button>
+          </div>
+        </div>
+      } @else {
+        <button mat-flat-button class="checkin-btn" (click)="openForm()">
+          <mat-icon>add_location_alt</mat-icon>
+          Ich bin an der Halle!
+        </button>
+      }
+    }
+  }
+</div>

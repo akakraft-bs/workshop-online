@@ -24,10 +24,12 @@ import { Verbrauchsmaterial } from '../../models/verbrauchsmaterial.model';
 import { Mangel } from '../../models/mangel.model';
 import { Umfrage } from '../../models/umfrage.model';
 import { Role, VORSTAND_ROLES } from '../../models/user.model';
+import { HallenWidgetComponent } from './hallen-widget/hallen-widget.component';
 
-type SectionId = 'umfragen' | 'veranstaltungen' | 'maengel' | 'bestand' | 'schnellzugriff';
+type SectionId = 'halle' | 'umfragen' | 'veranstaltungen' | 'maengel' | 'bestand' | 'schnellzugriff';
 
 const SECTION_LABELS: Record<SectionId, string> = {
+  halle: 'An der Halle',
   umfragen: 'Offene Umfragen',
   veranstaltungen: 'Nächste Veranstaltungen',
   maengel: 'Offene Mängel',
@@ -36,6 +38,7 @@ const SECTION_LABELS: Record<SectionId, string> = {
 };
 
 const SECTION_ICONS: Record<SectionId, string> = {
+  halle: 'sports_handball',
   umfragen: 'poll',
   veranstaltungen: 'celebration',
   maengel: 'report_problem',
@@ -43,7 +46,7 @@ const SECTION_ICONS: Record<SectionId, string> = {
   schnellzugriff: 'apps',
 };
 
-const DEFAULT_SECTION_ORDER: SectionId[] = ['umfragen', 'veranstaltungen', 'maengel', 'bestand', 'schnellzugriff'];
+const DEFAULT_SECTION_ORDER: SectionId[] = ['halle', 'umfragen', 'veranstaltungen', 'maengel', 'bestand', 'schnellzugriff'];
 const SECTION_ORDER_KEY = 'dashboard-section-order';
 
 function loadSectionOrder(): SectionId[] {
@@ -147,6 +150,7 @@ const DEFAULT_FAVORITES = ['/werkzeug', '/verbrauchsmaterial', '/hallenbuch'];
     RouterLink, MatCardModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, MatChipsModule, MatTooltipModule, MatBadgeModule,
     CdkDropList, CdkDrag, CdkDragHandle,
+    HallenWidgetComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -185,7 +189,7 @@ export class DashboardComponent implements OnInit {
       if (id === 'umfragen') return this.pendingUmfragen().length > 0;
       if (id === 'maengel') return this.openMaengel().length > 0;
       if (id === 'bestand') return this.lowStockItems().length > 0;
-      return true;
+      return true; // 'halle', 'veranstaltungen', 'schnellzugriff' immer sichtbar
     })
   );
 
