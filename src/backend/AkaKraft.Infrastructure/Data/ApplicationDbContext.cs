@@ -40,6 +40,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Ansprechpartner> Ansprechpartner => Set<Ansprechpartner>();
     public DbSet<Kontakteintrag> Kontakteintraege => Set<Kontakteintrag>();
     public DbSet<HallenCheck> HallenChecks => Set<HallenCheck>();
+    public DbSet<Fahrzeug> Fahrzeuge => Set<Fahrzeug>();
+    public DbSet<ParkAccount> ParkAccounts => Set<ParkAccount>();
+    public DbSet<ParkClaim> ParkClaims => Set<ParkClaim>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -90,5 +93,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfiguration(new AnsprechpartnerConfiguration());
         modelBuilder.ApplyConfiguration(new KontakteintragConfiguration());
         modelBuilder.ApplyConfiguration(new HallenCheckConfiguration());
+        modelBuilder.ApplyConfiguration(new FahrzeugConfiguration());
+        modelBuilder.ApplyConfiguration(new ParkAccountConfiguration());
+        modelBuilder.ApplyConfiguration(new ParkClaimConfiguration());
     }
 }

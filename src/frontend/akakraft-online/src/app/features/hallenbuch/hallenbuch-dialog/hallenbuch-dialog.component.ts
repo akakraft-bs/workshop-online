@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,11 +11,14 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { HallenbuchEintrag, GastschraubenArt, CreateHallenbuchEintragDto } from '../../../models/hallenbuch.model';
 import { MangelKategorie } from '../../../models/mangel.model';
+import { Fahrzeug } from '../../../models/fahrzeug.model';
+import { FahrzeugService } from '../../../core/fahrzeug/fahrzeug.service';
 
 export interface HallenbuchDialogPrefill {
   startTime: string; // HH:mm
   endTime: string;   // HH:mm
   description: string;
+  fahrzeugId?: string | null;
 }
 
 export interface HallenbuchDialogData {
@@ -58,11 +61,13 @@ function combineDateTime(date: Date, timeStr: string): Date {
 })
 export class HallenbuchDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly fahrzeugService = inject(FahrzeugService);
   readonly dialogRef = inject(MatDialogRef<HallenbuchDialogComponent>);
   readonly data: HallenbuchDialogData | null = inject(MAT_DIALOG_DATA, { optional: true });
 
   readonly isEdit = !!this.data?.eintrag;
   readonly eintrag = this.data?.eintrag;
+  readonly fahrzeuge = signal<Fahrzeug[]>([]);
 
   readonly kategorien: MangelKategorie[] = ['Halle', 'Werkzeug', 'Sonstiges'];
 
@@ -72,6 +77,7 @@ export class HallenbuchDialogComponent implements OnInit {
     endDate:              [null as Date | null, Validators.required],
     endTime:              ['', Validators.required],
     description:          ['', [Validators.required, Validators.maxLength(256)]],
+    fahrzeugId:           [''],
     hatGastgeschraubt:    [false],
     gastschraubenArt:     [null as GastschraubenArt | null],
     gastschraubenBezahlt: [false],
@@ -107,6 +113,11 @@ export class HallenbuchDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.fahrzeugService.list().subscribe({
+      next: list => this.fahrzeuge.set(list),
+      error: () => {},
+    });
+
     if (this.eintrag) {
       const start = new Date(this.eintrag.start);
       const end   = new Date(this.eintrag.end);
@@ -116,6 +127,7 @@ export class HallenbuchDialogComponent implements OnInit {
         endDate:   dateOnly(end),
         endTime:   toTimeString(end),
         description:          this.eintrag.description,
+        fahrzeugId:          this.eintrag.fahrzeugId ?? '',
         hatGastgeschraubt:    this.eintrag.hatGastgeschraubt,
         gastschraubenArt:     this.eintrag.gastschraubenArt,
         gastschraubenBezahlt: this.eintrag.gastschraubenBezahlt ?? false,
@@ -129,6 +141,7 @@ export class HallenbuchDialogComponent implements OnInit {
         endDate:     today,
         endTime:     this.data.prefill.endTime,
         description: this.data.prefill.description,
+        fahrzeugId:  this.data.prefill.fahrzeugId ?? '',
       });
     } else {
       const now = new Date();
@@ -215,6 +228,7 @@ export class HallenbuchDialogComponent implements OnInit {
       gastschraubenArt:  v.hatGastgeschraubt ? v.gastschraubenArt : null,
       gastschraubenBezahlt: v.hatGastgeschraubt ? !!v.gastschraubenBezahlt : null,
       hatFamiliegeschraubt: !!v.hatFamiliegeschraubt,
+      fahrzeugId: v.fahrzeugId || null,
     };
 
     const result: HallenbuchDialogResult = { hallenbuch };

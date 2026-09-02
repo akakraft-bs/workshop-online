@@ -17,6 +17,9 @@ public class HallenbuchEintragConfiguration : IEntityTypeConfiguration<Hallenbuc
         builder.Property(h => h.GastschraubenArt)
             .HasConversion<string>();
 
+        builder.Property(h => h.FahrzeugLabel)
+            .HasMaxLength(160);
+
         builder.HasOne(h => h.User)
             .WithMany()
             .HasForeignKey(h => h.UserId)

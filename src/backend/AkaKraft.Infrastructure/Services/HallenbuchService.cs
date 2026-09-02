@@ -44,6 +44,7 @@ public class HallenbuchService(ApplicationDbContext db) : IHallenbuchService
             HatFamiliegeschraubt = dto.HatFamiliegeschraubt,
             CreatedAt = DateTime.UtcNow,
         };
+        (eintrag.FahrzeugId, eintrag.FahrzeugLabel) = await ResolveFahrzeugAsync(userId, dto.FahrzeugId);
 
         db.HallenbuchEintraege.Add(eintrag);
         await db.SaveChangesAsync();
@@ -80,6 +81,7 @@ public class HallenbuchService(ApplicationDbContext db) : IHallenbuchService
         eintrag.GastschraubenArt = dto.HatGastgeschraubt ? dto.GastschraubenArt : null;
         eintrag.GastschraubenBezahlt = dto.HatGastgeschraubt ? dto.GastschraubenBezahlt : null;
         eintrag.HatFamiliegeschraubt = dto.HatFamiliegeschraubt;
+        (eintrag.FahrzeugId, eintrag.FahrzeugLabel) = await ResolveFahrzeugAsync(eintrag.UserId, dto.FahrzeugId);
 
         await db.SaveChangesAsync();
 
@@ -137,6 +139,14 @@ public class HallenbuchService(ApplicationDbContext db) : IHallenbuchService
             .OrderBy(s => s.UserName);
     }
 
+    private async Task<(Guid? Id, string? Label)> ResolveFahrzeugAsync(Guid ownerId, Guid? fahrzeugId)
+    {
+        if (fahrzeugId is not { } id) return (null, null);
+
+        var fahrzeug = await db.Fahrzeuge.FirstOrDefaultAsync(f => f.Id == id && f.UserId == ownerId);
+        return fahrzeug is null ? (null, null) : (fahrzeug.Id, fahrzeug.Anzeige);
+    }
+
     private static HallenbuchEintragDto ToDto(HallenbuchEintrag h, Dictionary<Guid, string> prefs)
     {
         var name = prefs.TryGetValue(h.UserId, out var n) ? n : h.User.Name;
@@ -145,6 +155,7 @@ public class HallenbuchService(ApplicationDbContext db) : IHallenbuchService
             h.Start, h.End, h.Description,
             h.HatGastgeschraubt, h.GastschraubenArt, h.GastschraubenBezahlt,
             h.HatFamiliegeschraubt,
-            h.CreatedAt);
+            h.CreatedAt,
+            h.FahrzeugId, h.FahrzeugLabel);
     }
 }

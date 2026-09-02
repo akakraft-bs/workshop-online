@@ -1,0 +1,95 @@
+<h2 mat-dialog-title>{{ data.account.label }} übernehmen</h2>
+
+<mat-dialog-content>
+  <div class="checkin-form">
+
+    <div class="berechtigung-box" [class]="'art-' + data.berechtigung.art.toLowerCase()">
+      <mat-icon>{{ data.berechtigung.art === 'Automatisch' ? 'verified' : 'info' }}</mat-icon>
+      <p>{{ data.berechtigung.hinweis }}</p>
+    </div>
+
+    @if (loadingFahrzeuge()) {
+      <div class="loading-row"><mat-spinner diameter="24" /></div>
+    } @else {
+      <mat-form-field appearance="outline">
+        <mat-label>Fahrzeug</mat-label>
+        <mat-select [(ngModel)]="fahrzeugId">
+          @for (fz of fahrzeuge(); track fz.id) {
+            <mat-option [value]="fz.id">
+              {{ fz.marke }}{{ fz.modell ? ' ' + fz.modell : '' }} · {{ fz.kennzeichen }}
+            </mat-option>
+          }
+          <mat-option [value]="MANUELL">Anderes Kennzeichen …</mat-option>
+        </mat-select>
+        @if (fahrzeugAusReservierung) {
+          <mat-hint>Aus deiner Bühne-Reservierung übernommen</mat-hint>
+        }
+      </mat-form-field>
+
+      @if (istManuell()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Kennzeichen</mat-label>
+          <input matInput [(ngModel)]="manuellKennzeichen" maxlength="16"
+                 placeholder="BS-XX 123" style="text-transform: uppercase">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Fahrzeug (optional)</mat-label>
+          <input matInput [(ngModel)]="manuellBezeichnung" maxlength="80" placeholder="z. B. VW Golf">
+        </mat-form-field>
+      }
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Einfahrt auf den Campus</mat-label>
+      <input matInput type="datetime-local" [(ngModel)]="einfahrt">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Voraussichtlich weg bis (optional)</mat-label>
+      <input matInput type="datetime-local" [(ngModel)]="voraussichtlichBis">
+      <mat-hint>Hilft anderen bei der Planung. Spätestens nach 24 h wird das Konto automatisch frei.</mat-hint>
+    </mat-form-field>
+
+    @if (data.berechtigung.waehlbareReservierungen.length > 0) {
+      <mat-form-field appearance="outline">
+        <mat-label>Zugehörige Bühne-Reservierung (optional)</mat-label>
+        <mat-select [(ngModel)]="bookingEventId" (ngModelChange)="onReservierungChange()">
+          <mat-option value="">– keine –</mat-option>
+          @for (r of data.berechtigung.waehlbareReservierungen; track r.eventId) {
+            <mat-option [value]="r.eventId">{{ formatReservierung(r.start, r.titel) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (data.berechtigung.erfordertBestaetigung) {
+      <mat-checkbox [(ngModel)]="bestaetigt" class="bestaetigung-check"
+                    [class.pflicht]="!bestaetigt">
+        Ich bestätige, dass ich zur Nutzung dieses Parkkontos berechtigt bin. <span class="pflicht-stern">*</span>
+      </mat-checkbox>
+    }
+
+    <div class="portal-hint">
+      <mat-icon>checklist</mat-icon>
+      <div>
+        <strong>Nach dem Übernehmen:</strong> im
+        <a [href]="portalUrl" target="_blank" rel="noopener">Uni-Portal</a>
+        mit den Zugangsdaten für {{ data.account.label }} anmelden, links in der Navigation auf „Kennzeichen"
+        und dein Kennzeichen in die Liste eintragen. Der Link steht danach auch auf der Parkplatz-Seite.
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+@if (disabledGrund(); as grund) {
+  <p class="disabled-hint">
+    <mat-icon>info</mat-icon> {{ grund }}
+  </p>
+}
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+  <button mat-flat-button color="primary" (click)="submit()" [disabled]="!kannSpeichern()">
+    @if (saving()) { <mat-spinner diameter="18" /> } @else { Übernehmen }
+  </button>
+</mat-dialog-actions>

@@ -74,6 +74,21 @@
       <input matInput formControlName="location">
     </mat-form-field>
 
+    @if (zeigtFahrzeugFeld()) {
+      <mat-form-field appearance="outline">
+        <mat-label>Fahrzeug (optional)</mat-label>
+        <mat-select formControlName="fahrzeugId">
+          <mat-option [value]="''">– keins –</mat-option>
+          @for (fz of fahrzeuge(); track fz.id) {
+            <mat-option [value]="fz.id">
+              {{ fz.marke }}{{ fz.modell ? ' ' + fz.modell : '' }} · {{ fz.kennzeichen }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-hint>Wird beim Parkkonto-Check-in für diese Reservierung vorausgewählt</mat-hint>
+      </mat-form-field>
+    }
+
     @if (data.showUrlField) {
       <mat-form-field appearance="outline">
         <mat-label>Link zur Veranstaltungsseite (optional)</mat-label>

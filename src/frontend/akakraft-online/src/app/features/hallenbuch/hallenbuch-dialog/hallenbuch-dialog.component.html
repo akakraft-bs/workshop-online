@@ -61,6 +61,19 @@
       <mat-hint align="end">{{ descriptionLength }}/256</mat-hint>
     </mat-form-field>
 
+    <!-- Fahrzeug (optional) -->
+    <mat-form-field appearance="outline">
+      <mat-label>Fahrzeug (optional)</mat-label>
+      <mat-select formControlName="fahrzeugId">
+        <mat-option [value]="''">– keins –</mat-option>
+        @for (fz of fahrzeuge(); track fz.id) {
+          <mat-option [value]="fz.id">
+            {{ fz.marke }}{{ fz.modell ? ' ' + fz.modell : '' }} · {{ fz.kennzeichen }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
     <mat-divider />
 
     <!-- Gastschrauben -->

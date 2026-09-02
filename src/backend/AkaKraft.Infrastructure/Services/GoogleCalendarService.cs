@@ -15,6 +15,8 @@ public class GoogleCalendarService : ICalendarService
     private const string AppCreatorEmailKey = "appCreatorEmail";
     private const string AppCreatorUserIdKey = "appCreatorUserId";
     private const string AppEventUrlKey = "appEventUrl";
+    private const string AppFahrzeugIdKey = "appFahrzeugId";
+    private const string AppFahrzeugLabelKey = "appFahrzeugLabel";
 
     private readonly CalendarService? _calendarService;
     private readonly ILogger<GoogleCalendarService> _logger;
@@ -96,7 +98,7 @@ public class GoogleCalendarService : ICalendarService
         if (_calendarService is null)
             throw new InvalidOperationException("Google Calendar Service ist nicht konfiguriert.");
 
-        var googleEvent = BuildGoogleEvent(dto.Title, dto.Start, dto.End, dto.IsAllDay, dto.Description, dto.Location, dto.Url, creatorName, creatorEmail, creatorUserId);
+        var googleEvent = BuildGoogleEvent(dto.Title, dto.Start, dto.End, dto.IsAllDay, dto.Description, dto.Location, dto.Url, creatorName, creatorEmail, creatorUserId, dto.FahrzeugId, dto.FahrzeugLabel);
         var request = _calendarService.Events.Insert(googleEvent, calendarId);
         var created = await request.ExecuteAsync();
 
@@ -143,6 +145,18 @@ public class GoogleCalendarService : ICalendarService
             existing.ExtendedProperties.Shared[AppEventUrlKey] = dto.Url;
         else
             existing.ExtendedProperties.Shared.Remove(AppEventUrlKey);
+
+        if (dto.FahrzeugId is { } fzId)
+        {
+            existing.ExtendedProperties.Shared[AppFahrzeugIdKey] = fzId.ToString();
+            existing.ExtendedProperties.Shared[AppFahrzeugLabelKey] = dto.FahrzeugLabel ?? string.Empty;
+        }
+        else
+        {
+            existing.ExtendedProperties.Shared.Remove(AppFahrzeugIdKey);
+            existing.ExtendedProperties.Shared.Remove(AppFahrzeugLabelKey);
+        }
+
         SetEventTime(existing, dto.Start, dto.End, dto.IsAllDay);
 
         var updated = await _calendarService.Events.Update(existing, calendarId, eventId).ExecuteAsync();
@@ -212,7 +226,8 @@ public class GoogleCalendarService : ICalendarService
 
     private static Event BuildGoogleEvent(
         string title, DateTime start, DateTime end, bool isAllDay,
-        string? description, string? location, string? url, string creatorName, string creatorEmail, Guid? creatorUserId)
+        string? description, string? location, string? url, string creatorName, string creatorEmail, Guid? creatorUserId,
+        Guid? fahrzeugId = null, string? fahrzeugLabel = null)
     {
         var shared = new Dictionary<string, string>
         {
@@ -223,6 +238,11 @@ public class GoogleCalendarService : ICalendarService
             shared[AppEventUrlKey] = url;
         if (creatorUserId.HasValue)
             shared[AppCreatorUserIdKey] = creatorUserId.Value.ToString();
+        if (fahrzeugId is { } fzId)
+        {
+            shared[AppFahrzeugIdKey] = fzId.ToString();
+            shared[AppFahrzeugLabelKey] = fahrzeugLabel ?? string.Empty;
+        }
 
         var ev = new Event
         {
@@ -268,6 +288,8 @@ public class GoogleCalendarService : ICalendarService
         string? creatorEmail = null;
         Guid? creatorUserId = null;
         string? eventUrl = null;
+        Guid? fahrzeugId = null;
+        string? fahrzeugLabel = null;
 
         if (ev.ExtendedProperties?.Shared is { } shared)
         {
@@ -276,6 +298,10 @@ public class GoogleCalendarService : ICalendarService
             shared.TryGetValue(AppEventUrlKey, out eventUrl);
             if (shared.TryGetValue(AppCreatorUserIdKey, out var userIdStr) && Guid.TryParse(userIdStr, out var parsedId))
                 creatorUserId = parsedId;
+            if (shared.TryGetValue(AppFahrzeugIdKey, out var fzIdStr) && Guid.TryParse(fzIdStr, out var parsedFzId))
+                fahrzeugId = parsedFzId;
+            if (shared.TryGetValue(AppFahrzeugLabelKey, out var fzLabel) && !string.IsNullOrWhiteSpace(fzLabel))
+                fahrzeugLabel = fzLabel;
         }
 
         creatorName ??= ev.Creator?.DisplayName;
@@ -295,7 +321,9 @@ public class GoogleCalendarService : ICalendarService
             creatorUserId,
             ev.Description,
             ev.Location,
-            eventUrl
+            eventUrl,
+            fahrzeugId,
+            fahrzeugLabel
         );
     }
 }

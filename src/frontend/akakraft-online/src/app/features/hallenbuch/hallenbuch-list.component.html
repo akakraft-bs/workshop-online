@@ -77,6 +77,12 @@
               Familienmitglied
             </mat-chip>
           }
+          @if (eintrag.fahrzeugLabel) {
+            <mat-chip class="fahrzeug-chip">
+              <mat-icon matChipAvatar>directions_car</mat-icon>
+              {{ eintrag.fahrzeugLabel }}
+            </mat-chip>
+          }
         </div>
 
       </div>

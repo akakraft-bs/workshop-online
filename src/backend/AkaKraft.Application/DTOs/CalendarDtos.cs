@@ -15,6 +15,7 @@ public record CalendarConfigDto(
     bool IsVisible,
     int SortOrder,
     string CalendarType,
+    bool GrantsParkplatzBerechtigung,
     IEnumerable<string> WriteRoles
 );
 
@@ -24,6 +25,7 @@ public record UpdateCalendarConfigDto(
     bool IsVisible,
     int SortOrder,
     string CalendarType,
+    bool GrantsParkplatzBerechtigung,
     IEnumerable<string> WriteRoles
 );
 
@@ -43,7 +45,9 @@ public record CalendarEventDto(
     Guid? CreatorUserId,
     string? Description,
     string? Location,
-    string? Url
+    string? Url,
+    Guid? FahrzeugId = null,
+    string? FahrzeugLabel = null
 );
 
 public record CreateCalendarEventDto(
@@ -54,7 +58,9 @@ public record CreateCalendarEventDto(
     bool IsAllDay,
     string? Description,
     string? Location,
-    string? Url
+    string? Url,
+    Guid? FahrzeugId = null,
+    string? FahrzeugLabel = null
 );
 
 public record UpdateCalendarEventDto(
@@ -64,5 +70,7 @@ public record UpdateCalendarEventDto(
     bool IsAllDay,
     string? Description,
     string? Location,
-    string? Url
+    string? Url,
+    Guid? FahrzeugId = null,
+    string? FahrzeugLabel = null
 );

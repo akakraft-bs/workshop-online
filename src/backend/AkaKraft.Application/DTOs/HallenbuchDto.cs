@@ -13,7 +13,9 @@ public record HallenbuchEintragDto(
     GastschraubenArt? GastschraubenArt,
     bool? GastschraubenBezahlt,
     bool HatFamiliegeschraubt,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    Guid? FahrzeugId = null,
+    string? FahrzeugLabel = null);
 
 public record CreateHallenbuchEintragDto(
     DateTime Start,
@@ -22,7 +24,8 @@ public record CreateHallenbuchEintragDto(
     bool HatGastgeschraubt,
     GastschraubenArt? GastschraubenArt,
     bool? GastschraubenBezahlt,
-    bool HatFamiliegeschraubt);
+    bool HatFamiliegeschraubt,
+    Guid? FahrzeugId = null);
 
 public record UpdateHallenbuchEintragDto(
     DateTime Start,
@@ -31,7 +34,8 @@ public record UpdateHallenbuchEintragDto(
     bool HatGastgeschraubt,
     GastschraubenArt? GastschraubenArt,
     bool? GastschraubenBezahlt,
-    bool HatFamiliegeschraubt);
+    bool HatFamiliegeschraubt,
+    Guid? FahrzeugId = null);
 
 public record HallenbuchStatistikEintragDto(
     Guid UserId,

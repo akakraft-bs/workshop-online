@@ -1,0 +1,73 @@
+.parkplatz-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.parkplatz-icon { color: #3b82f6; }
+
+.section-count {
+  background: #10b981;
+  color: #fff;
+
+  &.none {
+    background: color-mix(in srgb, #ef4444 85%, transparent);
+  }
+}
+
+.loading-row {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.account-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--mat-sys-surface-container-high);
+  border: 1px solid var(--mat-sys-outline-variant);
+  text-decoration: none;
+  color: inherit;
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #f59e0b;
+    flex-shrink: 0;
+  }
+  &.frei .dot { background: #10b981; }
+
+  &.mine {
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 45%, transparent);
+  }
+
+  .label {
+    font-weight: 600;
+    font-size: 13.5px;
+    flex-shrink: 0;
+  }
+
+  .detail {
+    font-size: 12px;
+    color: var(--mat-sys-on-surface-variant);
+    margin-left: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .frei-text { color: #0f9d6c; font-weight: 600; }
+}
+
+.widget-link {
+  width: 100%;
+}

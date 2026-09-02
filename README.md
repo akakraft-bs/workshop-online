@@ -12,15 +12,17 @@ Webbasierte Vereinsverwaltung für die AkaKraft Braunschweig. Die App bietet Mit
 |---|---|
 | **Dashboard** | Nächste Veranstaltungen, konfigurierbarer Schnellzugriff (geräteübergreifend gespeichert), Nachricht des Tages |
 | **Nachricht des Tages** | Vorstand/Admin kann eine tagesaktuelle Mitteilung mit Priorität (Info/Warnung/Kritisch) für alle Mitglieder setzen |
-| **Hallenbelegung** | Wochenkalender auf Basis von Google Calendar, Termine anlegen/bearbeiten/löschen |
+| **Hallenbelegung** | Wochenkalender auf Basis von Google Calendar, Termine anlegen/bearbeiten/löschen; optionale Fahrzeugauswahl je Reservierung (für die Parkkonto-Vorauswahl) |
 | **Veranstaltungen** | Agenda-Übersicht aller Veranstaltungskalender, Einträge verwalten |
 | **Werkzeug** | Inventarverwaltung mit Ausleihe und Rückgabe, Ablageort-Autocomplete |
 | **Verbrauchsmaterial** | Bestandsübersicht mit Mengen und Mindestbeständen, Badge bei niedrigem Bestand |
 | **Mängelmelder** | Mängel und Schäden melden, mit Bild, Status und Anmerkungen; Badge für offene Mängel |
 | **Wunschliste** | Anschaffungsvorschläge einreichen, per Up-/Downvote bewerten, Preis angeben, abschließen |
 | **Umfragen** | Abstimmungen erstellen und teilnehmen; Enthaltung möglich; manuelle Push-Erinnerung (Ersteller/Vorstand); Badge für ausstehende Abstimmungen |
-| **Hallenbuch** | Manuelle Nutzungseinträge der Halle inkl. Statistik-Export; Dialog wird automatisch mit Zeiten und Beschreibung der heutigen Kalenderreservierung vorausgefüllt; Nutzer mit Reservierung aber fehlendem Eintrag erhalten um 22 Uhr eine Push- und E-Mail-Erinnerung |
+| **Hallenbuch** | Manuelle Nutzungseinträge der Halle inkl. Statistik-Export; Dialog wird automatisch mit Zeiten, Beschreibung und Fahrzeug der heutigen Kalenderreservierung vorausgefüllt (Fahrzeug optional wählbar); Nutzer mit Reservierung aber fehlendem Eintrag erhalten um 22 Uhr eine Push- und E-Mail-Erinnerung |
 | **Aufgaben** | Aufgaben anlegen, zuweisen und erledigen; Badge für offene Aufgaben |
+| **Campus-Parken** | Zwei Uni-Parkkonten als Belegungs-Board (pro Konto max. 1 Fahrzeug, 24 h ab Einfahrt). Übernehmen/Freigeben, Konfliktprüfung fürs Kennzeichen, geführter Uni-Portal-Hinweis. Berechtigung über eine Reservierung „Bühne Halle 1" (−30 min bis +2 h); ohne sichere Zuordnung Übernahme mit Selbstbestätigung, ohne Reservierung spontane Nutzung freier Konten. Push-Erinnerung 2 h vor und bei Ablauf der 24-h-Grenze; „Problem melden" an Hallenwart/Vorstand; ausklappbare Historie aller Belegungen. Beim Check-in wird das Fahrzeug aus der eigenen Bühne-Reservierung vorausgewählt |
+| **Meine Fahrzeuge** | Marke, Modell und Kennzeichen hinterlegen (Standardfahrzeug); wird bei Hallenreservierung, Hallenbucheintrag und Parkkonto-Check-in vorausgewählt |
 | **Verein** | Vereinsinfo, Dokumente und Zugangsdaten (rollengeschützt) |
 | **Projekte** | Projektübersicht des Vereins |
 | **Vorstandsbereich** | Einstiegsbereich für Vorstandsrollen (CRM und weitere Vorstandsfunktionen) |
@@ -220,6 +222,7 @@ Beide Wege erzeugen ein JWT (Laufzeit konfigurierbar über `Authentication:Jwt:E
 3. JSON-Schlüssel herunterladen und als Secret hinterlegen (siehe oben)
 4. Jeden Google-Kalender, der in der App erscheinen soll, mit der E-Mail-Adresse des Service Accounts **teilen** (mindestens Lesezugriff, für Schreiben: Bearbeiter)
 5. In den **Kalender-Einstellungen** der App den Kalender abonnieren und Typ/Farbe konfigurieren
+6. Für *Campus-Parken*: den Kalender „Bühne Halle 1" in den Kalender-Einstellungen als **„Reservierung berechtigt zur Parkkonto-Nutzung"** markieren
 
 ---
 

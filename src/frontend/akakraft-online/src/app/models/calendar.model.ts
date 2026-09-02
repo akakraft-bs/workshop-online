@@ -15,6 +15,7 @@ export interface CalendarConfig {
   isVisible: boolean;
   sortOrder: number;
   calendarType: CalendarType;
+  grantsParkplatzBerechtigung: boolean;
   writeRoles: string[];
 }
 
@@ -40,6 +41,8 @@ export interface CalendarEvent {
   description?: string;
   location?: string;
   url?: string;
+  fahrzeugId?: string | null;
+  fahrzeugLabel?: string | null;
 }
 
 export interface CreateCalendarEventRequest {
@@ -51,6 +54,7 @@ export interface CreateCalendarEventRequest {
   description?: string;
   location?: string;
   url?: string;
+  fahrzeugId?: string | null;
 }
 
 export interface UpdateCalendarEventRequest {
@@ -61,6 +65,7 @@ export interface UpdateCalendarEventRequest {
   description?: string;
   location?: string;
   url?: string;
+  fahrzeugId?: string | null;
 }
 
 export interface UpdateCalendarConfigRequest {
@@ -69,6 +74,7 @@ export interface UpdateCalendarConfigRequest {
   isVisible: boolean;
   sortOrder: number;
   calendarType: CalendarType;
+  grantsParkplatzBerechtigung: boolean;
   writeRoles: string[];
 }
 

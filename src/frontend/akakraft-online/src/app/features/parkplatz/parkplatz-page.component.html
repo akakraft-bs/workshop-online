@@ -1,0 +1,192 @@
+<h1 class="page-title">Campus-Parken</h1>
+
+<p class="hint">
+  Zwei Uni-Parkkonten – pro Konto darf immer nur <strong>ein</strong> Fahrzeug auf dem Campus stehen (max. 24 h ab Einfahrt).
+  Trag dein Kennzeichen vor der Einfahrt im
+  <a href="https://tu-braunschweig.campusparken.de/portal" target="_blank" rel="noopener">Uni-Portal</a>
+  ein (Navigation links → „Kennzeichen").
+</p>
+
+@if (loading()) {
+  <div class="loading-state"><mat-spinner diameter="48" /></div>
+} @else if (overview(); as ov) {
+
+  <!-- Berechtigungshinweis -->
+  <div class="berechtigung" [class]="'art-' + ov.berechtigung.art.toLowerCase()">
+    <mat-icon>{{ ov.berechtigung.art === 'Automatisch' ? 'verified_user' : 'info' }}</mat-icon>
+    <p>{{ ov.berechtigung.hinweis }}</p>
+  </div>
+
+  @if (!ov.kalenderKonfiguriert && isPrivileged()) {
+    <div class="admin-hint">
+      <mat-icon>settings</mat-icon>
+      <p>Noch kein Bühne-Halle-1-Kalender hinterlegt. Unter <em>Kalender-Einstellungen</em> den passenden
+        Kalender als „berechtigt zur Parkkonto-Nutzung" markieren.</p>
+    </div>
+  }
+
+  <!-- Konten -->
+  <div class="accounts">
+    @for (acc of ov.accounts; track acc.id) {
+      <div class="account-card" [class.frei]="acc.istFrei" [class.belegt]="!acc.istFrei">
+
+        <div class="account-head">
+          <span class="account-label">{{ acc.label }}</span>
+          <span class="status-pill" [class.frei]="acc.istFrei">
+            {{ acc.istFrei ? 'Frei' : 'Belegt' }}
+          </span>
+        </div>
+
+        @if (acc.belegung; as claim) {
+          <div class="belegung">
+            <div class="avatar" [style.background-color]="avatarColor(claim.displayName)">
+              @if (claim.pictureUrl) {
+                <img [src]="claim.pictureUrl" [alt]="claim.displayName">
+              } @else {
+                {{ initials(claim.displayName) }}
+              }
+            </div>
+            <div class="belegung-info">
+              <span class="belegung-name">
+                {{ claim.userId === currentUserId() ? 'Du' : claim.displayName }}
+              </span>
+              <span class="belegung-kennzeichen">
+                {{ claim.kennzeichen }}@if (claim.fahrzeugBezeichnung) {<span class="fz-bez"> · {{ claim.fahrzeugBezeichnung }}</span>}
+              </span>
+              <span class="belegung-meta">
+                Einfahrt {{ uhrzeit(claim.einfahrtAt) }} · {{ seit(claim.einfahrtAt) }}
+              </span>
+              <span class="belegung-rest" [class.warn]="laeuftBald(claim)">
+                <mat-icon>schedule</mat-icon> {{ restzeit(claim) }}
+                @if (claim.voraussichtlichBis) {
+                  · geplant bis {{ uhrzeit(claim.voraussichtlichBis) }}
+                }
+              </span>
+            </div>
+          </div>
+
+          @if (claim.userId === currentUserId()) {
+            <div class="portal-checklist">
+              <strong>Nächste Schritte:</strong>
+              <ol>
+                <li>Im Uni-Portal mit den Zugangsdaten für <strong>{{ acc.label }}</strong> anmelden</li>
+                <li>Links in der Navigation auf <strong>„Kennzeichen"</strong> – dort <code>{{ claim.kennzeichen }}</code> in die Liste eintragen</li>
+                <li>Bei der Ausfahrt hier „Konto freigeben" tippen</li>
+              </ol>
+              <a mat-stroked-button [href]="portalLink(acc)" target="_blank" rel="noopener">
+                <mat-icon>open_in_new</mat-icon> Uni-Portal öffnen
+              </a>
+              @if (acc.notiz) { <p class="account-notiz">{{ acc.notiz }}</p> }
+            </div>
+
+            @if (editClaimId() === claim.id) {
+              <div class="edit-row">
+                <input type="datetime-local" [(ngModel)]="editVoraussichtlichBis">
+                <button mat-button (click)="cancelEdit()">Abbrechen</button>
+                <button mat-flat-button color="primary" (click)="saveEdit(claim)">Speichern</button>
+              </div>
+            }
+
+            <div class="card-actions">
+              <button mat-button (click)="startEdit(claim)">
+                <mat-icon>edit_calendar</mat-icon> Standdauer
+              </button>
+              <button mat-flat-button color="primary"
+                      [disabled]="busyAccountId() === acc.id"
+                      (click)="freigeben(claim, acc)">
+                <mat-icon>logout</mat-icon> Konto freigeben
+              </button>
+            </div>
+          } @else {
+            <div class="card-actions">
+              <button mat-button class="problem-btn" (click)="problemMelden(acc)">
+                <mat-icon>flag</mat-icon> Problem melden
+              </button>
+            </div>
+          }
+        } @else {
+          <p class="frei-text">Kein Fahrzeug gemeldet – Konto verfügbar.</p>
+          @if (acc.notiz) { <p class="account-notiz">{{ acc.notiz }}</p> }
+          <div class="card-actions">
+            @if (meinClaim()) {
+              <span class="hold-hint">Du hältst bereits ein Konto. Zum Wechseln zuerst freigeben.</span>
+            } @else {
+              <button mat-flat-button color="primary" (click)="openCheckin(acc)">
+                <mat-icon>add</mat-icon> Übernehmen
+              </button>
+            }
+            <button mat-button class="problem-btn" (click)="problemMelden(acc)">
+              <mat-icon>flag</mat-icon> Problem melden
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Historie -->
+  <section class="historie">
+    <button class="historie-toggle" (click)="toggleHistorie()">
+      <mat-icon>{{ historieOpen() ? 'expand_less' : 'expand_more' }}</mat-icon>
+      <h2>Historie</h2>
+    </button>
+
+    @if (historieOpen()) {
+      @if (historieLoading()) {
+        <div class="loading-row"><mat-spinner diameter="24" /></div>
+      } @else if (historie().length === 0) {
+        <p class="leer">Noch keine Belegungen erfasst.</p>
+      } @else {
+        <ul class="hist-list">
+          @for (h of historie(); track h.id) {
+            <li>
+              <div class="hist-main">
+                <span class="hist-account">{{ h.accountLabel }}</span>
+                <span class="hist-name">{{ h.displayName }}</span>
+                <span class="hist-kennzeichen">{{ h.kennzeichen }}</span>
+                <span class="hist-status" [class]="'st-' + h.status.toLowerCase()">{{ h.status }}</span>
+              </div>
+              <div class="hist-meta">
+                <mat-icon>login</mat-icon> {{ uhrzeit(h.einfahrtAt) }}
+                @if (h.freigegebenAt) {
+                  <mat-icon>logout</mat-icon> {{ uhrzeit(h.freigegebenAt) }}
+                } @else {
+                  <span class="hist-sep">· 24-Std.-Ablauf {{ uhrzeit(h.autoExpiresAt) }}</span>
+                }
+                <span class="hist-art">· {{ h.berechtigungArt }}</span>
+              </div>
+              @if (h.bestaetigungHinweis) {
+                <div class="hist-hinweis">{{ h.bestaetigungHinweis }}</div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+
+  <!-- Anstehende Reservierungen -->
+  <section class="reservierungen">
+    <h2>Anstehende Bühne-Halle-1-Reservierungen</h2>
+    @if (ov.anstehendeReservierungen.length === 0) {
+      <p class="leer">Keine Reservierungen in den nächsten 24 Stunden.</p>
+    } @else {
+      <ul>
+        @for (r of ov.anstehendeReservierungen; track r.eventId) {
+          <li [class.meine]="r.istMeine">
+            <mat-icon>event</mat-icon>
+            <span class="res-zeit">{{ r.start ? uhrzeit(r.start) : '' }}</span>
+            <span class="res-titel">{{ r.titel }}</span>
+            @if (r.istMeine) { <span class="res-meine">deine</span> }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+} @else {
+  <div class="empty-state">
+    <mat-icon>local_parking</mat-icon>
+    <p>Keine Daten verfügbar.</p>
+  </div>
+}

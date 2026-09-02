@@ -1,6 +1,8 @@
 using AkaKraft.Application.DTOs;
 using AkaKraft.Application.Interfaces;
 using AkaKraft.Domain.Enums;
+using AkaKraft.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace AkaKraft.WebApi.Endpoints;
 
@@ -104,7 +106,7 @@ internal static class CalendarEndpoints
             CreateCalendarEventDto dto, HttpContext ctx,
             ICalendarService calendarService, ICalendarConfigService configService,
             IUserService userService, IUserPreferencesService prefsService,
-            IPushNotificationService pushService) =>
+            IPushNotificationService pushService, ApplicationDbContext db) =>
         {
             if (!ctx.TryGetCurrentUserId(out var userId))
                 return Results.Unauthorized();
@@ -114,6 +116,9 @@ internal static class CalendarEndpoints
 
             if (config is null) return Results.NotFound("Kalender nicht gefunden.");
             if (!HasWriteAccess(ctx, config)) return Results.Forbid();
+
+            var (fahrzeugId, fahrzeugLabel) = await ResolveFahrzeugAsync(db, userId, dto.FahrzeugId);
+            dto = dto with { FahrzeugId = fahrzeugId, FahrzeugLabel = fahrzeugLabel };
 
             var user = await userService.GetByIdAsync(userId);
             if (user is null) return Results.Unauthorized();
@@ -149,13 +154,18 @@ internal static class CalendarEndpoints
 
         app.MapPut("/calendar/events/{calendarId}/{eventId}", async (
             string calendarId, string eventId, UpdateCalendarEventDto dto,
-            HttpContext ctx, ICalendarService calendarService, ICalendarConfigService configService) =>
+            HttpContext ctx, ICalendarService calendarService, ICalendarConfigService configService,
+            ApplicationDbContext db) =>
         {
             var config = (await configService.GetAllAsync())
                 .FirstOrDefault(c => c.GoogleCalendarId == calendarId);
 
             if (config is null) return Results.NotFound("Kalender nicht gefunden.");
             if (!HasWriteAccess(ctx, config)) return Results.Forbid();
+
+            ctx.TryGetCurrentUserId(out var currentUserId);
+            var (fahrzeugId, fahrzeugLabel) = await ResolveFahrzeugAsync(db, currentUserId, dto.FahrzeugId);
+            dto = dto with { FahrzeugId = fahrzeugId, FahrzeugLabel = fahrzeugLabel };
 
             var updated = await calendarService.UpdateEventAsync(calendarId, config.Name, config.Color, eventId, dto);
             return updated is null ? Results.NotFound() : Results.Ok(updated);
@@ -174,6 +184,16 @@ internal static class CalendarEndpoints
             await calendarService.DeleteEventAsync(calendarId, eventId);
             return Results.NoContent();
         }).RequireAuthorization("AnyRole");
+    }
+
+    /// <summary>Prüft, ob das angegebene Fahrzeug dem Nutzer gehört, und liefert Id + Anzeige-Label zurück.</summary>
+    private static async Task<(Guid? Id, string? Label)> ResolveFahrzeugAsync(
+        ApplicationDbContext db, Guid userId, Guid? fahrzeugId)
+    {
+        if (fahrzeugId is not { } id || userId == Guid.Empty) return (null, null);
+
+        var fahrzeug = await db.Fahrzeuge.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+        return fahrzeug is null ? (null, null) : (fahrzeug.Id, fahrzeug.Anzeige);
     }
 
     private static bool HasWriteAccess(HttpContext ctx, CalendarConfigDto config)
