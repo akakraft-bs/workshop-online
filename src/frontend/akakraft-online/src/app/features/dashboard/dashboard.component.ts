@@ -49,6 +49,10 @@ const SECTION_ICONS: Record<SectionId, string> = {
 const DEFAULT_SECTION_ORDER: SectionId[] = ['halle', 'umfragen', 'veranstaltungen', 'maengel', 'bestand', 'schnellzugriff'];
 const SECTION_ORDER_KEY = 'dashboard-section-order';
 
+// Temporär deaktivierte Sections – Feature vorübergehend komplett ausgeblendet.
+// Zum Reaktivieren einfach den Eintrag hier entfernen.
+const DISABLED_SECTIONS: readonly SectionId[] = ['halle'];
+
 function loadSectionOrder(): SectionId[] {
   try {
     const stored = localStorage.getItem(SECTION_ORDER_KEY);
@@ -184,8 +188,13 @@ export class DashboardComponent implements OnInit {
   readonly sectionLabels = SECTION_LABELS;
   readonly sectionIcons = SECTION_ICONS;
 
+  readonly reorderableSections = computed(() =>
+    this.sectionOrder().filter(id => !DISABLED_SECTIONS.includes(id))
+  );
+
   readonly visibleSections = computed(() =>
     this.sectionOrder().filter(id => {
+      if (DISABLED_SECTIONS.includes(id)) return false;
       if (id === 'umfragen') return this.pendingUmfragen().length > 0;
       if (id === 'maengel') return this.openMaengel().length > 0;
       if (id === 'bestand') return this.lowStockItems().length > 0;
@@ -267,8 +276,10 @@ export class DashboardComponent implements OnInit {
   }
 
   onSectionDrop(event: CdkDragDrop<string[]>): void {
-    const order = [...this.sectionOrder()];
-    moveItemInArray(order, event.previousIndex, event.currentIndex);
+    const reordered = [...this.reorderableSections()];
+    moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+    // Deaktivierte Sections behalten ihre gespeicherte Position (am Ende angehängt).
+    const order = [...reordered, ...this.sectionOrder().filter(id => DISABLED_SECTIONS.includes(id))];
     this.sectionOrder.set(order);
     localStorage.setItem(SECTION_ORDER_KEY, JSON.stringify(order));
   }
