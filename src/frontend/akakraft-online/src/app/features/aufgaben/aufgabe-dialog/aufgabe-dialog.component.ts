@@ -74,8 +74,8 @@ export class AufgabeDialogComponent implements OnInit {
       this.snackBar.open('Erlaubt: JPEG, PNG, WebP, GIF.', 'OK', { duration: 4000 });
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      this.snackBar.open('Maximal 5 MB erlaubt.', 'OK', { duration: 4000 });
+    if (file.size > 10 * 1024 * 1024) {
+      this.snackBar.open('Maximal 10 MB erlaubt.', 'OK', { duration: 4000 });
       return;
     }
     this.selectedFile.set(file);
