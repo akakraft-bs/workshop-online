@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
         - name: minio
-          image: minio/minio:latest
+          image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+          imagePullPolicy: IfNotPresent
           args: ["server", "/data", "--console-address", ":9001"]
           ports:
             - name: api
