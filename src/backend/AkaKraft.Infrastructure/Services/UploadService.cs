@@ -27,7 +27,7 @@ public class UploadService(IMinioClient minio, IOptions<MinioOptions> opts) : IU
         "image/jpeg", "image/png", "image/webp", "image/gif",
     ];
 
-    private const long MaxImageBytes    = 5  * 1024 * 1024; //  5 MB
+    private const long MaxImageBytes    = 10 * 1024 * 1024; // 10 MB
     private const long MaxDocumentBytes = 50 * 1024 * 1024; // 50 MB
     private const int  ThumbnailSize    = 400;               // px (längste Seite)
 
@@ -37,7 +37,7 @@ public class UploadService(IMinioClient minio, IOptions<MinioOptions> opts) : IU
             throw new InvalidOperationException("Ungültiger Dateityp. Erlaubt: JPEG, PNG, WebP, GIF.");
 
         if (file.Length > MaxImageBytes)
-            throw new InvalidOperationException("Datei zu groß. Maximal 5 MB erlaubt.");
+            throw new InvalidOperationException("Datei zu groß. Maximal 10 MB erlaubt.");
 
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (string.IsNullOrEmpty(ext)) ext = ".jpg";

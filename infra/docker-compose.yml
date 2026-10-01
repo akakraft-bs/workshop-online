@@ -26,7 +26,7 @@ services:
       - 8080:8080
 
   ako-minio:
-    image: minio/minio
+    image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
     restart: always
     ports:
       - 9000:9000   # S3 API
