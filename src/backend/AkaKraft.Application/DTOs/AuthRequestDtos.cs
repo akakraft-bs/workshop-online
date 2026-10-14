@@ -27,3 +27,8 @@ public record ResetPasswordRequest(
     string Token,
     string NewPassword
 );
+
+public record MobileCodeExchangeRequest(
+    string Code,
+    string CodeVerifier
+);
