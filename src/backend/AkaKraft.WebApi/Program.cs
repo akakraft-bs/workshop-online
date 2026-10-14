@@ -25,6 +25,7 @@ public static class Program
             reloadOnChange: true);
 
         builder.Services.AddInfrastructure(builder.Configuration);
+        builder.Services.AddMemoryCache();
         builder.Services.AddHostedService<UmfrageDeadlineBackgroundService>();
         builder.Services.AddHostedService<CalendarUserResolutionBackgroundService>();
         builder.Services.AddHostedService<HallenbuchReminderBackgroundService>();
