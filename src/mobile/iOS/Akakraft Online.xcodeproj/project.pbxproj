@@ -1,0 +1,556 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		11048A4B307F8F5800823ABA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 11048A33307F8F5600823ABA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 11048A3A307F8F5600823ABA;
+			remoteInfo = "Akakraft Online";
+		};
+		11048A55307F8F5800823ABA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 11048A33307F8F5600823ABA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 11048A3A307F8F5600823ABA;
+			remoteInfo = "Akakraft Online";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		11048A3B307F8F5600823ABA /* Akakraft Online.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Akakraft Online.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		11048A4A307F8F5800823ABA /* Akakraft OnlineTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Akakraft OnlineTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		11048A54307F8F5800823ABA /* Akakraft OnlineUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Akakraft OnlineUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		11048A3D307F8F5600823ABA /* Akakraft Online */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Akakraft Online";
+			sourceTree = "<group>";
+		};
+		11048A4D307F8F5800823ABA /* Akakraft OnlineTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Akakraft OnlineTests";
+			sourceTree = "<group>";
+		};
+		11048A57307F8F5800823ABA /* Akakraft OnlineUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Akakraft OnlineUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		11048A38307F8F5600823ABA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		11048A47307F8F5800823ABA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		11048A51307F8F5800823ABA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		11048A32307F8F5600823ABA = {
+			isa = PBXGroup;
+			children = (
+				11048A3D307F8F5600823ABA /* Akakraft Online */,
+				11048A4D307F8F5800823ABA /* Akakraft OnlineTests */,
+				11048A57307F8F5800823ABA /* Akakraft OnlineUITests */,
+				11048A3C307F8F5600823ABA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		11048A3C307F8F5600823ABA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				11048A3B307F8F5600823ABA /* Akakraft Online.app */,
+				11048A4A307F8F5800823ABA /* Akakraft OnlineTests.xctest */,
+				11048A54307F8F5800823ABA /* Akakraft OnlineUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		11048A3A307F8F5600823ABA /* Akakraft Online */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11048A5C307F8F5900823ABA /* Build configuration list for PBXNativeTarget "Akakraft Online" */;
+			buildPhases = (
+				11048A37307F8F5600823ABA /* Sources */,
+				11048A38307F8F5600823ABA /* Frameworks */,
+				11048A39307F8F5600823ABA /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				11048A3D307F8F5600823ABA /* Akakraft Online */,
+			);
+			name = "Akakraft Online";
+			productName = "Akakraft Online";
+			productReference = 11048A3B307F8F5600823ABA /* Akakraft Online.app */;
+			productType = "com.apple.product-type.application";
+		};
+		11048A49307F8F5800823ABA /* Akakraft OnlineTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11048A5F307F8F5900823ABA /* Build configuration list for PBXNativeTarget "Akakraft OnlineTests" */;
+			buildPhases = (
+				11048A46307F8F5800823ABA /* Sources */,
+				11048A47307F8F5800823ABA /* Frameworks */,
+				11048A48307F8F5800823ABA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				11048A4C307F8F5800823ABA /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				11048A4D307F8F5800823ABA /* Akakraft OnlineTests */,
+			);
+			name = "Akakraft OnlineTests";
+			productName = "Akakraft OnlineTests";
+			productReference = 11048A4A307F8F5800823ABA /* Akakraft OnlineTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		11048A53307F8F5800823ABA /* Akakraft OnlineUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11048A62307F8F5900823ABA /* Build configuration list for PBXNativeTarget "Akakraft OnlineUITests" */;
+			buildPhases = (
+				11048A50307F8F5800823ABA /* Sources */,
+				11048A51307F8F5800823ABA /* Frameworks */,
+				11048A52307F8F5800823ABA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				11048A56307F8F5800823ABA /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				11048A57307F8F5800823ABA /* Akakraft OnlineUITests */,
+			);
+			name = "Akakraft OnlineUITests";
+			productName = "Akakraft OnlineUITests";
+			productReference = 11048A54307F8F5800823ABA /* Akakraft OnlineUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		11048A33307F8F5600823ABA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					11048A3A307F8F5600823ABA = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					11048A49307F8F5800823ABA = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 11048A3A307F8F5600823ABA;
+					};
+					11048A53307F8F5800823ABA = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 11048A3A307F8F5600823ABA;
+					};
+				};
+			};
+			buildConfigurationList = 11048A36307F8F5600823ABA /* Build configuration list for PBXProject "Akakraft Online" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 11048A32307F8F5600823ABA;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 11048A3C307F8F5600823ABA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				11048A3A307F8F5600823ABA /* Akakraft Online */,
+				11048A49307F8F5800823ABA /* Akakraft OnlineTests */,
+				11048A53307F8F5800823ABA /* Akakraft OnlineUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		11048A39307F8F5600823ABA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		11048A48307F8F5800823ABA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		11048A52307F8F5800823ABA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		11048A37307F8F5600823ABA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		11048A46307F8F5800823ABA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		11048A50307F8F5800823ABA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		11048A4C307F8F5800823ABA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 11048A3A307F8F5600823ABA /* Akakraft Online */;
+			targetProxy = 11048A4B307F8F5800823ABA /* PBXContainerItemProxy */;
+		};
+		11048A56307F8F5800823ABA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 11048A3A307F8F5600823ABA /* Akakraft Online */;
+			targetProxy = 11048A55307F8F5800823ABA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		11048A5A307F8F5800823ABA /* Debug configuration for PBXProject "Akakraft Online" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 9LA323LPLP;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		11048A5B307F8F5800823ABA /* Release configuration for PBXProject "Akakraft Online" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 9LA323LPLP;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		11048A5D307F8F5900823ABA /* Debug configuration for PBXNativeTarget "Akakraft Online" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9LA323LPLP;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.akakraft-bs.Akakraft-Online";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		11048A5E307F8F5900823ABA /* Release configuration for PBXNativeTarget "Akakraft Online" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9LA323LPLP;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.akakraft-bs.Akakraft-Online";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		11048A60307F8F5900823ABA /* Debug configuration for PBXNativeTarget "Akakraft OnlineTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9LA323LPLP;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.akakraft-bs.Akakraft-OnlineTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Akakraft Online.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Akakraft Online";
+			};
+			name = Debug;
+		};
+		11048A61307F8F5900823ABA /* Release configuration for PBXNativeTarget "Akakraft OnlineTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9LA323LPLP;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.akakraft-bs.Akakraft-OnlineTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Akakraft Online.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Akakraft Online";
+			};
+			name = Release;
+		};
+		11048A63307F8F5900823ABA /* Debug configuration for PBXNativeTarget "Akakraft OnlineUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9LA323LPLP;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.akakraft-bs.Akakraft-OnlineUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Akakraft Online";
+			};
+			name = Debug;
+		};
+		11048A64307F8F5900823ABA /* Release configuration for PBXNativeTarget "Akakraft OnlineUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9LA323LPLP;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.akakraft-bs.Akakraft-OnlineUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Akakraft Online";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		11048A36307F8F5600823ABA /* Build configuration list for PBXProject "Akakraft Online" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11048A5A307F8F5800823ABA /* Debug configuration for PBXProject "Akakraft Online" */,
+				11048A5B307F8F5800823ABA /* Release configuration for PBXProject "Akakraft Online" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		11048A5C307F8F5900823ABA /* Build configuration list for PBXNativeTarget "Akakraft Online" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11048A5D307F8F5900823ABA /* Debug configuration for PBXNativeTarget "Akakraft Online" */,
+				11048A5E307F8F5900823ABA /* Release configuration for PBXNativeTarget "Akakraft Online" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		11048A5F307F8F5900823ABA /* Build configuration list for PBXNativeTarget "Akakraft OnlineTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11048A60307F8F5900823ABA /* Debug configuration for PBXNativeTarget "Akakraft OnlineTests" */,
+				11048A61307F8F5900823ABA /* Release configuration for PBXNativeTarget "Akakraft OnlineTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		11048A62307F8F5900823ABA /* Build configuration list for PBXNativeTarget "Akakraft OnlineUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11048A63307F8F5900823ABA /* Debug configuration for PBXNativeTarget "Akakraft OnlineUITests" */,
+				11048A64307F8F5900823ABA /* Release configuration for PBXNativeTarget "Akakraft OnlineUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 11048A33307F8F5600823ABA /* Project object */;
+	validationLevel = 1;
+}

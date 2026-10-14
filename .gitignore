@@ -131,3 +131,8 @@ docker-compose.override.yml
 src/backend/AkaKraft.WebApi/wwwroot/uploads
 k8s/secrets/*
 **/credentials.yaml
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
