@@ -152,3 +152,34 @@ struct PKCETests {
         #expect(url.absoluteString == "https://app.akakraft-bs.de/api/auth/login/google?client=ios&code_challenge=abc")
     }
 }
+
+struct GreetingTests {
+    private func date(day: Int, hour: Int, _ calendar: Calendar) throws -> Date {
+        try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour, minute: 30)))
+    }
+
+    private var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .gmt
+        return calendar
+    }
+
+    @Test(arguments: [(4, 3), (5, 0), (10, 0), (11, 1), (17, 1), (18, 2), (22, 2), (23, 3), (0, 3)])
+    func salutationMatchesTimeOfDay(_ hour: Int, _ period: Int) throws {
+        let texts = period < 3 ? DashboardView.salutations[period].texts : DashboardView.nightSalutations
+        #expect(texts.contains(DashboardView.salutation(at: try date(day: 15, hour: hour, calendar), calendar: calendar)))
+    }
+
+    @Test func salutationIsStableWithinADayAndVariesAcrossDays() throws {
+        let morning = try date(day: 15, hour: 6, calendar)
+        let later = try date(day: 15, hour: 9, calendar)
+        #expect(DashboardView.salutation(at: morning, calendar: calendar) == DashboardView.salutation(at: later, calendar: calendar))
+        let week = try (15..<19).map { DashboardView.salutation(at: try date(day: $0, hour: 6, calendar), calendar: calendar) }
+        #expect(Set(week).count > 1)
+    }
+
+    @Test func noMahlzeit() {
+        let all = DashboardView.salutations.flatMap(\.texts) + DashboardView.nightSalutations
+        #expect(!all.contains("Mahlzeit"))
+    }
+}

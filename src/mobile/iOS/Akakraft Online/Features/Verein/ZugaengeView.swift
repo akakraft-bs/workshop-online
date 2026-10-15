@@ -60,6 +60,7 @@ struct ZugaengeView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Zugänge")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if session.permissions.isPrivileged {
                 ToolbarItem(placement: .topBarTrailing) {

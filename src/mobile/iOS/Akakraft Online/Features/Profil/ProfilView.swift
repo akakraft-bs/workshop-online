@@ -3,17 +3,18 @@ import SwiftUI
 struct ProfilView: View {
     @Environment(AppSession.self) private var session
     @Environment(ConnectivityMonitor.self) private var connectivity
+    @Environment(OfflineSync.self) private var offlineSync
     @State private var preferences = Remote<UserPreferences>("users/me/preferences")
     @State private var displayName = ""
     @State private var phone = ""
     @State private var address = ""
     @State private var loadedPreferences = false
-    @State private var saved = false
     @State private var action = ActionRunner()
     @State private var confirmLogout = false
     @State private var confirmClearCache = false
     @State private var cacheBytes = 0
     @State private var showServerSheet = false
+    @State private var serverVersion: String?
 
     var body: some View {
         @Bindable var connectivity = connectivity
@@ -40,11 +41,6 @@ struct ProfilView: View {
                     .keyboardType(.phonePad)
                 TextField("Adresse", text: $address, axis: .vertical)
                     .textContentType(.fullStreetAddress)
-                Button(saved ? "Gespeichert" : "Profil speichern", systemImage: saved ? "checkmark" : "square.and.arrow.down") {
-                    Task { await save() }
-                }
-                .disabled(action.isRunning || !loadedPreferences)
-                .requiresOnline()
             } header: {
                 Text("Profil")
             } footer: {
@@ -53,11 +49,21 @@ struct ProfilView: View {
 
             Section {
                 LabeledContent("Server", value: session.server.displayName)
+                // Werte nur als einzelner Text: Label oder ProgressView als Wert lassen die Zeile aufblähen.
                 LabeledContent("Status") {
-                    Label(connectivity.isOnline ? "Online" : "Offline", systemImage: connectivity.isOnline ? "wifi" : "wifi.slash")
+                    Text("\(Image(systemName: connectivity.isOnline ? "wifi" : "wifi.slash")) \(connectivity.isOnline ? "Online" : "Offline")")
                         .foregroundStyle(connectivity.isOnline ? .green : .orange)
                 }
+                LabeledContent("Offline-Stand", value: offlineSyncStatus)
                 LabeledContent("Gespeicherte Daten", value: cacheBytes.byteString)
+                Button("Offline-Daten jetzt laden", systemImage: "arrow.down.circle") {
+                    Task {
+                        await offlineSync.sync(session)
+                        cacheBytes = session.cache.totalBytes + ImagePipeline.shared.diskUsage
+                    }
+                }
+                .disabled(offlineSync.isRunning)
+                .requiresOnline()
                 Button("Offline-Daten löschen", systemImage: "trash") { confirmClearCache = true }
                 #if DEBUG
                 Toggle("Offline-Modus simulieren", isOn: $connectivity.simulateOffline)
@@ -68,7 +74,7 @@ struct ProfilView: View {
             } header: {
                 Text("Offline & Server")
             } footer: {
-                Text("Alle Seiten, die du einmal geöffnet hast, bleiben offline lesbar. Änderungen sind nur mit Verbindung möglich.")
+                Text("Beim Öffnen der App werden alle Bereiche samt Vorschaubildern geladen und bleiben offline lesbar – auch Seiten, die du noch nie geöffnet hast. Änderungen sind nur mit Verbindung möglich.")
             }
 
             Section {
@@ -80,7 +86,8 @@ struct ProfilView: View {
                 Link(destination: session.server.webURL(route: "")) {
                     Label("Web-App öffnen", systemImage: "safari")
                 }
-                LabeledContent("Version", value: Bundle.main.appVersion)
+                LabeledContent("App-Version", value: Bundle.main.appVersion)
+                LabeledContent("Server-Version", value: serverVersion ?? "–")
             }
 
             Section {
@@ -90,6 +97,8 @@ struct ProfilView: View {
             }
         }
         .navigationTitle("Profil & Einstellungen")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { serverVersion = await loadServerVersion() }
         .task {
             cacheBytes = session.cache.totalBytes + ImagePipeline.shared.diskUsage
             await preferences.load(session)
@@ -115,7 +124,24 @@ struct ProfilView: View {
             Text("Seiten werden beim nächsten Öffnen mit Verbindung neu geladen.")
         }
         .sheet(isPresented: $showServerSheet) { ServerSelectionView() }
+        .toolbar {
+            // Wie in iOS-Einstellungen üblich: „Sichern“ erscheint erst, wenn etwas geändert wurde.
+            if hasChanges {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Sichern", role: .confirm) { Task { await save() } }
+                        .disabled(action.isRunning)
+                        .requiresOnline()
+                }
+            }
+        }
         .actionAlert(action)
+    }
+
+    private var hasChanges: Bool {
+        guard loadedPreferences, let prefs = preferences.value else { return false }
+        return displayName.trimmed != (prefs.displayName ?? "").trimmed
+            || phone.trimmed != (prefs.phone ?? "").trimmed
+            || address.trimmed != (prefs.address ?? "").trimmed
     }
 
     private func save() async {
@@ -126,11 +152,30 @@ struct ProfilView: View {
             address: address.nonEmpty
         )
         if await action.run({ try await session.client.send(.put, "users/me/preferences", body: input) }) {
-            saved = true
+            preferences.update { $0 = input }
             await session.refreshUser()
-            try? await Task.sleep(for: .seconds(2))
-            saved = false
         }
+    }
+
+    private var offlineSyncStatus: String {
+        if offlineSync.isRunning { return "wird geladen …" }
+        return offlineSync.lastCompleted?.formatted(date: .abbreviated, time: .shortened) ?? "noch nicht geladen"
+    }
+
+    /// Backend-Version über `GET /version`; ältere Backends ohne den Endpunkt
+    /// liefern stattdessen die Release-Version der Web-App (`version.json`).
+    private func loadServerVersion() async -> String? {
+        struct VersionInfo: Decodable { let version: String }
+        if let data = try? await session.client.sendPublic(.get, "version", body: nil),
+           let info = try? JSONDecoder().decode(VersionInfo.self, from: data) {
+            return info.version
+        }
+        guard connectivity.isOnline,
+              let (data, response) = try? await URLSession.shared.data(from: session.server.webURL(route: "version.json")),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let info = try? JSONDecoder().decode(VersionInfo.self, from: data)
+        else { return nil }
+        return info.version
     }
 }
 
@@ -175,6 +220,7 @@ struct FeedbackView: View {
             }
         }
         .navigationTitle("Feedback")
+        .navigationBarTitleDisplayMode(.inline)
         .actionAlert(action)
     }
 }

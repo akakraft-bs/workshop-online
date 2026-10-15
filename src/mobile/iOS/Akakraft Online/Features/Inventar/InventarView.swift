@@ -16,15 +16,15 @@ struct InventarView: View {
             case .material: VerbrauchsmaterialListView()
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Picker("Bereich", selection: $segment) {
-                    ForEach(Segment.allCases) { Text($0.rawValue).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 240)
+        .navigationTitle("Inventar")
+        // Umschalter unter Titel und Suche statt in der Kopfzeile, damit der Titel sichtbar bleibt.
+        .safeAreaBar(edge: .top) {
+            Picker("Bereich", selection: $segment) {
+                ForEach(Segment.allCases) { Text($0.rawValue).tag($0) }
             }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            .padding(.bottom, 8)
         }
     }
 }

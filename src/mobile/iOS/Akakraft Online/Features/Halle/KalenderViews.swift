@@ -6,15 +6,15 @@ struct KalenderView: View {
     var body: some View {
         CalendarEventsView(kind: kind)
             .id(kind)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Picker("Kalender", selection: $kind) {
-                        ForEach(CalendarKind.allCases) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 280)
+            .navigationTitle("Kalender")
+            // Umschalter unter dem Titel statt in der Kopfzeile, damit der Titel sichtbar bleibt.
+            .safeAreaBar(edge: .top) {
+                Picker("Kalender", selection: $kind) {
+                    ForEach(CalendarKind.allCases) { Text($0.title).tag($0) }
                 }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.bottom, 8)
             }
     }
 }
@@ -64,7 +64,6 @@ struct CalendarEventsView: View {
         .safeAreaInset(edge: .top, spacing: 0) { monthBar }
         .refreshable { await reload() }
         .task { await reload() }
-        .navigationTitle(kind.title)
         .navigationDestination(for: CalendarEvent.self) { event in
             CalendarEventDetailView(event: event, config: configs.value?.first { $0.googleCalendarId == event.calendarId }) {
                 await events.load(session)
@@ -96,7 +95,7 @@ struct CalendarEventsView: View {
             } label: {
                 Text(month.formatted(.dateTime.month(.wide).year()))
                     .font(.headline)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color.primary)
             }
             Spacer()
             Button("Nächster Monat", systemImage: "chevron.right") { shift(1) }
@@ -118,7 +117,7 @@ struct CalendarEventsView: View {
         _ = await (list, cfg)
     }
 
-    private static func query(for month: Date, kind: CalendarKind) -> [URLQueryItem] {
+    static func query(for month: Date, kind: CalendarKind) -> [URLQueryItem] {
         let end = Calendar.current.date(byAdding: .month, value: 1, to: month) ?? month
         return [
             URLQueryItem(name: "from", value: DateParsing.string(from: month)),

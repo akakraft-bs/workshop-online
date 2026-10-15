@@ -173,10 +173,10 @@
 				};
 			};
 			buildConfigurationList = 11048A36307F8F5600823ABA /* Build configuration list for PBXProject "Akakraft Online" */;
-			developmentRegion = en;
+			developmentRegion = de;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
+				de,
 				Base,
 			);
 			mainGroup = 11048A32307F8F5600823ABA;

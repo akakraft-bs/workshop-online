@@ -59,6 +59,7 @@ struct ParkenView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Campus-Parken")
+        .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $checkinAccount) { account in
             if let berechtigung = remote.value?.berechtigung {
                 ParkCheckinSheet(account: account, berechtigung: berechtigung) { await remote.load(session) }
@@ -103,11 +104,15 @@ struct ParkenView: View {
 
             HStack {
                 if account.istFrei {
-                    Button("Einchecken", systemImage: "arrow.down.to.line") { checkinAccount = account }
-                        .buttonStyle(.glassProminent)
+                    Button { checkinAccount = account } label: {
+                        Label("Einchecken", systemImage: "car.side.arrowtriangle.down.fill")
+                            .labelStyle(.titleAndIcon)
+                    }
+                    .buttonStyle(.glassProminent)
                 } else if let claim, isMine || session.permissions.isPrivileged {
-                    Button("Freigeben", systemImage: "arrow.up.to.line") {
-                        Task { await release(claim) }
+                    Button { Task { await release(claim) } } label: {
+                        Label("Freigeben", systemImage: "car.side.arrowtriangle.up.fill")
+                            .labelStyle(.titleAndIcon)
                     }
                     .buttonStyle(.glassProminent)
                     Button("Bis wann?", systemImage: "clock") { editingClaim = claim }
@@ -329,6 +334,7 @@ struct ParkHistorieView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Verlauf")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -395,6 +401,7 @@ struct ParkKennzeichenView: View {
         .refreshable { await reload() }
         .task { await reload() }
         .navigationTitle(account.label)
+        .navigationBarTitleDisplayMode(.inline)
         .actionAlert(action)
     }
 

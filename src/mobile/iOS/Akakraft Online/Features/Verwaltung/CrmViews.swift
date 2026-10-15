@@ -42,6 +42,7 @@ struct CrmListView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Partner & Sponsoren")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: PartnerOverview.self) { partner in
             CrmDetailView(partnerId: partner.id) { await remote.load(session) }
         }

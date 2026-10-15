@@ -28,6 +28,7 @@ struct ProjekteListView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Projekte")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: Projekt.self) { projekt in
             ProjektDetailView(projekt: projekt) { await remote.load(session) }
         }

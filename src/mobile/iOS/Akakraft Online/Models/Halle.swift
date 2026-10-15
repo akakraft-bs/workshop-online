@@ -54,17 +54,6 @@ nonisolated struct HallenbuchInput: Codable, Sendable {
     var fahrzeugId: String?
 }
 
-nonisolated struct HallenbuchStatistik: Codable, Identifiable, Hashable, Sendable {
-    let userId: String
-    let userName: String
-    let eigeneStunden: Double
-    let gastStunden: Double
-    let familieStunden: Double
-
-    var id: String { userId }
-    var gesamt: Double { eigeneStunden + gastStunden + familieStunden }
-}
-
 // MARK: - Hallen-Check-in & MOTD
 
 nonisolated struct HallenCheck: Codable, Identifiable, Hashable, Sendable {

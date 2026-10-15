@@ -2,11 +2,13 @@ import SwiftUI
 
 struct AdminView: View {
     @Environment(AppSession.self) private var session
+    @State private var users = Remote<[User]>("users")
 
     var body: some View {
         List {
             Section {
                 NavigationLink { AdminUsersView() } label: { Label("Nutzerverwaltung", systemImage: "person.2.badge.gearshape") }
+                    .badge(users.value?.withoutAccessCount ?? 0)
                 NavigationLink { AdminFeedbackView() } label: { Label("Feedback", systemImage: "bubble.left.and.bubble.right") }
                 NavigationLink { AblageorteView() } label: { Label("Ablageorte", systemImage: "mappin.and.ellipse") }
                 NavigationLink { PushTestView() } label: { Label("Test-Benachrichtigung", systemImage: "bell.badge") }
@@ -26,7 +28,14 @@ struct AdminView: View {
             }
         }
         .navigationTitle("Adminbereich")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await users.load(session) }
     }
+}
+
+extension [User] {
+    /// Nutzer ohne Rolle („Kein Zugriff“), die auf Freischaltung warten.
+    var withoutAccessCount: Int { filter { !Permissions(user: $0).isMember }.count }
 }
 
 // MARK: - Nutzer
@@ -42,7 +51,13 @@ struct AdminUsersView: View {
             let visible = users
                 .filter { !onlyPending || !Permissions(user: $0).isMember }
                 .filter { searchText.isEmpty || $0.shownName.localizedCaseInsensitiveContains(searchText) || $0.email.localizedCaseInsensitiveContains(searchText) }
-                .sorted { $0.shownName.localizedStandardCompare($1.shownName) == .orderedAscending }
+                .sorted { lhs, rhs in
+                    // Nutzer ohne Zugriff zuerst, damit offene Freischaltungen sofort auffallen.
+                    let lhsPending = !Permissions(user: lhs).isMember
+                    let rhsPending = !Permissions(user: rhs).isMember
+                    if lhsPending != rhsPending { return lhsPending }
+                    return lhs.shownName.localizedStandardCompare(rhs.shownName) == .orderedAscending
+                }
             List {
                 ForEach(visible) { user in
                     NavigationLink(value: user) {
@@ -64,6 +79,7 @@ struct AdminUsersView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Nutzer")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: User.self) { user in
             AdminUserDetailView(user: user) { await remote.load(session) }
         }
@@ -190,6 +206,7 @@ struct AdminFeedbackView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Feedback")
+        .navigationBarTitleDisplayMode(.inline)
         .actionAlert(action)
     }
 
@@ -216,7 +233,7 @@ struct AblageorteView: View {
                         editing = ort
                     } label: {
                         HStack {
-                            StorageLocationLabel(name: ort.name, color: Color(hex: ort.color)).foregroundStyle(.primary)
+                            StorageLocationLabel(name: ort.name, color: Color(hex: ort.color)).foregroundStyle(Color.primary)
                             Spacer()
                             Text("\(ort.itemCount)").foregroundStyle(.secondary)
                         }
@@ -238,6 +255,7 @@ struct AblageorteView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Ablageorte")
+        .navigationBarTitleDisplayMode(.inline)
         .sheet(item: Binding(
             get: { editing.map(IdentifiedOrt.init) },
             set: { editing = $0?.ort }
@@ -339,6 +357,7 @@ private struct PushTestView: View {
             .requiresOnline()
         }
         .navigationTitle("Test-Benachrichtigung")
+        .navigationBarTitleDisplayMode(.inline)
         .task { await users.load(session) }
         .actionAlert(action)
     }
@@ -365,6 +384,7 @@ private struct WartungView: View {
             }
         }
         .navigationTitle("Wartung")
+        .navigationBarTitleDisplayMode(.inline)
         .actionAlert(action)
     }
 

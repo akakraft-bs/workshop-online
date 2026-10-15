@@ -29,6 +29,7 @@ struct UmfrageListView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Umfragen")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: Umfrage.self) { umfrage in
             UmfrageDetailView(umfrage: umfrage) { await remote.load(session) }
         }
@@ -214,7 +215,7 @@ struct UmfrageDetailView: View {
                     Image(systemName: symbol(selected: isSelected))
                         .foregroundStyle(isSelected ? Color.accentColor : .secondary)
                         .font(.title3)
-                    Text(option.text).foregroundStyle(.primary)
+                    Text(option.text).foregroundStyle(Color.primary)
                     Spacer()
                     if let count = option.voteCount {
                         Text("\(count)").font(.headline.monospacedDigit())

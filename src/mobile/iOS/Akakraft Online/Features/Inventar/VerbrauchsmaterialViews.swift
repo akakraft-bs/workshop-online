@@ -32,7 +32,6 @@ struct VerbrauchsmaterialListView: View {
         .searchable(text: $searchText, prompt: "Material suchen")
         .refreshable { await reload() }
         .task { await reload() }
-        .navigationTitle("Verbrauchsmaterial")
         .navigationDestination(for: Verbrauchsmaterial.self) { item in
             VerbrauchsmaterialDetailView(item: item, locationColor: colorMap.color(for: item.storageLocation)) {
                 await remote.load(session)

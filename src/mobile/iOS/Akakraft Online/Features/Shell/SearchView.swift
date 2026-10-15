@@ -60,7 +60,8 @@ struct SearchView: View {
             }
         }
         .navigationTitle("Suche")
-        .searchable(text: $query, prompt: "Werkzeug, Material, Mängel …")
+        // Suchfeld immer sichtbar direkt unter dem Titel statt erst beim Wischen.
+        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Werkzeug, Material, Mängel …")
         .task {
             await withTaskGroup(of: Void.self) { group in
                 group.addTask { await werkzeug.load(session) }

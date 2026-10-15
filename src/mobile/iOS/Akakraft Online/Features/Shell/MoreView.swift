@@ -3,8 +3,10 @@ import SwiftUI
 /// Alle Bereiche, die nicht in der Tab-Leiste stehen – wie das Seitenmenü der Web-App.
 struct MoreView: View {
     let badges: Badges?
+    var usersWithoutAccess = 0
 
     @Environment(AppSession.self) private var session
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         List {
@@ -25,8 +27,14 @@ struct MoreView: View {
                 }
             }
 
+            if sizeClass == .compact {
+                Section("Werkstatt") {
+                    link("Inventar", "wrench.and.screwdriver", tint: .orange) { InventarView() }
+                    link("Mängel", "exclamationmark.triangle", tint: .red, badge: badges?.openMaengel) { MangelListView() }
+                }
+            }
+
             Section("Halle") {
-                link("Hallenbuch", "book.closed", tint: .brown) { HallenbuchListView() }
                 link("Campus-Parken", "parkingsign.circle", tint: .blue) { ParkenView() }
                 link("Meine Fahrzeuge", "car", tint: .gray) { FahrzeugeView() }
             }
@@ -50,7 +58,7 @@ struct MoreView: View {
                         link("Partner & Sponsoren", "person.crop.rectangle.stack", tint: .purple) { CrmListView() }
                     }
                     if session.permissions.isAdmin {
-                        link("Adminbereich", "shield.lefthalf.filled", tint: .red, badge: badges?.unseenFeedback) { AdminView() }
+                        link("Adminbereich", "shield.lefthalf.filled", tint: .red, badge: (badges?.unseenFeedback ?? 0) + usersWithoutAccess) { AdminView() }
                     }
                 }
             }
@@ -63,7 +71,8 @@ struct MoreView: View {
         @ViewBuilder destination: @escaping () -> Destination
     ) -> some View {
         NavigationLink {
-            destination()
+            // Unterseiten mit kleinem Titel neben dem Zurück-Button (HIG); große Titel nur auf Tab-Ebene.
+            destination().navigationBarTitleDisplayMode(.inline)
         } label: {
             Label {
                 Text(title)

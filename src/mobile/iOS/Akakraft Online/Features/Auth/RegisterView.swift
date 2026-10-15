@@ -57,6 +57,7 @@ struct RegisterView: View {
             }
         }
         .navigationTitle("Registrieren")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var isValid: Bool {
@@ -122,6 +123,7 @@ struct ForgotPasswordView: View {
             }
         }
         .navigationTitle("Passwort vergessen")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

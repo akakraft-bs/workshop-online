@@ -37,6 +37,7 @@ struct WunschListView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Wunschliste")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: Wunsch.self) { wunsch in
             WunschDetailView(wunsch: wunsch) { await remote.load(session) }
         }

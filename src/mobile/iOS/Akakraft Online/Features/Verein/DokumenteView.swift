@@ -57,6 +57,7 @@ struct DokumenteView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Dokumente")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if session.permissions.isPrivileged {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -90,7 +91,7 @@ struct DokumenteView: View {
             HStack(spacing: 12) {
                 Image(systemName: dokument.symbol).font(.title3).foregroundStyle(.tint).frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(dokument.fileName).foregroundStyle(.primary).lineLimit(2)
+                    Text(dokument.fileName).foregroundStyle(Color.primary).lineLimit(2)
                     Text([dokument.uploadedByName, dokument.uploadedAt.dayString, dokument.fileSizeBytes?.byteString]
                         .compactMap { $0 }.joined(separator: " · "))
                         .font(.caption)

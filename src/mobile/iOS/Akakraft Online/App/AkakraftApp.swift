@@ -5,6 +5,7 @@ import SwiftData
 struct AkakraftApp: App {
     @State private var connectivity: ConnectivityMonitor
     @State private var session: AppSession
+    @State private var offlineSync = OfflineSync()
     private let container: ModelContainer
 
     init() {
@@ -24,6 +25,7 @@ struct AkakraftApp: App {
             RootView()
                 .environment(session)
                 .environment(connectivity)
+                .environment(offlineSync)
         }
         .modelContainer(container)
     }

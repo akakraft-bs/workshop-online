@@ -49,6 +49,7 @@ bzw. ihn betrifft (z. B. eigene Ausleihe). „Eigentümer oder Privilegiert“ i
 | Login E-Mail/Passwort            | `POST /auth/login`                    | Antwort `{token, expiresAt}`; Refresh-Token als HttpOnly-Cookie `refresh_token`. `403 {error:"email_not_confirmed"}` wenn unbestätigt |
 | Login mit Google (Web)           | `GET /auth/login/google` → `/auth/callback` | Leitet auf `{Frontend}/auth/callback?token=…` weiter |
 | Login mit Google (iOS)           | `GET /auth/login/google?client=ios&code_challenge=…` → `/auth/callback` → `POST /auth/google/exchange` | Callback leitet auf `akakraft://auth?code=…`; Code ist 2 Min. gültig, einmalig und nur mit PKCE-Verifier (S256) einlösbar |
+| Server-Version abfragen          | `GET /version` (anonym) | Liefert `{ version }` aus `APP_VERSION` (Docker-Build-Arg `BUILD_VERSION`, sonst `dev`); die iOS-App fällt bei älteren Backends auf `/app/version.json` zurück |
 | Registrieren                     | `POST /auth/register`                 | E-Mail, Passwort (≥ 8 Zeichen), Anzeigename; Bestätigungsmail; Admins erhalten Push |
 | E-Mail bestätigen                | `POST /auth/confirm-email`            | Token aus Mail-Link; loggt direkt ein |
 | Bestätigung erneut senden        | `POST /auth/resend-confirmation`      | antwortet immer 200 |
@@ -129,7 +130,7 @@ Erfassung der Schraubzeiten in der Halle.
 | Einträge seitenweise anzeigen | Mitglied | `GET /hallenbuch?page&pageSize` → `PagedResult` |
 | Eintrag anlegen: Start, Ende, Beschreibung, Gastschrauber (Art: Kasten Premiumbier / 20 € PayPal, bezahlt?), Familie geschraubt, Fahrzeug | Mitglied | `POST /hallenbuch` |
 | Eintrag bearbeiten / löschen | Eigentümer **innerhalb 7 Tagen** oder Privilegiert | `PUT/DELETE /hallenbuch/{id}` |
-| Statistik (Stunden je Nutzer: eigen/Gast/Familie) für Zeitraum | Privilegiert | `GET /hallenbuch/statistik?from&to` |
+| Statistik als CSV-Download (Stunden je Nutzer: eigen/Gast/Familie) für Zeitraum | Privilegiert (Endpunkt: VorstandOrAdmin) | `GET /hallenbuch/statistik?from&to` (liefert `text/csv`) |
 
 ### 4.5 Campus-Parken
 

@@ -22,10 +22,10 @@ struct FahrzeugeView: View {
                             VStack(alignment: .leading) {
                                 Text([fahrzeug.marke, fahrzeug.modell.nonEmpty].compactMap { $0 }.joined(separator: " "))
                                     .font(.headline)
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(Color.primary)
                                 Text(fahrzeug.kennzeichen)
                                     .font(.subheadline.monospaced())
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color.secondary)
                             }
                             Spacer()
                             if fahrzeug.istStandard {
@@ -49,6 +49,7 @@ struct FahrzeugeView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Meine Fahrzeuge")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Fahrzeug hinzufügen", systemImage: "plus") { showCreate = true }

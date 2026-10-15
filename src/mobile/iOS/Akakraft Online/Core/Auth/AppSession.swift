@@ -76,6 +76,7 @@ final class AppSession {
         await client.logout()
         cache.removeAll(scope: dataScope)
         cache.removeAll(scope: sessionScope)
+        ImagePipeline.shared.clear()
         user = nil
         signOutReason = nil
         state = .signedOut
@@ -105,6 +106,12 @@ final class AppSession {
         let value = try client.decode(type, from: data)
         cache.store(data, key: cacheKey(path, query), scope: dataScope)
         return (value, .now)
+    }
+
+    /// Lädt eine Antwort nur in den Cache (Vorladen für die Offline-Nutzung).
+    func prefetch(_ path: String, query: [URLQueryItem] = []) async throws {
+        let data = try await client.getData(path, query: query)
+        cache.store(data, key: cacheKey(path, query), scope: dataScope)
     }
 
     // MARK: - Intern

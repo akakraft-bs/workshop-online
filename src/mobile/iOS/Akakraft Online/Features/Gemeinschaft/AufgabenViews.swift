@@ -33,6 +33,7 @@ struct AufgabenListView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Aufgaben")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: Aufgabe.self) { aufgabe in
             AufgabeDetailView(aufgabe: aufgabe) { await remote.load(session) }
         }

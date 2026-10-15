@@ -43,7 +43,6 @@ struct WerkzeugListView: View {
         .searchable(text: $searchText, prompt: "Werkzeug suchen")
         .refreshable { await reload() }
         .task { await reload() }
-        .navigationTitle("Werkzeug")
         .navigationDestination(for: Werkzeug.self) { item in
             WerkzeugDetailView(werkzeug: item, locationColor: colorMap.color(for: item.storageLocation)) {
                 await remote.load(session)

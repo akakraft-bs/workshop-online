@@ -112,7 +112,7 @@ struct LoginView: View {
             Image("Logo")
                 .resizable()
                 .scaledToFit()
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color.primary)
                 .frame(width: 120, height: 120)
                 .accessibilityLabel("akaKraft Braunschweig")
             Text("AkaKraft Online")

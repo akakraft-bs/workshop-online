@@ -2,11 +2,10 @@ import SwiftUI
 
 struct HallenbuchListView: View {
     private static let pageSize = 30
+    static let firstPageQuery = [URLQueryItem(name: "page", value: "0"), URLQueryItem(name: "pageSize", value: "\(pageSize)")]
 
     @Environment(AppSession.self) private var session
-    @State private var firstPage = Remote<PagedResult<HallenbuchEintrag>>(
-        "hallenbuch", query: [URLQueryItem(name: "page", value: "0"), URLQueryItem(name: "pageSize", value: "\(pageSize)")]
-    )
+    @State private var firstPage = Remote<PagedResult<HallenbuchEintrag>>("hallenbuch", query: firstPageQuery)
     @State private var morePages: [HallenbuchEintrag] = []
     @State private var nextPage = 1
     @State private var isLoadingMore = false
@@ -245,51 +244,69 @@ struct HallenbuchFormView: View {
     }
 }
 
+/// Wie in der Web-App: Stunden je Nutzer (eigen/Gast/Familie) als CSV-Datei für einen Zeitraum.
+/// Der Server liefert die Statistik nur als CSV, daher Teilen/Sichern statt Anzeige.
 struct HallenbuchStatistikView: View {
     @Environment(AppSession.self) private var session
     @State private var from = Calendar.current.dateInterval(of: .year, for: .now)?.start ?? .now
     @State private var to = Date.now
-    @State private var remote = Remote<[HallenbuchStatistik]>("hallenbuch/statistik")
+    @State private var file: URL?
+    @State private var action = ActionRunner()
 
     var body: some View {
-        List {
-            Section("Zeitraum") {
+        Form {
+            Section {
                 DatePicker("Von", selection: $from, displayedComponents: .date)
                 DatePicker("Bis", selection: $to, in: from..., displayedComponents: .date)
+            } header: {
+                Text("Zeitraum")
+            } footer: {
+                Text("Die CSV-Datei enthält je Mitglied die eigenen Stunden sowie Gast- und Familien-Stunden.")
             }
-            if let rows = remote.value {
-                Section {
-                    ForEach(rows.sorted { $0.gesamt > $1.gesamt }) { row in
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text(row.userName).font(.headline)
+
+            Section {
+                if let file {
+                    ShareLink(item: file) {
+                        Label("CSV teilen oder sichern", systemImage: "square.and.arrow.up")
+                    }
+                } else {
+                    Button {
+                        Task { await export() }
+                    } label: {
+                        HStack {
+                            Label("CSV erstellen", systemImage: "tablecells")
+                            if action.isRunning {
                                 Spacer()
-                                Text(hours(row.gesamt * 3600)).font(.headline.monospacedDigit())
+                                ProgressView()
                             }
-                            Text("Eigen \(hours(row.eigeneStunden * 3600)) · Gast \(hours(row.gastStunden * 3600)) · Familie \(hours(row.familieStunden * 3600))")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
                         }
                     }
-                } footer: {
-                    LastUpdatedFooter(date: remote.lastUpdated)
+                    .disabled(action.isRunning)
+                    .requiresOnline()
                 }
-            } else if let failure = remote.failure {
-                Text(failure.localizedDescription).foregroundStyle(.secondary)
-            } else {
-                ProgressView()
             }
         }
         .navigationTitle("Statistik")
-        .task(id: [from, to]) { await load() }
-        .refreshable { await load() }
+        .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: [from, to]) { file = nil }
+        .actionAlert(action)
     }
 
-    private func load() async {
+    private func export() async {
         let end = Calendar.current.date(byAdding: .day, value: 1, to: to.startOfDay) ?? to
-        await remote.load(session, path: "hallenbuch/statistik", query: [
-            URLQueryItem(name: "from", value: DateParsing.string(from: from.startOfDay)),
-            URLQueryItem(name: "to", value: DateParsing.string(from: end)),
-        ])
+        await action.run {
+            let data = try await session.client.getData("hallenbuch/statistik", query: [
+                URLQueryItem(name: "from", value: DateParsing.string(from: from.startOfDay)),
+                URLQueryItem(name: "to", value: DateParsing.string(from: end)),
+            ])
+            let name = "hallenbuch-statistik_\(Self.fileDate(from))_\(Self.fileDate(to)).csv"
+            let url = FileManager.default.temporaryDirectory.appending(path: name)
+            try data.write(to: url, options: .atomic)
+            file = url
+        }
+    }
+
+    private static func fileDate(_ date: Date) -> String {
+        date.formatted(.iso8601.year().month().day())
     }
 }

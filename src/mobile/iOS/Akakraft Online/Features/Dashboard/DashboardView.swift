@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DashboardView: View {
     @Environment(AppSession.self) private var session
+    @Environment(\.scenePhase) private var scenePhase
     @State private var motd = Remote<Motd?>("motd")
     @State private var anwesend = Remote<[HallenCheck]>("halle/anwesend")
     @State private var umfragen = Remote<[Umfrage]>("umfrage")
@@ -10,8 +11,8 @@ struct DashboardView: View {
     @State private var maengel = Remote<[Mangel]>("mangel")
     @State private var showMotdEditor = false
     @State private var showCheckin = false
-    @State private var lowStockExpanded = true
-    @State private var maengelExpanded = true
+    @State private var lowStockExpanded = false
+    @State private var maengelExpanded = false
     @State private var action = ActionRunner()
 
     private var permissions: Permissions { session.permissions }
@@ -111,8 +112,25 @@ struct DashboardView: View {
     }
 
     private var greeting: String {
+        _ = scenePhase // neu berechnen, wenn die App wieder in den Vordergrund kommt
         let firstName = session.user?.shownName.split(separator: " ").first.map(String.init) ?? ""
-        return firstName.isEmpty ? "Übersicht" : "Hallo, \(firstName)"
+        return firstName.isEmpty ? "Übersicht" : "\(Self.salutation(at: .now)), \(firstName)"
+    }
+
+    /// Begrüßungen je Tageszeit – bewusst kurz, damit sie mit Namen in die Kopfzeile passen.
+    nonisolated static let salutations: [(hours: Range<Int>, texts: [String])] = [
+        (5..<11, ["Guten Morgen", "Moin", "Morgen", "Frisch ans Werk"]),
+        (11..<18, ["Hallo", "Moin", "Servus", "Hey"]),
+        (18..<23, ["Guten Abend", "N’Abend", "Moin", "Schönen Abend"]),
+    ]
+    nonisolated static let nightSalutations = ["Noch wach", "Nachtschicht", "Späte Schicht"]
+
+    /// Wählt je Tageszeit eine Begrüßung; sie wechselt täglich, bleibt innerhalb eines Tages aber stabil.
+    nonisolated static func salutation(at date: Date, calendar: Calendar = .current) -> String {
+        let hour = calendar.component(.hour, from: date)
+        let texts = salutations.first { $0.hours.contains(hour) }?.texts ?? nightSalutations
+        let day = calendar.ordinality(of: .day, in: .era, for: date) ?? 0
+        return texts[day % texts.count]
     }
 
     @ViewBuilder

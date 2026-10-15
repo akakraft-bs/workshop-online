@@ -115,6 +115,10 @@ public static class Program
         app.MapMotdEndpoints();
         app.MapCrmEndpoints();
 
+        // Release-Version des Backends (wird beim Image-Build gesetzt), z. B. für die Anzeige in der iOS-App.
+        app.MapGet("/version", () => Results.Ok(new { version = Environment.GetEnvironmentVariable("APP_VERSION") ?? "dev" }))
+            .AllowAnonymous();
+
         app.Run();
     }
 }

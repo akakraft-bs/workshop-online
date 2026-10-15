@@ -53,10 +53,11 @@ struct VereinInfoView: View {
         .refreshable { await remote.load(session) }
         .task { await remote.load(session) }
         .navigationTitle("Verein")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if session.permissions.isPrivileged {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Schlüsselhinterlegung hinzufügen", systemImage: "key.badge.plus") { showCreate = true }
+                    Button("Schlüsselhinterlegung hinzufügen", systemImage: "plus") { showCreate = true }
                         .requiresOnline()
                 }
             }
