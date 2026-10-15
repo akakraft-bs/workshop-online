@@ -18,12 +18,16 @@ COPY src/backend/AkaKraft.WebApi/AkaKraft.WebApi.csproj \
 
 RUN dotnet restore src/backend/AkaKraft.WebApi/AkaKraft.WebApi.csproj
 
-# Quellcode kopieren und publishen
+# Quellcode kopieren und publishen.
+# Die Six-Labors-Lizenz (ImageSharp) wird beim Build geprüft. Sie kommt als
+# BuildKit-Secret und ist nur während dieses Schritts vorhanden – nicht im Image.
 COPY src/backend/ src/backend/
-RUN dotnet publish src/backend/AkaKraft.WebApi/AkaKraft.WebApi.csproj \
+RUN --mount=type=secret,id=sixlabors_license,required=true \
+    dotnet publish src/backend/AkaKraft.WebApi/AkaKraft.WebApi.csproj \
     --no-restore \
     -c Release \
-    -o /app/publish
+    -o /app/publish \
+    -p:SixLaborsLicenseFile=/run/secrets/sixlabors_license
 
 # =============================================================================
 # Runtime-Stage: nur ASP.NET Runtime (kein SDK → kleines Image)
