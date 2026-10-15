@@ -131,3 +131,10 @@ docker-compose.override.yml
 src/backend/AkaKraft.WebApi/wwwroot/uploads
 k8s/secrets/*
 **/credentials.yaml
+
+# Lizenzdateien (z. B. Six Labors) – nie committen
+*.lic
+
+# Benutzerspezifische Dateien von XCode
+*.xcuserstate
+**/xcuserdata/*
