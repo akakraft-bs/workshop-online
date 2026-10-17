@@ -1,6 +1,6 @@
 # AkaKraft Online – Funktionsumfang
 
-Referenz für alle Clients (Web, iOS). Beschreibt Seiten, Berechtigungen und Funktionen
+Referenz für alle Clients (Web, iOS, Android). Beschreibt Seiten, Berechtigungen und Funktionen
 sowie den jeweils genutzten API-Endpunkt. Alle Pfade sind relativ zur API-Basis
 (`https://app.akakraft-bs.de/api`).
 

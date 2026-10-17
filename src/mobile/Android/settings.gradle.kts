@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Akakraft Onlne"
+rootProject.name = "Akakraft Online"
 include(":app")

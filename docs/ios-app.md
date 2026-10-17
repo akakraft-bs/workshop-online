@@ -1,7 +1,7 @@
 # iOS-App – Architektur & Stand
 
 Native SwiftUI-App unter `src/mobile/iOS` (Xcode 27, iOS 27, iPhone & iPad).
-Funktionsumfang siehe [features.md](features.md).
+Funktionsumfang siehe [features.md](features.md), Gegenstück auf Android: [android-app.md](android-app.md).
 
 ## Grundprinzipien
 
