@@ -9,7 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
@@ -18,12 +18,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextOverflow
 
 /**
  * Seitengerüst innerhalb der App-Shell.
  *
- * - Startseiten eines Bereichs ([onBack] = null): große, beim Scrollen einklappende Titelleiste.
+ * - Startseiten eines Bereichs ([onBack] = null): großer Titel direkt in der Titelleiste neben den
+ *   Aktionen – wie `inlineLarge` auf iOS, ohne leeren Bereich über der Überschrift.
  * - Unterseiten: kompakte Titelleiste mit Zurück-Pfeil.
+ *
+ * Beide bleiben beim Scrollen stehen und heben sich farblich ab, sobald Inhalt darunter liegt.
  *
  * Den unteren Systemrand übernimmt die Navigationsleiste der Shell, deshalb ist er hier ausgenommen.
  */
@@ -37,33 +41,30 @@ fun AppScaffold(
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    val scrollBehavior = if (onBack == null) {
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    } else {
-        TopAppBarDefaults.pinnedScrollBehavior()
-    }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         topBar = {
-            if (onBack == null) {
-                LargeTopAppBar(
-                    title = { Text(title) },
-                    actions = actions,
-                    scrollBehavior = scrollBehavior,
-                )
-            } else {
-                TopAppBar(
-                    title = { Text(title) },
-                    navigationIcon = {
+            TopAppBar(
+                title = {
+                    Text(
+                        title,
+                        style = if (onBack == null) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                navigationIcon = {
+                    if (onBack != null) {
                         IconButton(onClick = onBack) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Zurück")
                         }
-                    },
-                    actions = actions,
-                    scrollBehavior = scrollBehavior,
-                )
-            }
+                    }
+                },
+                actions = actions,
+                scrollBehavior = scrollBehavior,
+            )
         },
         floatingActionButton = floatingActionButton,
         content = content,

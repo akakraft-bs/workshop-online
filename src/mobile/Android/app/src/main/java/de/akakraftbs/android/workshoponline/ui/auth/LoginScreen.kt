@@ -72,6 +72,13 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
     val server by viewModel.server.collectAsStateWithLifecycle()
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var showServerDialog by rememberSaveable { mutableStateOf(false) }
+    var page by rememberSaveable { mutableStateOf(LoginPage.Login) }
+
+    when (page) {
+        LoginPage.Register -> return RegisterScreen(viewModel.email, onBack = { page = LoginPage.Login })
+        LoginPage.Forgot -> return ForgotPasswordScreen(viewModel.email, onBack = { page = LoginPage.Login })
+        LoginPage.Login -> Unit
+    }
 
     Scaffold { padding ->
         Box(
@@ -176,13 +183,8 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
                     }
                 }
 
-                // Bis die nativen Bildschirme portiert sind, laufen diese Abläufe über die Web-App.
-                TextButton(onClick = { context.openInCustomTab(viewModel.webUrl("auth/forgot-password")) }) {
-                    Text("Passwort vergessen?")
-                }
-                TextButton(onClick = { context.openInCustomTab(viewModel.webUrl("auth/register")) }) {
-                    Text("Noch kein Konto? Registrieren")
-                }
+                TextButton(onClick = { page = LoginPage.Forgot }) { Text("Passwort vergessen?") }
+                TextButton(onClick = { page = LoginPage.Register }) { Text("Noch kein Konto? Registrieren") }
 
                 if (AppConfig.allowsCustomServer) {
                     TextButton(onClick = { showServerDialog = true }) {
@@ -197,6 +199,8 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
 
     if (showServerDialog) ServerSelectionDialog(onDismiss = { showServerDialog = false })
 }
+
+private enum class LoginPage { Login, Register, Forgot }
 
 @Composable
 private fun Header() {

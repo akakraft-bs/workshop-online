@@ -63,6 +63,8 @@ abstract class ResilientEnumSerializer<T : Enum<T>>(
 object JsonCoding {
     val json: Json = Json {
         ignoreUnknownKeys = true
+        // Eingaben senden auch Standardwerte (z. B. `istStandard = false`); null-Felder entfallen wie auf iOS.
+        encodeDefaults = true
         explicitNulls = false
         coerceInputValues = true
     }

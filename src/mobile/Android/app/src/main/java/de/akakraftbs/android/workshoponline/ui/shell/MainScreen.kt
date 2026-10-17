@@ -10,14 +10,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -27,124 +31,109 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import androidx.window.core.layout.WindowSizeClass
 import de.akakraftbs.android.workshoponline.ui.components.LocalIsOnline
+import de.akakraftbs.android.workshoponline.ui.components.LocalNavigator
+import de.akakraftbs.android.workshoponline.ui.components.Navigator
 import de.akakraftbs.android.workshoponline.ui.components.OfflineBanner
-import de.akakraftbs.android.workshoponline.ui.components.PlaceholderScreen
-import de.akakraftbs.android.workshoponline.ui.profil.ProfilScreen
 
 /**
  * App-Shell: Navigationsleiste auf Smartphones, Navigation Rail auf Tablets/Foldables
  * (`NavigationSuiteScaffold` wählt automatisch nach Fensterbreite – Gegenstück zu
  * `.sidebarAdaptable` auf iOS). Offline erscheint über der Navigation ein Hinweis.
+ *
+ * Jeder Tab ist ein eigener Graph mit seiner Startseite; alle Unterseiten liegen auf oberster
+ * Ebene (siehe [appDestinations]) und sind so aus jedem Tab erreichbar. Der aktive Tab ergibt
+ * sich aus dem obersten Tab-Graphen im Back Stack.
  */
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val navController = rememberNavController()
+    val navigator = remember(navController) { Navigator(navController) }
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val destination = backStackEntry?.destination
     val isCompact = !currentWindowAdaptiveInfoV2().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val isOnline = LocalIsOnline.current
     val tabs = TopLevel.entries.filter { it.showOnCompact || !isCompact }
-    val currentTab = TopLevel.entries.firstOrNull { destination.isIn(it) }
+    // Unterseiten liegen außerhalb der Tab-Graphen; dort bleibt der zuletzt aktive Tab markiert.
+    var lastTab by rememberSaveable { mutableStateOf(TopLevel.Dashboard) }
+    val destinationTab = backStackEntry?.destination?.let { destination ->
+        TopLevel.entries.firstOrNull { tab -> destination.hierarchy.any { it.hasRoute(tab.graph::class) } }
+    }
+    LaunchedEffect(destinationTab) { if (destinationTab != null) lastTab = destinationTab }
+    val currentTab = destinationTab ?: lastTab
 
     LifecycleEventEffect(Lifecycle.Event.ON_START) { viewModel.loadBadges() }
-    LaunchedEffect(currentTab) { if (currentTab != null) viewModel.loadBadges() }
+    LaunchedEffect(currentTab) { viewModel.loadBadges() }
 
     // Inventar und Mängel gibt es auf schmalen Fenstern nur unter „Mehr“.
     LaunchedEffect(isCompact, currentTab) {
-        if (isCompact && currentTab?.showOnCompact == false) navController.navigateToTab(TopLevel.Dashboard)
+        if (isCompact && !currentTab.showOnCompact) {
+            lastTab = TopLevel.Dashboard
+            navController.navigateToTab(TopLevel.Dashboard)
+        }
     }
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            tabs.forEach { tab ->
-                val selected = tab == currentTab
-                val count = when (tab) {
-                    TopLevel.Maengel -> viewModel.badges.value?.openMaengel ?: 0
-                    TopLevel.Mehr -> viewModel.moreBadge(isCompact)
-                    else -> 0
-                }
-                item(
-                    selected = selected,
-                    onClick = {
-                        if (selected) {
-                            navController.popBackStack(tab.root, inclusive = false)
-                        } else {
-                            navController.navigateToTab(tab)
-                        }
-                    },
-                    icon = {
-                        BadgedBox(badge = { if (count > 0) Badge { Text("$count") } }) {
-                            Icon(if (selected) tab.selectedIcon else tab.icon, contentDescription = null)
-                        }
-                    },
-                    label = { Text(tab.label) },
-                )
-            }
-        },
-    ) {
-        Column(Modifier.fillMaxSize()) {
-            NavHost(
-                navController = navController,
-                startDestination = DashboardGraph,
-                modifier = Modifier.weight(1f),
-            ) {
-                tabRoot<DashboardGraph, DashboardRoute>(DashboardRoute) {
-                    PlaceholderScreen("Übersicht", onBack = null, webUrl = viewModel.webUrl("dashboard"))
-                }
-                tabRoot<KalenderGraph, KalenderRoute>(KalenderRoute) {
-                    PlaceholderScreen("Kalender", onBack = null, webUrl = viewModel.webUrl("kalender"))
-                }
-                tabRoot<HallenbuchGraph, HallenbuchRoute>(HallenbuchRoute) {
-                    PlaceholderScreen("Hallenbuch", onBack = null, webUrl = viewModel.webUrl("hallenbuch"))
-                }
-                tabRoot<InventarGraph, InventarRoute>(InventarRoute) {
-                    PlaceholderScreen("Inventar", onBack = null, webUrl = viewModel.webUrl("werkzeug"))
-                }
-                tabRoot<MaengelGraph, MaengelRoute>(MaengelRoute) {
-                    PlaceholderScreen("Mängel", onBack = null, webUrl = viewModel.webUrl("mangel"))
-                }
-                tabRoot<SucheGraph, SucheRoute>(SucheRoute) {
-                    PlaceholderScreen("Suche", onBack = null, webUrl = null)
-                }
-                navigation<MehrGraph>(startDestination = MehrRoute) {
-                    composable<MehrRoute> {
-                        MoreScreen(viewModel = viewModel, isCompact = isCompact, onOpen = { navController.navigate(it) })
+    CompositionLocalProvider(LocalNavigator provides navigator) {
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                tabs.forEach { tab ->
+                    val selected = tab == currentTab
+                    val count = when (tab) {
+                        TopLevel.Maengel -> viewModel.badges.value?.openMaengel ?: 0
+                        TopLevel.Mehr -> viewModel.moreBadge(isCompact)
+                        else -> 0
                     }
-                    composable<ProfilRoute> {
-                        ProfilScreen(onBack = { navController.popBackStack() })
-                    }
-                    composable<FeatureRoute> { entry ->
-                        val route = entry.toRoute<FeatureRoute>()
-                        PlaceholderScreen(
-                            title = route.title,
-                            onBack = { navController.popBackStack() },
-                            webUrl = route.webRoute?.let(viewModel::webUrl),
-                        )
-                    }
+                    item(
+                        selected = selected,
+                        onClick = {
+                            if (selected) {
+                                navController.popBackStack(tab.root, inclusive = false)
+                            } else {
+                                lastTab = tab
+                                navController.navigateToTab(tab)
+                            }
+                        },
+                        icon = {
+                            BadgedBox(badge = { if (count > 0) Badge { Text("$count") } }) {
+                                Icon(if (selected) tab.selectedIcon else tab.icon, contentDescription = null)
+                            }
+                        },
+                        label = { Text(tab.label) },
+                    )
                 }
-            }
-            AnimatedVisibility(visible = !isOnline) {
-                OfflineBanner()
+            },
+        ) {
+            Column(Modifier.fillMaxSize()) {
+                NavHost(
+                    navController = navController,
+                    startDestination = DashboardGraph,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    TopLevel.entries.forEach { tab -> tabGraph(tab, viewModel, isCompact) }
+                    appDestinations()
+                }
+                AnimatedVisibility(visible = !isOnline) {
+                    OfflineBanner()
+                }
             }
         }
     }
 }
 
-private inline fun <reified G : Any, reified R : Any> NavGraphBuilder.tabRoot(
-    root: R,
-    crossinline content: @Composable () -> Unit,
-) {
-    navigation<G>(startDestination = root) {
-        composable<R> { content() }
+private fun NavGraphBuilder.tabGraph(tab: TopLevel, viewModel: MainViewModel, isCompact: Boolean) {
+    when (tab) {
+        TopLevel.Dashboard -> navigation<DashboardGraph>(startDestination = DashboardRoute) { composable<DashboardRoute> { TabRoot(tab) } }
+        TopLevel.Kalender -> navigation<KalenderGraph>(startDestination = KalenderRoute) { composable<KalenderRoute> { TabRoot(tab) } }
+        TopLevel.Hallenbuch -> navigation<HallenbuchGraph>(startDestination = HallenbuchRoute) { composable<HallenbuchRoute> { TabRoot(tab) } }
+        TopLevel.Inventar -> navigation<InventarGraph>(startDestination = InventarRoute) { composable<InventarRoute> { TabRoot(tab) } }
+        TopLevel.Maengel -> navigation<MaengelGraph>(startDestination = MaengelRoute) { composable<MaengelRoute> { TabRoot(tab) } }
+        TopLevel.Suche -> navigation<SucheGraph>(startDestination = SucheRoute) { composable<SucheRoute> { TabRoot(tab) } }
+        TopLevel.Mehr -> navigation<MehrGraph>(startDestination = MehrRoute) {
+            composable<MehrRoute> { MoreScreen(viewModel = viewModel, isCompact = isCompact) }
+        }
     }
 }
-
-private fun NavDestination?.isIn(tab: TopLevel): Boolean =
-    this?.hierarchy?.any { it.hasRoute(tab.graph::class) } == true
 
 /** Tab-Wechsel mit eigenem Verlauf je Tab (Zustand wird gesichert und wiederhergestellt). */
 private fun NavController.navigateToTab(tab: TopLevel) {

@@ -34,9 +34,10 @@ app/src/main/java/de/akakraftbs/android/workshoponline/
   ui/
     RootScreen    Root-Routing (Login / Freischaltung / App)
     auth/         Login, Server-Auswahl, Freischaltung ausstehend
-    shell/        Routes, MainScreen (Navigation), MoreScreen
-    profil/       Profil & Einstellungen
-    components/   AppScaffold, RemoteContent, RemoteImage/Avatar, OfflineBanner, PlaceholderScreen
+    shell/        Routes, MainScreen (Navigation), AppDestinations, MoreScreen
+    dashboard/ halle/ inventar/ maengel/ gemeinschaft/ verein/ verwaltung/ suche/ profil/
+                  Fachbereiche (Routen, ViewModels, Bildschirme)
+    components/   AppScaffold, FormScaffold, RemoteList, Formularfelder, RemoteImage/Avatar, Navigator, FeatureViewModel
     theme/        Farbschema, Typografie
 ```
 
@@ -63,42 +64,46 @@ fun FooScreen(viewModel: FooViewModel = hiltViewModel()) {
 
 Abfragen, die auch `OfflineSync` vorlädt (z. B. Hallenbuch-Seite 1, Kalendermonate), stehen in `Endpoints`. Pfad und Query-Reihenfolge müssen exakt übereinstimmen, sonst trifft der Cache-Schlüssel nicht.
 
-Neue Seite in die Navigation einhängen: Route in `ui/shell/Routes.kt` anlegen und im passenden Tab-Graphen in `MainScreen.kt` registrieren. Den Platzhalter (`PlaceholderScreen` bzw. `FeatureRoute`) dann ersetzen.
+Neue Seite in die Navigation einhängen: `@Serializable`-Route in der Datei des Bereichs anlegen, in dessen `…Destinations()` registrieren und per `LocalNavigator.current.open(route)` öffnen.
 
 ## Funktionsabdeckung
 
 | Bereich | Android |
 |---|---|
-| Login, Freischaltung ausstehend | ✅ |
+| Login, Registrierung, Passwort vergessen, Freischaltung ausstehend | ✅ |
 | Login mit Google (Custom Tab + PKCE) | ✅ |
-| Registrierung, Passwort vergessen | 🌐 Link in die Web-App |
-| App-Shell (Navigation, Badges, Offline-Hinweis, „Mehr“) | ✅ |
-| Profil & Einstellungen (Server, Offline-Daten, Abmelden) | ✅ – Profil bearbeiten und Feedback fehlen noch |
-| Offline-Cache & Vorladen inkl. Vorschaubilder | ✅ |
-| Dashboard (MOTD, Hallen-Check-in, offene Umfragen, Veranstaltungen, Bestand, Mängel) | ⏳ Platzhalter mit Link in die Web-App |
-| Hallenbelegung & Veranstaltungen inkl. Termin-CRUD nach Schreibrollen | ⏳ |
-| Hallenbuch inkl. 7-Tage-Regel und Statistik | ⏳ |
-| Campus-Parken (Check-in, Freigeben, Verlauf, Kennzeichen, Problem melden) | ⏳ |
-| Werkzeug inkl. Ausleihe, Historie, Verwaltung mit Foto & Anleitung | ⏳ |
-| Verbrauchsmaterial inkl. Bestand, Nachbestellung, Verwaltung | ⏳ |
-| Mängel inkl. Foto, Anmerkungen, Status, Zurückziehen | ⏳ |
-| Wunschliste, Umfragen, Aufgaben | ⏳ |
-| Verein: Info, Schlüssel, Dokumente (Upload), Zugänge, Projekte | ⏳ |
-| Fahrzeuge, Feedback | ⏳ |
-| Suche | ⏳ |
-| CRM (Partner, Ansprechpartner, Kontakthistorie) | ⏳ |
-| Admin: Nutzer & Rollen, Feedback, Ablageorte, Push-Test, Wartung | ⏳ |
+| Dashboard (MOTD inkl. Bearbeiten, Hallen-Check-in, offene Umfragen, Veranstaltungen, Bestand, Mängel) | ✅ |
+| Hallenbelegung & Veranstaltungen inkl. Termin-CRUD nach Schreibrollen | ✅ |
+| Hallenbuch inkl. 7-Tage-Regel und Statistik (CSV teilen) | ✅ |
+| Campus-Parken (Check-in, Freigeben, Verlauf, Kennzeichen, Problem melden) | ✅ |
+| Werkzeug inkl. Ausleihe, Historie, Verwaltung mit Foto & Anleitung | ✅ |
+| Verbrauchsmaterial inkl. Bestand, Nachbestellung, Verwaltung | ✅ |
+| Mängel inkl. Foto, Anmerkungen, Status, Zurückziehen | ✅ |
+| Wunschliste, Umfragen, Aufgaben | ✅ |
+| Verein: Info, Schlüssel, Dokumente (Upload), Zugänge, Projekte | ✅ |
+| Fahrzeuge, Profil (inkl. Bearbeiten), Feedback | ✅ |
+| Suche (offline auf dem Cache) | ✅ |
+| CRM (Partner, Ansprechpartner, Kontakthistorie) | ✅ |
+| Admin: Nutzer & Rollen, Feedback, Ablageorte, Push-Test, Wartung | ✅ |
+| Admin: Kalender-Einstellungen, Parkkonten-Zugang | 🌐 Link in die Web-App (wie iOS) |
 | Push-Benachrichtigungen | ⏳ braucht Firebase-Konfiguration (`google-services.json`) |
 
-⏳ = noch nicht nativ umgesetzt. Bis dahin zeigt der Bereich einen Platzhalter mit Link in die Web-App.
+### Umsetzung der Ansichten
+
+- **Je Bereich eine Datei** unter `ui/<bereich>/` mit Routen, ViewModels und Bildschirmen (z. B. `ui/maengel/Maengel.kt`). `NavGraphBuilder.<bereich>Destinations()` registriert die Routen, gesammelt in `ui/shell/AppDestinations.kt`.
+- **Tabs** sind eigene Graphen mit ihrer Startseite; alle Unterseiten liegen auf oberster Ebene und sind so aus jedem Tab erreichbar (z. B. Mangel-Detail aus Übersicht, Mängel und Suche). Inventar und Mängel gibt es zusätzlich als Unterseite (`InventarPageRoute`, `MaengelPageRoute`) für „Mehr“ auf dem Smartphone.
+- **Detailseiten** bekommen das Objekt als JSON in der Route (`toArg()`/`fromArg()`) und zeigen es sofort – auch offline und nach Prozess-Neustart. Beim Anzeigen wird der aktuelle Stand aus der (zwischengespeicherten) Liste übernommen.
+- **Formulare** sind Vollbild-Dialoge (`FormScaffold`: Schließen links, Sichern rechts). Kurze Eingaben (Check-in, Ordnername, Anmerkung bearbeiten) laufen über Dialoge.
+- **ViewModels** erben von `FeatureViewModel`: `reloadAll()` lädt die Seite, `act { … }` führt schreibende Aktionen aus (Fehler als Dialog). Listen laden bei jedem Anzeigen neu (`LaunchedEffect(Unit) { viewModel.reload() }`) – so sind sie nach Änderungen auf Unterseiten aktuell, ohne Rückruf-Ketten wie auf iOS.
+- **Gemeinsame Bausteine** in `ui/components/`: `RemoteList` (Pull-to-Refresh, Lade-/Fehler-/Offline-Zustand, „Stand: …“), `StatusPill`, `DetailRow`, `OverflowMenu`, `DateTimeField`/`DateField`, `DropdownField`, `SuggestionTextField`, `PhotoUploadField` (System-Photo-Picker), `SearchField`.
+- iOS-Wischaktionen sind als Drei-Punkte-Menüs umgesetzt, „+“-Schaltflächen als Extended FAB.
 
 ## Offene Punkte
 
-1. **Fachbereiche portieren**: in der Reihenfolge der Tabs (Übersicht, Kalender, Hallenbuch), danach die Bereiche unter „Mehr“. Die iOS-Views und -Modelle (`src/mobile/iOS/…/Features`, `Models`) dienen als Vorlage.
-2. **App-Icon:** Noch das Standard-Icon von Android Studio. Adaptive Icon (Vordergrund + Hintergrund + monochrom für Themed Icons) aus `Logo_komplett_700.svg` erzeugen.
-3. **Push:** Firebase-Android-SDK und `google-services.json`, Registrierung über `POST /push/tokens`, Laufzeit-Berechtigung `POST_NOTIFICATIONS`.
-4. **Dokumente offline:** wie auf iOS noch nicht vorab gespeichert.
-5. **Icons:** Aktuell `material-icons-extended`. Für den neuesten Material-Stil können später Material Symbols als Vector Drawables folgen.
+1. **App-Icon:** Noch das Standard-Icon von Android Studio. Adaptive Icon (Vordergrund + Hintergrund + monochrom für Themed Icons) aus `Logo_komplett_700.svg` erzeugen.
+2. **Push:** Firebase-Android-SDK und `google-services.json`, Registrierung über `POST /push/tokens`, Laufzeit-Berechtigung `POST_NOTIFICATIONS`.
+3. **Dokumente offline:** wie auf iOS noch nicht vorab gespeichert.
+4. **Icons:** Aktuell `material-icons-extended`. Für den neuesten Material-Stil können später Material Symbols als Vector Drawables folgen.
 
 ## Lokal testen
 

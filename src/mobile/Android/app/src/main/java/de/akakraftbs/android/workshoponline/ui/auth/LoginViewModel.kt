@@ -85,8 +85,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun webUrl(route: String): String = session.server.value.webUrl(route)
-
     private suspend fun finishGoogleLogin(code: String) {
         val verifier = savedState.get<String>(VERIFIER_KEY)
         savedState.remove<String>(VERIFIER_KEY)

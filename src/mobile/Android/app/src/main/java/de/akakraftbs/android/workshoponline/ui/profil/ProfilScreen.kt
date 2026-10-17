@@ -2,6 +2,7 @@ package de.akakraftbs.android.workshoponline.ui.profil
 
 import android.text.format.Formatter
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Dns
+import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -31,6 +33,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,13 +43,17 @@ import de.akakraftbs.android.workshoponline.core.auth.openInCustomTab
 import de.akakraftbs.android.workshoponline.core.server.AppConfig
 import de.akakraftbs.android.workshoponline.model.Role
 import de.akakraftbs.android.workshoponline.ui.auth.ServerSelectionDialog
+import de.akakraftbs.android.workshoponline.ui.components.ActionErrorDialog
 import de.akakraftbs.android.workshoponline.ui.components.AppScaffold
+import de.akakraftbs.android.workshoponline.ui.components.FormHint
+import de.akakraftbs.android.workshoponline.ui.components.FormTextField
 import de.akakraftbs.android.workshoponline.ui.components.Avatar
 import de.akakraftbs.android.workshoponline.ui.components.LocalIsOnline
+import de.akakraftbs.android.workshoponline.ui.components.SectionHeader
 import de.akakraftbs.android.workshoponline.ui.components.dayTimeString
 
 @Composable
-fun ProfilScreen(onBack: () -> Unit, viewModel: ProfilViewModel = hiltViewModel()) {
+fun ProfilScreen(onBack: () -> Unit, onFeedback: () -> Unit, viewModel: ProfilViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val isOnline = LocalIsOnline.current
     val user by viewModel.user.collectAsStateWithLifecycle()
@@ -58,9 +66,18 @@ fun ProfilScreen(onBack: () -> Unit, viewModel: ProfilViewModel = hiltViewModel(
     var confirmClear by rememberSaveable { mutableStateOf(false) }
     var showServerDialog by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) { viewModel.refreshCacheSize() }
+    LaunchedEffect(Unit) { viewModel.load() }
 
-    AppScaffold(title = "Profil & Einstellungen", onBack = onBack) { padding ->
+    AppScaffold(
+        title = "Profil & Einstellungen",
+        onBack = onBack,
+        actions = {
+            // Wie in den Android-Einstellungen üblich: „Sichern“ erscheint erst, wenn etwas geändert wurde.
+            if (viewModel.hasChanges) {
+                TextButton(onClick = viewModel::savePreferences, enabled = isOnline && !viewModel.action.isRunning) { Text("Sichern") }
+            }
+        },
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -80,6 +97,14 @@ fun ProfilScreen(onBack: () -> Unit, viewModel: ProfilViewModel = hiltViewModel(
                         Text(current.roles.filter { it != Role.None }.joinToString(", ") { it.label }.ifEmpty { "–" })
                     },
                 )
+            }
+
+            SectionHeader("Profil")
+            Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                FormTextField(viewModel.displayName, { viewModel.displayName = it }, "Anzeigename", capitalization = KeyboardCapitalization.Words)
+                FormTextField(viewModel.phone, { viewModel.phone = it }, "Telefon", keyboardType = KeyboardType.Phone)
+                FormTextField(viewModel.address, { viewModel.address = it }, "Adresse", minLines = 2)
+                FormHint("Telefon und Adresse sind für Vorstandsmitglieder in der Vereinsinfo sichtbar.")
             }
 
             SectionHeader("Offline & Server")
@@ -134,10 +159,12 @@ fun ProfilScreen(onBack: () -> Unit, viewModel: ProfilViewModel = hiltViewModel(
             )
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            ActionItem("Feedback senden", Icons.Outlined.Feedback, onClick = onFeedback)
             ActionItem("Web-App öffnen", Icons.AutoMirrored.Outlined.OpenInNew) {
                 context.openInCustomTab(server.webUrl(""))
             }
-            ListItem(overlineContent = { Text("App-Version") }, headlineContent = { Text(BuildConfig.VERSION_NAME) })
+            ListItem(overlineContent = { Text("App-Version") }, headlineContent = { Text("${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})") })
+            ListItem(overlineContent = { Text("Server-Version") }, headlineContent = { Text(viewModel.serverVersion ?: "–") })
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             ListItem(
@@ -175,16 +202,7 @@ fun ProfilScreen(onBack: () -> Unit, viewModel: ProfilViewModel = hiltViewModel(
         )
     }
     if (showServerDialog) ServerSelectionDialog(onDismiss = { showServerDialog = false })
-}
-
-@Composable
-private fun SectionHeader(title: String) {
-    Text(
-        title,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 4.dp),
-    )
+    ActionErrorDialog(viewModel.action)
 }
 
 @Composable

@@ -38,9 +38,6 @@ import kotlinx.serialization.Serializable
 @Serializable data object MehrRoute
 @Serializable data object ProfilRoute
 
-/** Bereich, der noch nicht nativ umgesetzt ist – zeigt einen Platzhalter mit Link in die Web-App. */
-@Serializable data class FeatureRoute(val title: String, val webRoute: String? = null)
-
 /**
  * Hauptbereiche der App. Auf Smartphones zeigt die Navigationsleiste höchstens fünf Ziele
  * (Material-Empfehlung); Inventar und Mängel liegen dort unter „Mehr“, auf Tablets und

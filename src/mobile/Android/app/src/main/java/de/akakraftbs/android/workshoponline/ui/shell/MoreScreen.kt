@@ -40,14 +40,28 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.akakraftbs.android.workshoponline.ui.components.AppScaffold
 import de.akakraftbs.android.workshoponline.ui.components.Avatar
+import de.akakraftbs.android.workshoponline.ui.components.LocalNavigator
+import de.akakraftbs.android.workshoponline.ui.gemeinschaft.AufgabenRoute
+import de.akakraftbs.android.workshoponline.ui.gemeinschaft.UmfragenRoute
+import de.akakraftbs.android.workshoponline.ui.gemeinschaft.WunschlisteRoute
+import de.akakraftbs.android.workshoponline.ui.halle.FahrzeugeRoute
+import de.akakraftbs.android.workshoponline.ui.halle.ParkenRoute
+import de.akakraftbs.android.workshoponline.ui.inventar.InventarPageRoute
+import de.akakraftbs.android.workshoponline.ui.maengel.MaengelPageRoute
+import de.akakraftbs.android.workshoponline.ui.verein.DokumenteRoute
+import de.akakraftbs.android.workshoponline.ui.verein.ProjekteRoute
+import de.akakraftbs.android.workshoponline.ui.verein.VereinInfoRoute
+import de.akakraftbs.android.workshoponline.ui.verein.ZugaengeRoute
+import de.akakraftbs.android.workshoponline.ui.verwaltung.AdminRoute
+import de.akakraftbs.android.workshoponline.ui.verwaltung.CrmRoute
 
 /** Alle Bereiche, die nicht in der Navigation stehen – wie das Seitenmenü der Web-App. */
 @Composable
 fun MoreScreen(
     viewModel: MainViewModel,
     isCompact: Boolean,
-    onOpen: (Any) -> Unit,
 ) {
+    val onOpen: (Any) -> Unit = LocalNavigator.current::open
     val user by viewModel.user.collectAsStateWithLifecycle()
     val permissions by viewModel.permissions.collectAsStateWithLifecycle()
     val badges = viewModel.badges.value
@@ -72,33 +86,33 @@ fun MoreScreen(
 
             if (isCompact) {
                 section("Werkstatt")
-                link("Inventar", Icons.Outlined.Handyman, colors.tertiaryContainer, colors.onTertiaryContainer, "werkzeug", onOpen = onOpen)
-                link("Mängel", Icons.Outlined.ReportProblem, colors.errorContainer, colors.onErrorContainer, "mangel", badges?.openMaengel, onOpen)
+                link("Inventar", Icons.Outlined.Handyman, colors.tertiaryContainer, colors.onTertiaryContainer, InventarPageRoute, onOpen = onOpen)
+                link("Mängel", Icons.Outlined.ReportProblem, colors.errorContainer, colors.onErrorContainer, MaengelPageRoute, badges?.openMaengel, onOpen)
             }
 
             section("Halle")
-            link("Campus-Parken", Icons.Outlined.LocalParking, colors.primaryContainer, colors.onPrimaryContainer, "parkplatz", onOpen = onOpen)
-            link("Meine Fahrzeuge", Icons.Outlined.DirectionsCar, colors.secondaryContainer, colors.onSecondaryContainer, "fahrzeuge", onOpen = onOpen)
+            link("Campus-Parken", Icons.Outlined.LocalParking, colors.primaryContainer, colors.onPrimaryContainer, ParkenRoute, onOpen = onOpen)
+            link("Meine Fahrzeuge", Icons.Outlined.DirectionsCar, colors.secondaryContainer, colors.onSecondaryContainer, FahrzeugeRoute, onOpen = onOpen)
 
             section("Mitmachen")
-            link("Umfragen", Icons.Outlined.Poll, colors.primaryContainer, colors.onPrimaryContainer, "umfrage", badges?.pendingUmfragen, onOpen)
-            link("Wunschliste", Icons.Outlined.AutoAwesome, colors.tertiaryContainer, colors.onTertiaryContainer, "wunsch", onOpen = onOpen)
-            link("Aufgaben", Icons.Outlined.Checklist, colors.secondaryContainer, colors.onSecondaryContainer, "aufgaben", badges?.openAufgaben, onOpen)
+            link("Umfragen", Icons.Outlined.Poll, colors.primaryContainer, colors.onPrimaryContainer, UmfragenRoute, badges?.pendingUmfragen, onOpen)
+            link("Wunschliste", Icons.Outlined.AutoAwesome, colors.tertiaryContainer, colors.onTertiaryContainer, WunschlisteRoute, onOpen = onOpen)
+            link("Aufgaben", Icons.Outlined.Checklist, colors.secondaryContainer, colors.onSecondaryContainer, AufgabenRoute, badges?.openAufgaben, onOpen)
 
             section("Verein")
-            link("Vereinsinfo", Icons.Outlined.Groups, colors.primaryContainer, colors.onPrimaryContainer, "verein/info", onOpen = onOpen)
-            link("Dokumente", Icons.Outlined.Folder, colors.secondaryContainer, colors.onSecondaryContainer, "verein/dokumente", onOpen = onOpen)
-            link("Zugänge", Icons.Outlined.Key, colors.tertiaryContainer, colors.onTertiaryContainer, "verein/zugaenge", onOpen = onOpen)
-            link("Projekte", Icons.Outlined.Build, colors.primaryContainer, colors.onPrimaryContainer, "projekte", onOpen = onOpen)
+            link("Vereinsinfo", Icons.Outlined.Groups, colors.primaryContainer, colors.onPrimaryContainer, VereinInfoRoute, onOpen = onOpen)
+            link("Dokumente", Icons.Outlined.Folder, colors.secondaryContainer, colors.onSecondaryContainer, DokumenteRoute, onOpen = onOpen)
+            link("Zugänge", Icons.Outlined.Key, colors.tertiaryContainer, colors.onTertiaryContainer, ZugaengeRoute, onOpen = onOpen)
+            link("Projekte", Icons.Outlined.Build, colors.primaryContainer, colors.onPrimaryContainer, ProjekteRoute, onOpen = onOpen)
 
             if (permissions.canSeeVorstandsbereich || permissions.isAdmin) {
                 section("Verwaltung")
                 if (permissions.canSeeVorstandsbereich) {
-                    link("Partner & Sponsoren", Icons.Outlined.Handshake, colors.secondaryContainer, colors.onSecondaryContainer, "crm", onOpen = onOpen)
+                    link("Partner & Sponsoren", Icons.Outlined.Handshake, colors.secondaryContainer, colors.onSecondaryContainer, CrmRoute, onOpen = onOpen)
                 }
                 if (permissions.isAdmin) {
                     val adminBadge = (badges?.unseenFeedback ?: 0) + viewModel.usersWithoutAccess
-                    link("Adminbereich", Icons.Outlined.AdminPanelSettings, colors.errorContainer, colors.onErrorContainer, "admin", adminBadge, onOpen)
+                    link("Adminbereich", Icons.Outlined.AdminPanelSettings, colors.errorContainer, colors.onErrorContainer, AdminRoute, adminBadge, onOpen)
                 }
             }
         }
@@ -121,13 +135,13 @@ private fun LazyListScope.link(
     icon: ImageVector,
     container: Color,
     content: Color,
-    webRoute: String,
+    route: Any,
     badge: Int? = null,
     onOpen: (Any) -> Unit,
 ) {
     item(key = title) {
         ListItem(
-            modifier = Modifier.clickable { onOpen(FeatureRoute(title, webRoute)) },
+            modifier = Modifier.clickable { onOpen(route) },
             leadingContent = {
                 Surface(shape = CircleShape, color = container, contentColor = content, modifier = Modifier.size(40.dp)) {
                     Box(contentAlignment = Alignment.Center) {
