@@ -14,7 +14,7 @@
       @for (acc of ov.accounts; track acc.id) {
         <a class="account-row" routerLink="/parkplatz"
            [class.frei]="acc.istFrei"
-           [class.mine]="acc.id === meinClaimAccountId()">
+           [class.mine]="!!acc.belegung && acc.belegung.userId === myUserId()">
           <span class="dot"></span>
           <span class="label">{{ acc.label }}</span>
           @if (acc.belegung; as b) {

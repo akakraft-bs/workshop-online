@@ -95,11 +95,12 @@ internal static class ParkplatzEndpoints
             if (kontoBelegt)
                 return Results.BadRequest("Dieses Parkkonto ist gerade belegt.");
 
-            // Nutzer darf nicht schon ein anderes Konto halten
-            var haeltBereits = await db.ParkClaims.AnyAsync(c =>
+            // Höchstens zwei Konten pro Nutzer: das zweite ist für Gastschraubungen gedacht
+            // (Gastfahrzeug + Mitglied vor Ort). Die App weist darauf hin, erfasst wird es nicht.
+            var gehalteneKonten = await db.ParkClaims.CountAsync(c =>
                 c.UserId == userId && c.FreigegebenAt == null && c.AutoExpiresAt > now);
-            if (haeltBereits)
-                return Results.BadRequest("Du hast bereits ein Parkkonto belegt. Bitte zuerst freigeben.");
+            if (gehalteneKonten >= 2)
+                return Results.BadRequest("Du hast bereits beide Parkkonten belegt. Bitte zuerst eines freigeben.");
 
             // Fahrzeug / Kennzeichen ermitteln
             string kennzeichen;
