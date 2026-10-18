@@ -17,6 +17,7 @@ import de.akakraftbs.android.workshoponline.core.auth.AppSession
 import de.akakraftbs.android.workshoponline.core.auth.SessionState
 import de.akakraftbs.android.workshoponline.core.cache.OfflineSync
 import de.akakraftbs.android.workshoponline.core.cache.OfflineSyncWorker
+import de.akakraftbs.android.workshoponline.core.location.HallenGeofence
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
@@ -30,6 +31,7 @@ class AkakraftApplication : Application(), Configuration.Provider, SingletonImag
     @Inject lateinit var session: AppSession
     @Inject lateinit var offlineSync: OfflineSync
     @Inject lateinit var workManager: WorkManager
+    @Inject lateinit var geofence: HallenGeofence
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
@@ -38,6 +40,7 @@ class AkakraftApplication : Application(), Configuration.Provider, SingletonImag
 
     override fun onCreate() {
         super.onCreate()
+        HallenGeofence.ensureChannel(this)
         observeSession()
     }
 
@@ -54,9 +57,13 @@ class AkakraftApplication : Application(), Configuration.Provider, SingletonImag
                 when (state) {
                     SessionState.SignedIn -> {
                         OfflineSyncWorker.schedule(workManager)
+                        geofence.refreshStandort()
                         offlineSync.syncIfNeeded()
                     }
-                    SessionState.SignedOut -> OfflineSyncWorker.cancel(workManager)
+                    SessionState.SignedOut -> {
+                        OfflineSyncWorker.cancel(workManager)
+                        geofence.stop()
+                    }
                     else -> Unit
                 }
             }

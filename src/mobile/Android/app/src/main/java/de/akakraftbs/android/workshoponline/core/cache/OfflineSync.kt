@@ -149,6 +149,7 @@ class OfflineSync @Inject constructor(private val session: AppSession) {
             "users/me/preferences" to emptyList(),
             "motd" to emptyList(),
             "halle/anwesend" to emptyList(),
+            "halle/standort" to emptyList(),
             "calendar/upcoming-events" to emptyList(),
             "calendar/configs" to emptyList(),
             "storage-locations" to emptyList(),

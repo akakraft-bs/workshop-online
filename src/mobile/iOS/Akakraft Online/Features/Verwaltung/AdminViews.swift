@@ -11,6 +11,7 @@ struct AdminView: View {
                     .badge(users.value?.withoutAccessCount ?? 0)
                 NavigationLink { AdminFeedbackView() } label: { Label("Feedback", systemImage: "bubble.left.and.bubble.right") }
                 NavigationLink { AblageorteView() } label: { Label("Ablageorte", systemImage: "mappin.and.ellipse") }
+                NavigationLink { HallenStandortView() } label: { Label("Hallen-Standort", systemImage: "location.circle") }
                 NavigationLink { PushTestView() } label: { Label("Test-Benachrichtigung", systemImage: "bell.badge") }
                 NavigationLink { WartungView() } label: { Label("Wartung", systemImage: "wrench.and.screwdriver") }
             }

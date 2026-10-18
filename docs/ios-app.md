@@ -60,6 +60,13 @@ RemoteContent(remote: remote) { items in List(items) { … } }
 | Push-Benachrichtigungen | ⏳ braucht APNs-Schlüssel & Firebase-Konfiguration |
 | Favoriten-Schnellzugriff | – Tab-Leiste und „Mehr“ übernehmen die Rolle |
 
+## Check-in per Standort
+
+- `Core/Location/HallenGeofence.swift`: `CLMonitor` mit Kreis (Radius aus `/halle/standort`, 200 m). Betreten → lokale Mitteilung „An der Halle?“ mit Aktion *Einchecken* (`POST /halle/checkin`), höchstens alle 30 Min.; Verlassen → `DELETE /halle/checkin`, falls eingecheckt, plus Hinweis.
+- Standort wird lokal gemerkt, damit die Überwachung nach einem Hintergrund-Start ohne Netz weiterläuft. Monitor wird in `AkakraftApp.init` angelegt (iOS startet die App bei Ereignissen ggf. nur im Hintergrund).
+- Freigaben: Standort „Immer“ + Mitteilungen; Schalter im Profil (Standard an). Admin pflegt die Koordinaten unter *Adminbereich → Hallen-Standort* (Karte, Tippen setzt den Punkt).
+- Android analog: `core/location/HallenGeofence.kt` (Play-Services-Geofencing → Receiver → WorkManager), Neu-Registrierung nach Neustart über `HallenBootReceiver`.
+
 ## Offene Punkte
 
 1. **Push:** Firebase-iOS-SDK, `GoogleService-Info.plist` und ein APNs-Schlüssel im Firebase-Projekt. Die Registrierung erfolgt über `POST /push/tokens`.

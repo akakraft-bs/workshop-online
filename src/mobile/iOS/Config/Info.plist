@@ -7,6 +7,10 @@
 	<array>
 		<string>de</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Damit die App dich beim Ankommen an der Halle fragen kann, ob du einchecken möchtest.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Damit die App dich beim Ankommen an der Halle fragen kann, ob du einchecken möchtest, und dich beim Verlassen automatisch auscheckt – auch wenn die App geschlossen ist. Abschaltbar im Profil.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<!-- Erlaubt HTTP nur für lokale Adressen (localhost, *.local, IPs) – für das lokale Backend. -->

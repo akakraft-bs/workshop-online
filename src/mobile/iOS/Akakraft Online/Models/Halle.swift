@@ -66,6 +66,14 @@ nonisolated struct HallenCheck: Codable, Identifiable, Hashable, Sendable {
     let expiresAt: Date
 }
 
+/// Hallen-Position für den Standort-Check-in (Geofence).
+nonisolated struct HallenStandort: Codable, Hashable, Sendable {
+    var latitude: Double
+    var longitude: Double
+    var radiusMeter: Int
+    var updatedAt: Date?
+}
+
 nonisolated enum MotdSeverity: String, ResilientEnum, CaseIterable, Identifiable {
     case info = "Info"
     case warning = "Warning"

@@ -51,6 +51,7 @@ import de.akakraftbs.android.workshoponline.ui.components.Avatar
 import de.akakraftbs.android.workshoponline.ui.components.LocalIsOnline
 import de.akakraftbs.android.workshoponline.ui.components.SectionHeader
 import de.akakraftbs.android.workshoponline.ui.components.dayTimeString
+import de.akakraftbs.android.workshoponline.ui.halle.HallenGeofenceSettings
 
 @Composable
 fun ProfilScreen(onBack: () -> Unit, onFeedback: () -> Unit, viewModel: ProfilViewModel = hiltViewModel()) {
@@ -106,6 +107,8 @@ fun ProfilScreen(onBack: () -> Unit, onFeedback: () -> Unit, viewModel: ProfilVi
                 FormTextField(viewModel.address, { viewModel.address = it }, "Adresse", minLines = 2)
                 FormHint("Telefon und Adresse sind für Vorstandsmitglieder in der Vereinsinfo sichtbar.")
             }
+
+            HallenGeofenceSettings()
 
             SectionHeader("Offline & Server")
             ListItem(overlineContent = { Text("Server") }, headlineContent = { Text(server.displayName) })

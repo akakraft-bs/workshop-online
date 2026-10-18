@@ -421,6 +421,29 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.ToTable("HallenChecks");
                 });
 
+            modelBuilder.Entity("AkaKraft.Domain.Entities.HallenStandort", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HallenStandorte");
+                });
+
             modelBuilder.Entity("AkaKraft.Domain.Entities.HallenbuchEintrag", b =>
                 {
                     b.Property<Guid>("Id")

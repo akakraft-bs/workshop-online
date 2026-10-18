@@ -66,6 +66,15 @@ data class HallenCheck(
     val expiresAt: ApiInstant,
 )
 
+/** Hallen-Position für den Standort-Check-in (Geofence). */
+@Serializable
+data class HallenStandort(
+    val latitude: Double,
+    val longitude: Double,
+    val radiusMeter: Int = 200,
+    val updatedAt: ApiInstant? = null,
+)
+
 @Serializable(with = MotdSeverity.Serializer::class)
 enum class MotdSeverity(val raw: String, val label: String, val tone: Tone) {
     Info("Info", "Info", Tone.Blue),

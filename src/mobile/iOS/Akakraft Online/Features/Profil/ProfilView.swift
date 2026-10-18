@@ -4,6 +4,8 @@ struct ProfilView: View {
     @Environment(AppSession.self) private var session
     @Environment(ConnectivityMonitor.self) private var connectivity
     @Environment(OfflineSync.self) private var offlineSync
+    @Environment(HallenGeofence.self) private var geofence
+    @Environment(\.openURL) private var openURL
     @State private var preferences = Remote<UserPreferences>("users/me/preferences")
     @State private var displayName = ""
     @State private var phone = ""
@@ -45,6 +47,35 @@ struct ProfilView: View {
                 Text("Profil")
             } footer: {
                 Text("Telefon und Adresse sind für Vorstandsmitglieder in der Vereinsinfo sichtbar.")
+            }
+
+            Section {
+                Toggle("Check-in per Standort", isOn: Binding(
+                    get: { geofence.isEnabled },
+                    set: { enabled in
+                        geofence.isEnabled = enabled
+                        if enabled { geofence.requestPermissions() }
+                    }
+                ))
+                if geofence.isEnabled {
+                    if geofence.isDenied {
+                        Button("Standortfreigabe in den Einstellungen erlauben", systemImage: "location.slash") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                        }
+                    } else if !geofence.hasAlwaysPermission {
+                        Button("Standort „Immer“ erlauben", systemImage: "location") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                        }
+                    }
+                    if geofence.standort == nil {
+                        Text("Für die Halle ist noch kein Standort hinterlegt.")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                Text("Halle")
+            } footer: {
+                Text("Kommst du in die Nähe der Halle (200 m), fragt die App, ob du einchecken möchtest. Verlässt du den Bereich, wirst du automatisch ausgecheckt. Damit das auch bei geschlossener App klappt, braucht sie die Standortfreigabe „Immer“.")
             }
 
             Section {

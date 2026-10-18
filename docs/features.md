@@ -98,6 +98,8 @@ Global: **Feedback senden** (schwebender Button).
 | MOTD setzen / entfernen | Privilegiert | `PUT /motd`, `DELETE /motd` |
 | Wer ist gerade an der Halle? | Mitglied | `GET /halle/anwesend` |
 | An der Halle einchecken (optionale Nachricht, läuft automatisch ab) / auschecken | Mitglied | `POST /halle/checkin`, `DELETE /halle/checkin` |
+| Check-in per Standort (nur Mobile-Apps): im Umkreis von 200 m um die Halle fragt eine Mitteilung „Einchecken?“, beim Verlassen wird automatisch ausgecheckt; im Profil abschaltbar | Mitglied | `GET /halle/standort` (204 = nicht eingerichtet) |
+| Hallen-Standort (Koordinaten) pflegen / entfernen | Admin | `PUT /halle/standort`, `DELETE /halle/standort` |
 | Offene Umfragen, an denen man noch nicht teilgenommen hat | Mitglied | `GET /umfrage` |
 | Nächste Veranstaltungen | Mitglied | `GET /calendar/upcoming-events` |
 | Material mit niedrigem Bestand (einklappbar), „Nachbestellt“ markieren | Mitglied / Privilegiert | `GET /verbrauchsmaterial`, `POST /verbrauchsmaterial/{id}/nachbestellen` |

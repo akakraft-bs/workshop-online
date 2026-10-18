@@ -1,5 +1,6 @@
 package de.akakraftbs.android.workshoponline.ui.shell
 
+import de.akakraftbs.android.workshoponline.ui.halle.HallenGeofencePermissionPrompt
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,6 +65,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val currentTab = destinationTab ?: lastTab
 
     LifecycleEventEffect(Lifecycle.Event.ON_START) { viewModel.loadBadges() }
+    // Nach der Anmeldung einmalig nach Standort-/Mitteilungs-Freigabe fragen (Hallen-Check-in).
+    HallenGeofencePermissionPrompt()
     LaunchedEffect(currentTab) { viewModel.loadBadges() }
 
     // Inventar und Mängel gibt es auf schmalen Fenstern nur unter „Mehr“.

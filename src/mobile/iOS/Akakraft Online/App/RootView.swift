@@ -3,6 +3,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppSession.self) private var session
     @Environment(ConnectivityMonitor.self) private var connectivity
+    @Environment(HallenGeofence.self) private var geofence
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -20,6 +21,13 @@ struct RootView: View {
             }
         }
         .animation(.default, value: session.state)
+        .onChange(of: session.state, initial: true) { _, state in
+            switch state {
+            case .signedIn: Task { await geofence.refreshStandort() }
+            case .signedOut, .pendingApproval: Task { await geofence.stop() }
+            case .launching: break
+            }
+        }
         .onChange(of: connectivity.isOnline) { _, isOnline in
             if isOnline, session.state != .launching, session.state != .signedOut {
                 Task { await session.refreshUser() }

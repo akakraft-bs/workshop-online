@@ -5,6 +5,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Check-in per Standort an der Halle (Geofence 200 m). Abschaltbar im Profil. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Geofences gehen bei einem Neustart verloren und werden danach neu registriert. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <!-- Custom Tabs für Google-Login und Links in die Web-App (Paketsichtbarkeit ab Android 11). -->
     <queries>
         <intent>
@@ -57,6 +65,22 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- Hallen-Check-in per Standort -->
+        <receiver
+            android:name=".core.location.HallenGeofenceReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".core.location.HallenCheckinActionReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".core.location.HallenBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <!-- WorkManager wird über Hilt konfiguriert (AkakraftApplication). -->
         <provider

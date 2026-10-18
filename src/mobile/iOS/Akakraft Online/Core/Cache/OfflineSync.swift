@@ -107,6 +107,7 @@ final class OfflineSync {
             ("users/me/preferences", []),
             ("motd", []),
             ("halle/anwesend", []),
+            ("halle/standort", []),
             ("calendar/upcoming-events", []),
             ("calendar/configs", []),
             ("storage-locations", []),

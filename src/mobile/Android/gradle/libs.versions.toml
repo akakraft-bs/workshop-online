@@ -16,6 +16,7 @@ browser = "1.10.0"
 okhttp = "5.5.0"
 kotlinxSerialization = "1.11.0"
 coil = "3.6.3"
+playServicesLocation = "21.3.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -63,6 +64,9 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+
+# Standort (Geofence für den Hallen-Check-in)
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 # Tests
 junit = { group = "junit", name = "junit", version.ref = "junit" }

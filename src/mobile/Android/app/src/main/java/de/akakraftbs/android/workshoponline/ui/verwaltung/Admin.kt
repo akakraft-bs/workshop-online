@@ -22,6 +22,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.MyLocation
+import de.akakraftbs.android.workshoponline.ui.halle.HallenStandortRoute
+import de.akakraftbs.android.workshoponline.ui.halle.HallenStandortScreen
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Feedback
@@ -126,6 +129,7 @@ fun NavGraphBuilder.adminDestinations() {
     composable<AdminFeedbackRoute> { AdminFeedbackScreen() }
     composable<AblageorteRoute> { AblageorteScreen() }
     composable<AblageortEditRoute> { AblageortEditScreen() }
+    composable<HallenStandortRoute> { HallenStandortScreen() }
     composable<PushTestRoute> { PushTestScreen() }
     composable<WartungRoute> { WartungScreen() }
 }
@@ -152,6 +156,7 @@ private fun AdminScreen(viewModel: AdminViewModel = hiltViewModel()) {
             AdminLink("Nutzerverwaltung", Icons.Outlined.ManageAccounts, badge = pending) { nav.open(AdminUsersRoute) }
             AdminLink("Feedback", Icons.Outlined.Feedback) { nav.open(AdminFeedbackRoute) }
             AdminLink("Ablageorte", Icons.Outlined.Place) { nav.open(AblageorteRoute) }
+            AdminLink("Hallen-Standort", Icons.Outlined.MyLocation) { nav.open(HallenStandortRoute) }
             AdminLink("Test-Benachrichtigung", Icons.Outlined.NotificationsActive) { nav.open(PushTestRoute) }
             AdminLink("Wartung", Icons.Outlined.Build) { nav.open(WartungRoute) }
 
