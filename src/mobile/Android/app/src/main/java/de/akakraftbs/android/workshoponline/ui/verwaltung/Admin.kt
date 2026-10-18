@@ -327,7 +327,12 @@ private fun AdminFeedbackScreen(viewModel: AdminFeedbackViewModel = hiltViewMode
                     supportingContent = {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(feedback.text, color = MaterialTheme.colorScheme.onSurface)
-                            Text(listOfNotNull(feedback.createdAt.dayTimeString(), feedback.pageUrl.nonEmpty, feedback.appVersion.nonEmpty).joinToString(" · "))
+                            Text(listOfNotNull(
+                                feedback.createdAt.dayTimeString(),
+                                feedback.pageUrl.nonEmpty,
+                                feedback.appVersion.nonEmpty?.let { "App $it" },
+                                feedback.serverVersion.nonEmpty?.let { "Server $it" },
+                            ).joinToString(" · "))
                         }
                     },
                     trailingContent = {

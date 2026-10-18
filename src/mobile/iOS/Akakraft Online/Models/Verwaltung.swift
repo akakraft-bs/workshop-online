@@ -186,6 +186,7 @@ nonisolated struct Feedback: Codable, Identifiable, Hashable, Sendable {
     let text: String
     let pageUrl: String
     let appVersion: String?
+    let serverVersion: String?
     let status: FeedbackStatus
     let createdAt: Date
 }

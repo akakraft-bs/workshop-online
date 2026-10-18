@@ -154,6 +154,7 @@ data class Feedback(
     val text: String,
     val pageUrl: String = "",
     val appVersion: String? = null,
+    val serverVersion: String? = null,
     val status: FeedbackStatus = FeedbackStatus.New,
     val createdAt: ApiInstant,
 )

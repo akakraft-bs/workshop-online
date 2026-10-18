@@ -195,7 +195,12 @@ struct AdminFeedbackView: View {
                             .requiresOnline()
                         }
                         Text(feedback.text)
-                        Text([feedback.createdAt.dayTimeString, feedback.pageUrl, feedback.appVersion].compactMap { $0.nonEmpty }.joined(separator: " · "))
+                        Text([
+                            feedback.createdAt.dayTimeString,
+                            feedback.pageUrl,
+                            feedback.appVersion.nonEmpty.map { "App \($0)" },
+                            feedback.serverVersion.nonEmpty.map { "Server \($0)" },
+                        ].compactMap { $0.nonEmpty }.joined(separator: " · "))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

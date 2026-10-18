@@ -254,7 +254,7 @@ Fahrzeuge werden in Hallenbuch, Hallenbelegung und Campus-Parken ausgewählt.
 
 | Funktion | Wer | Endpunkt |
 |---|---|---|
-| Feedback mit aktueller Seite und App-Version senden | Mitglied | `POST /feedback` |
+| Feedback mit aktueller Seite und App-Version senden (Web: Route + Release-Version, iOS/Android: `ios-app`/`android-app` + Plattform-Version); der Server ergänzt seine eigene Version (`serverVersion`) | Mitglied | `POST /feedback` |
 
 ### 4.17 Vorstandsbereich
 
