@@ -17,6 +17,8 @@ import { ParkAccountStatus, ParkBerechtigung, ParkClaim } from '../../models/par
 export interface ParkCheckinDialogData {
   account: ParkAccountStatus;
   berechtigung: ParkBerechtigung;
+  /** Die Person hält bereits ein Konto – das zweite ist nur fürs Gastschrauben gedacht. */
+  zweitesKonto?: boolean;
 }
 
 const MANUELL = '__manuell__';
@@ -83,7 +85,8 @@ export class ParkplatzCheckinDialogComponent implements OnInit {
       next: list => {
         this.fahrzeuge.set(list);
         const vorschlag = this.data.berechtigung.vorgeschlagenesFahrzeugId;
-        this.fahrzeugId = (vorschlag && list.some(f => f.id === vorschlag))
+        // Beim zweiten Konto parkt meist das Gastfahrzeug → Kennzeichen eingeben.
+        this.fahrzeugId = this.data.zweitesKonto ? MANUELL : (vorschlag && list.some(f => f.id === vorschlag))
           ? vorschlag
           : (list.find(f => f.istStandard)?.id ?? list[0]?.id ?? MANUELL);
         this.loadingFahrzeuge.set(false);

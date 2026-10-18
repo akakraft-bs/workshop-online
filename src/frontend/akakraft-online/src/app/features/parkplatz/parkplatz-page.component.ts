@@ -81,13 +81,15 @@ export class ParkplatzPageComponent implements OnInit, OnDestroy {
   readonly currentUserId = computed(() => this.auth.currentUser()?.id ?? null);
   readonly isPrivileged = computed(() => this.auth.isPrivileged());
 
-  readonly meinClaim = computed<ParkClaim | null>(() => {
+  readonly meineClaims = computed<ParkClaim[]>(() => {
     const uid = this.currentUserId();
-    for (const acc of this.overview()?.accounts ?? []) {
-      if (acc.belegung && acc.belegung.userId === uid) return acc.belegung;
-    }
-    return null;
+    return (this.overview()?.accounts ?? [])
+      .map(acc => acc.belegung)
+      .filter((c): c is ParkClaim => !!c && c.userId === uid);
   });
+
+  /** Höchstens zwei Konten pro Person – das zweite nur fürs Gastschrauben (wird nicht erfasst). */
+  readonly kannUebernehmen = computed(() => this.meineClaims().length < 2);
 
   ngOnInit(): void {
     this.load();
@@ -115,7 +117,7 @@ export class ParkplatzPageComponent implements OnInit, OnDestroy {
     this.dialog.open(ParkplatzCheckinDialogComponent, {
       width: '460px',
       maxWidth: '95vw',
-      data: { account, berechtigung: ov.berechtigung },
+      data: { account, berechtigung: ov.berechtigung, zweitesKonto: this.meineClaims().length > 0 },
     }).afterClosed().subscribe((claim: ParkClaim | undefined) => {
       if (claim) {
         this.snackBar.open(`${account.label} übernommen. Jetzt Kennzeichen im Uni-Portal eintragen.`, 'OK', { duration: 5000 });
@@ -126,7 +128,10 @@ export class ParkplatzPageComponent implements OnInit, OnDestroy {
   }
 
   freigeben(claim: ParkClaim, account: ParkAccountStatus): void {
-    if (!confirm(`${account.label} freigeben? Bitte nur, wenn dein Fahrzeug den Campus verlassen hat.`)) return;
+    const frage = claim.userId === this.currentUserId()
+      ? `${account.label} freigeben? Bitte nur, wenn dein Fahrzeug den Campus verlassen hat.`
+      : `${account.label} für ${claim.displayName} (${claim.kennzeichen}) freigeben? Bitte nur, wenn das Fahrzeug den Campus verlassen hat.`;
+    if (!confirm(frage)) return;
     this.busyAccountId.set(account.id);
     this.api.freigeben(claim.id).subscribe({
       next: () => {
