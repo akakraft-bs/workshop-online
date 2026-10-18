@@ -3,6 +3,16 @@
 <mat-dialog-content>
   <div class="checkin-form">
 
+    @if (data.zweitesKonto) {
+      <div class="berechtigung-box art-selbstbestaetigt">
+        <mat-icon>group</mat-icon>
+        <p>
+          Ein zweites Parkkonto ist <strong>nur für Gastschraubungen</strong> erlaubt – auch ohne
+          Hallenbelegung mit Gast-Zusatz. Trage hier das Kennzeichen des Gastfahrzeugs ein.
+        </p>
+      </div>
+    }
+
     <div class="berechtigung-box" [class]="'art-' + data.berechtigung.art.toLowerCase()">
       <mat-icon>{{ data.berechtigung.art === 'Automatisch' ? 'verified' : 'info' }}</mat-icon>
       <p>{{ data.berechtigung.hinweis }}</p>

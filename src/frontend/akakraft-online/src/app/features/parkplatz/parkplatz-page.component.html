@@ -121,18 +121,31 @@
               <button mat-button class="problem-btn" (click)="problemMelden(acc)">
                 <mat-icon>flag</mat-icon> Problem melden
               </button>
+              @if (isPrivileged()) {
+                <button mat-stroked-button
+                        [disabled]="busyAccountId() === acc.id"
+                        (click)="freigeben(claim, acc)">
+                  <mat-icon>logout</mat-icon> Für {{ claim.displayName }} freigeben
+                </button>
+              }
             </div>
           }
         } @else {
           <p class="frei-text">Kein Fahrzeug gemeldet – Konto verfügbar.</p>
           @if (acc.notiz) { <p class="account-notiz">{{ acc.notiz }}</p> }
           <div class="card-actions">
-            @if (meinClaim()) {
-              <span class="hold-hint">Du hältst bereits ein Konto. Zum Wechseln zuerst freigeben.</span>
-            } @else {
+            @if (kannUebernehmen()) {
               <button mat-flat-button color="primary" (click)="openCheckin(acc)">
                 <mat-icon>add</mat-icon> Übernehmen
               </button>
+              @if (meineClaims().length > 0) {
+                <span class="hold-hint">
+                  Ein zweites Konto ist <strong>nur für Gastschraubungen</strong> erlaubt –
+                  auch ohne Hallenbelegung mit Gast-Zusatz.
+                </span>
+              }
+            } @else {
+              <span class="hold-hint">Du hältst bereits beide Konten. Zum Wechseln zuerst eines freigeben.</span>
             }
             <button mat-button class="problem-btn" (click)="problemMelden(acc)">
               <mat-icon>flag</mat-icon> Problem melden

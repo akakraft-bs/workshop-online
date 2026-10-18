@@ -29,10 +29,6 @@ export class ParkplatzWidgetComponent implements OnInit, OnDestroy {
     this.overview()?.accounts.filter(a => a.istFrei).length ?? 0
   );
 
-  readonly meinClaimAccountId = computed(() =>
-    this.overview()?.accounts.find(a => a.belegung?.userId === this.myUserId())?.id ?? null
-  );
-
   ngOnInit(): void {
     this.load();
     this.intervalId = setInterval(() => { this.now.set(Date.now()); this.load(); }, 60_000);
