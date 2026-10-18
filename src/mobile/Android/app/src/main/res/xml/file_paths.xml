@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dateien zum Teilen (z. B. Hallenbuch-Statistik als CSV). -->
+<paths>
+    <cache-path name="exports" path="exports/" />
+</paths>

@@ -1,3 +1,4 @@
+using AkaKraft.Application;
 using AkaKraft.Application.DTOs;
 using AkaKraft.Application.Interfaces;
 using AkaKraft.Domain.Entities;
@@ -32,6 +33,7 @@ public class FeedbackService(ApplicationDbContext db) : IFeedbackService
             Text = dto.Text,
             PageUrl = dto.PageUrl,
             AppVersion = dto.AppVersion,
+            ServerVersion = AppInfo.Version,
             Status = FeedbackStatus.New,
             CreatedAt = DateTime.UtcNow,
         };
@@ -70,6 +72,6 @@ public class FeedbackService(ApplicationDbContext db) : IFeedbackService
     private static FeedbackDto ToDto(Feedback f, Dictionary<Guid, string> prefs)
     {
         var name = prefs.TryGetValue(f.UserId, out var n) ? n : f.User.Name;
-        return new FeedbackDto(f.Id, f.UserId, name, f.Text, f.PageUrl, f.AppVersion, f.Status, f.CreatedAt);
+        return new FeedbackDto(f.Id, f.UserId, name, f.Text, f.PageUrl, f.AppVersion, f.Status, f.CreatedAt, f.ServerVersion);
     }
 }

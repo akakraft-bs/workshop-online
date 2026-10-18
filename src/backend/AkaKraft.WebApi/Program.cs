@@ -115,6 +115,10 @@ public static class Program
         app.MapMotdEndpoints();
         app.MapCrmEndpoints();
 
+        // Release-Version des Backends (wird beim Image-Build gesetzt), z. B. für die Anzeige in der iOS-App.
+        app.MapGet("/version", () => Results.Ok(new { version = AkaKraft.Application.AppInfo.Version }))
+            .AllowAnonymous();
+
         app.Run();
     }
 }

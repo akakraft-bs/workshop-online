@@ -7,6 +7,8 @@ export interface Feedback {
   text: string;
   pageUrl: string;
   appVersion?: string | null;
+  /** Backend-Version beim Absenden – vom Server gesetzt. */
+  serverVersion?: string | null;
   status: FeedbackStatus;
   createdAt: string;
 }

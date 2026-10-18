@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Die App ist deutschsprachig: auch System-Texte (Zurück, Abbrechen, Suchen) auf Deutsch. -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>de</string>
+	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Damit die App dich beim Ankommen an der Halle fragen kann, ob du einchecken möchtest.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Damit die App dich beim Ankommen an der Halle fragen kann, ob du einchecken möchtest, und dich beim Verlassen automatisch auscheckt – auch wenn die App geschlossen ist. Abschaltbar im Profil.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Erlaubt HTTP nur für lokale Adressen (localhost, *.local, IPs) – für das lokale Backend. -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+</dict>
+</plist>

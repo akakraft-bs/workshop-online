@@ -372,6 +372,9 @@ namespace AkaKraft.Infrastructure.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)");
 
+                    b.Property<string>("ServerVersion")
+                        .HasColumnType("text");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -416,6 +419,29 @@ namespace AkaKraft.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("HallenChecks");
+                });
+
+            modelBuilder.Entity("AkaKraft.Domain.Entities.HallenStandort", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HallenStandorte");
                 });
 
             modelBuilder.Entity("AkaKraft.Domain.Entities.HallenbuchEintrag", b =>

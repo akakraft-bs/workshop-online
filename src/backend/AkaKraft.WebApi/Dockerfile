@@ -35,6 +35,10 @@ RUN --mount=type=secret,id=sixlabors_license,required=true \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+# Release-Version (semantic-release) – ausgeliefert über GET /api/version
+ARG BUILD_VERSION=dev
+ENV APP_VERSION=$BUILD_VERSION
+
 # Unprivilegierter Nutzer für mehr Sicherheit
 RUN groupadd --system --gid 1001 appgroup \
  && useradd  --system --uid 1001 --gid appgroup appuser

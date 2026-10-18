@@ -102,8 +102,50 @@ internal static class HallenCheckEndpoints
             return Results.NoContent();
         }).RequireAuthorization("AnyRole");
 
+        // Standort der Halle für den Standort-Check-in der Mobile-Apps
+        app.MapGet("/halle/standort", async (ApplicationDbContext db) =>
+        {
+            var standort = await db.HallenStandorte.FirstOrDefaultAsync();
+            return standort is null ? Results.NoContent() : Results.Ok(ToDto(standort));
+        }).RequireAuthorization("AnyRole");
+
+        app.MapPut("/halle/standort", async (SetHallenStandortRequest req, ApplicationDbContext db) =>
+        {
+            if (req.Latitude is < -90 or > 90 || req.Longitude is < -180 or > 180
+                || double.IsNaN(req.Latitude) || double.IsNaN(req.Longitude))
+                return Results.BadRequest("Ungültige Koordinaten.");
+
+            var standort = await db.HallenStandorte.FirstOrDefaultAsync();
+            if (standort is null)
+            {
+                standort = new HallenStandort { Id = Guid.NewGuid() };
+                db.HallenStandorte.Add(standort);
+            }
+            standort.Latitude = req.Latitude;
+            standort.Longitude = req.Longitude;
+            await db.SaveChangesAsync();
+            return Results.Ok(ToDto(standort));
+        }).RequireAuthorization("AdminOnly");
+
+        app.MapDelete("/halle/standort", async (ApplicationDbContext db) =>
+        {
+            var standort = await db.HallenStandorte.FirstOrDefaultAsync();
+            if (standort is not null)
+            {
+                db.HallenStandorte.Remove(standort);
+                await db.SaveChangesAsync();
+            }
+            return Results.NoContent();
+        }).RequireAuthorization("AdminOnly");
+
         return app;
     }
+
+    /// <summary>Umkreis um die Halle, in dem die Apps zum Einchecken fragen bzw. beim Verlassen auschecken.</summary>
+    private const int GeofenceRadiusMeter = 200;
+
+    private static HallenStandortDto ToDto(HallenStandort s) =>
+        new(s.Latitude, s.Longitude, GeofenceRadiusMeter, s.UpdatedAt ?? s.CreatedAt);
 
     private static Guid? GetUserId(HttpContext ctx)
     {

@@ -10,7 +10,8 @@ public record FeedbackDto(
     string PageUrl,
     string? AppVersion,
     FeedbackStatus Status,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string? ServerVersion
 );
 
 public record CreateFeedbackDto(string Text, string PageUrl, string? AppVersion);
