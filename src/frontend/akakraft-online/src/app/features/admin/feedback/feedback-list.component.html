@@ -55,7 +55,10 @@
             <div class="page-cell">
               <code class="page-url">{{ fb.pageUrl }}</code>
               @if (fb.appVersion) {
-                <span class="app-version-badge">v{{ fb.appVersion }}</span>
+                <span class="app-version-badge">App {{ fb.appVersion }}</span>
+              }
+              @if (fb.serverVersion) {
+                <span class="app-version-badge">Server {{ fb.serverVersion }}</span>
               }
             </div>
           </td>
