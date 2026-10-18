@@ -7,13 +7,15 @@ struct ParkenView: View {
     @State private var editingClaim: ParkClaim?
     @State private var action = ActionRunner()
     @State private var problemReported: Set<String> = []
+    @State private var releasingForOther: ParkClaim?
 
     var body: some View {
         RemoteContent(remote: remote) { overview in
             List {
                 Section {
+                    let ownClaims = overview.accounts.compactMap(\.belegung).filter { session.permissions.isOwner($0.userId) }.count
                     ForEach(overview.accounts) { account in
-                        accountRow(account, berechtigung: overview.berechtigung)
+                        accountRow(account, ownClaims: ownClaims)
                     }
                 } header: {
                     Text("Parkkonten")
@@ -62,17 +64,30 @@ struct ParkenView: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $checkinAccount) { account in
             if let berechtigung = remote.value?.berechtigung {
-                ParkCheckinSheet(account: account, berechtigung: berechtigung) { await remote.load(session) }
+                let ownClaims = remote.value?.accounts.compactMap(\.belegung).filter { session.permissions.isOwner($0.userId) }.count ?? 0
+                ParkCheckinSheet(account: account, berechtigung: berechtigung, isSecondAccount: ownClaims > 0) {
+                    await remote.load(session)
+                }
             }
         }
         .sheet(item: $editingClaim) { claim in
             ParkClaimEditSheet(claim: claim) { await remote.load(session) }
         }
+        .confirmationDialog(
+            "Parkkonto freigeben?",
+            isPresented: Binding(get: { releasingForOther != nil }, set: { if !$0 { releasingForOther = nil } }),
+            titleVisibility: .visible,
+            presenting: releasingForOther
+        ) { claim in
+            Button("Für \(claim.displayName) freigeben", role: .destructive) { Task { await release(claim) } }
+        } message: { claim in
+            Text("\(claim.displayName) (\(claim.kennzeichen)) – bitte nur, wenn das Fahrzeug den Campus verlassen hat.")
+        }
         .actionAlert(action)
     }
 
     @ViewBuilder
-    private func accountRow(_ account: ParkAccountStatus, berechtigung: ParkBerechtigung) -> some View {
+    private func accountRow(_ account: ParkAccountStatus, ownClaims: Int) -> some View {
         let claim = account.belegung
         let isMine = session.permissions.isOwner(claim?.userId)
         VStack(alignment: .leading, spacing: 8) {
@@ -103,13 +118,13 @@ struct ParkenView: View {
             }
 
             HStack {
-                if account.istFrei {
+                if account.istFrei, ownClaims < 2 {
                     Button { checkinAccount = account } label: {
                         Label("Einchecken", systemImage: "car.side.arrowtriangle.down.fill")
                             .labelStyle(.titleAndIcon)
                     }
                     .buttonStyle(.glassProminent)
-                } else if let claim, isMine || session.permissions.isPrivileged {
+                } else if let claim, isMine {
                     Button { Task { await release(claim) } } label: {
                         Label("Freigeben", systemImage: "car.side.arrowtriangle.up.fill")
                             .labelStyle(.titleAndIcon)
@@ -117,6 +132,13 @@ struct ParkenView: View {
                     .buttonStyle(.glassProminent)
                     Button("Bis wann?", systemImage: "clock") { editingClaim = claim }
                         .buttonStyle(.glass)
+                } else if let claim, session.permissions.isPrivileged {
+                    // Vorstand/Admin/Moderation: fremde Belegung freigeben, z. B. wenn vergessen wurde auszuchecken.
+                    Button { releasingForOther = claim } label: {
+                        Label("Freigeben", systemImage: "car.side.arrowtriangle.up.fill")
+                            .labelStyle(.titleAndIcon)
+                    }
+                    .buttonStyle(.glass)
                 }
                 Spacer()
                 Menu("Mehr", systemImage: "ellipsis.circle") {
@@ -138,6 +160,14 @@ struct ParkenView: View {
             }
             .buttonBorderShape(.capsule)
             .requiresOnline()
+
+            if account.istFrei, ownClaims > 0 {
+                Text(ownClaims == 1
+                     ? "Ein zweites Konto ist nur für Gastschraubungen erlaubt – auch ohne Hallenbelegung mit Gast-Zusatz."
+                     : "Du hältst bereits beide Konten. Zum Wechseln zuerst eines freigeben.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(.vertical, 4)
     }
@@ -158,6 +188,8 @@ struct ParkenView: View {
 private struct ParkCheckinSheet: View {
     let account: ParkAccountStatus
     let berechtigung: ParkBerechtigung
+    /// Die Person hält bereits ein Konto – das zweite ist nur fürs Gastschrauben gedacht.
+    var isSecondAccount = false
     let onDone: () async -> Void
 
     @Environment(AppSession.self) private var session
@@ -175,6 +207,16 @@ private struct ParkCheckinSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                if isSecondAccount {
+                    Section {
+                        Label {
+                            Text("Ein zweites Parkkonto ist **nur für Gastschraubungen** erlaubt – auch ohne Hallenbelegung mit Gast-Zusatz. Trage hier das Kennzeichen des Gastfahrzeugs ein.")
+                        } icon: {
+                            Image(systemName: "person.2")
+                        }
+                        .font(.subheadline)
+                    }
+                }
                 Section {
                     Picker("Fahrzeug", selection: $fahrzeugId) {
                         Text("Anderes Fahrzeug").tag(String?.none)
@@ -216,6 +258,8 @@ private struct ParkCheckinSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 await fahrzeuge.load(session)
+                // Beim zweiten Konto parkt meist das Gastfahrzeug → Kennzeichen eingeben.
+                guard !isSecondAccount else { return }
                 fahrzeugId = berechtigung.vorgeschlagenesFahrzeugId?.lowercased()
                     ?? fahrzeuge.value?.first(where: \.istStandard)?.id.lowercased()
             }

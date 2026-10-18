@@ -36,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,6 +68,7 @@ import de.akakraftbs.android.workshoponline.model.Tone
 import de.akakraftbs.android.workshoponline.model.nonEmpty
 import de.akakraftbs.android.workshoponline.ui.components.ActionErrorDialog
 import de.akakraftbs.android.workshoponline.ui.components.AppScaffold
+import de.akakraftbs.android.workshoponline.ui.components.ConfirmDialog
 import de.akakraftbs.android.workshoponline.ui.components.Avatar
 import de.akakraftbs.android.workshoponline.ui.components.DateTimeField
 import de.akakraftbs.android.workshoponline.ui.components.DropdownField
@@ -97,7 +99,7 @@ import java.time.Instant
 import javax.inject.Inject
 
 @Serializable data object ParkenRoute
-@Serializable data class ParkCheckinRoute(val account: String, val berechtigung: String)
+@Serializable data class ParkCheckinRoute(val account: String, val berechtigung: String, val zweitesKonto: Boolean = false)
 @Serializable data class ParkClaimEditRoute(val claim: String)
 @Serializable data object ParkHistorieRoute
 @Serializable data class ParkKennzeichenRoute(val accountId: String, val label: String)
@@ -138,8 +140,9 @@ private fun ParkenScreen(viewModel: ParkenViewModel = hiltViewModel()) {
     AppScaffold(title = "Campus-Parken", onBack = nav::back) { padding ->
         RemoteList(viewModel.overview, padding, viewModel.isRefreshing, viewModel::refresh, bottomSpacing = 24.dp) { overview ->
             sectionHeader("Parkkonten")
+            val ownClaims = overview.accounts.mapNotNull { it.belegung }.count { viewModel.isMine(it) }
             items(overview.accounts, key = { it.id }) { account ->
-                ParkAccountCard(account, overview.berechtigung, viewModel)
+                ParkAccountCard(account, overview.berechtigung, ownClaims, viewModel)
             }
             item(key = "hinweis") {
                 overview.berechtigung.hinweis.nonEmpty?.let {
@@ -188,8 +191,9 @@ private fun ParkenScreen(viewModel: ParkenViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun ParkAccountCard(account: ParkAccountStatus, berechtigung: ParkBerechtigung, viewModel: ParkenViewModel) {
+private fun ParkAccountCard(account: ParkAccountStatus, berechtigung: ParkBerechtigung, ownClaims: Int, viewModel: ParkenViewModel) {
     val nav = LocalNavigator.current
+    var releasingForOther by remember { mutableStateOf<ParkClaim?>(null) }
     val context = LocalContext.current
     val isOnline = LocalIsOnline.current
     val claim = account.belegung
@@ -231,17 +235,20 @@ private fun ParkAccountCard(account: ParkAccountStatus, berechtigung: ParkBerech
             }
 
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (account.istFrei) {
+                if (account.istFrei && ownClaims < 2) {
                     Button(
-                        onClick = { nav.open(ParkCheckinRoute(account.toArg(), berechtigung.toArg())) },
+                        onClick = { nav.open(ParkCheckinRoute(account.toArg(), berechtigung.toArg(), zweitesKonto = ownClaims > 0)) },
                         enabled = isOnline,
                     ) { Text("Einchecken") }
-                } else if (claim != null && (viewModel.isMine(claim) || viewModel.permissions.isPrivileged)) {
+                } else if (claim != null && viewModel.isMine(claim)) {
                     Button(onClick = { viewModel.release(claim) }, enabled = isOnline) { Text("Freigeben") }
                     OutlinedButton(onClick = { nav.open(ParkClaimEditRoute(claim.toArg())) }, enabled = isOnline) {
                         Icon(Icons.Outlined.Schedule, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
                         Text("  Bis wann?")
                     }
+                } else if (claim != null && viewModel.permissions.isPrivileged) {
+                    // Vorstand/Admin/Moderation: fremde Belegung freigeben, z. B. wenn vergessen wurde auszuchecken.
+                    OutlinedButton(onClick = { releasingForOther = claim }, enabled = isOnline) { Text("Freigeben") }
                 }
                 Spacer(Modifier.weight(1f))
                 val reported = account.id in viewModel.problemReported
@@ -256,7 +263,30 @@ private fun ParkAccountCard(account: ParkAccountStatus, berechtigung: ParkBerech
                     ),
                 )
             }
+
+            if (account.istFrei && ownClaims > 0) {
+                FormHint(
+                    if (ownClaims == 1) {
+                        "Ein zweites Konto ist nur für Gastschraubungen erlaubt – auch ohne Hallenbelegung mit Gast-Zusatz."
+                    } else {
+                        "Du hältst bereits beide Konten. Zum Wechseln zuerst eines freigeben."
+                    },
+                )
+            }
         }
+    }
+
+    releasingForOther?.let { other ->
+        ConfirmDialog(
+            title = "Für ${other.displayName} freigeben?",
+            message = "${account.label} (${other.kennzeichen}) – bitte nur, wenn das Fahrzeug den Campus verlassen hat.",
+            confirmLabel = "Freigeben",
+            onConfirm = {
+                viewModel.release(other)
+                releasingForOther = null
+            },
+            onDismiss = { releasingForOther = null },
+        )
     }
 }
 
@@ -267,6 +297,8 @@ private fun ParkAccountCard(account: ParkAccountStatus, berechtigung: ParkBerech
 @HiltViewModel
 class ParkCheckinViewModel @Inject constructor(session: AppSession, saved: SavedStateHandle) : FeatureViewModel(session) {
     private val route = saved.toRoute<ParkCheckinRoute>()
+    /** Die Person hält bereits ein Konto – das zweite ist nur fürs Gastschrauben gedacht. */
+    val zweitesKonto = route.zweitesKonto
     val account: ParkAccountStatus = route.account.fromArg()
     val berechtigung: ParkBerechtigung = route.berechtigung.fromArg()
     val fahrzeuge = remote<List<Fahrzeug>>("fahrzeuge")
@@ -285,6 +317,8 @@ class ParkCheckinViewModel @Inject constructor(session: AppSession, saved: Saved
     init {
         viewModelScope.launch {
             fahrzeuge.load(session)
+            // Beim zweiten Konto parkt meist das Gastfahrzeug → Kennzeichen eingeben.
+            if (zweitesKonto) return@launch
             fahrzeugId = berechtigung.vorgeschlagenesFahrzeugId?.lowercase()
                 ?: fahrzeuge.value?.firstOrNull { it.istStandard }?.id?.lowercase()
         }
@@ -317,6 +351,9 @@ private fun ParkCheckinScreen(viewModel: ParkCheckinViewModel = hiltViewModel())
         action = viewModel.action,
         saveLabel = "Einchecken",
     ) {
+        if (viewModel.zweitesKonto) {
+            FormHint("Ein zweites Parkkonto ist nur für Gastschraubungen erlaubt – auch ohne Hallenbelegung mit Gast-Zusatz. Trage hier das Kennzeichen des Gastfahrzeugs ein.")
+        }
         DropdownField(
             label = "Fahrzeug",
             options = viewModel.fahrzeuge.value.orEmpty(),
