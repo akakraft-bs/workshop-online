@@ -121,6 +121,13 @@
               <button mat-button class="problem-btn" (click)="problemMelden(acc)">
                 <mat-icon>flag</mat-icon> Problem melden
               </button>
+              @if (isPrivileged()) {
+                <button mat-stroked-button
+                        [disabled]="busyAccountId() === acc.id"
+                        (click)="freigeben(claim, acc)">
+                  <mat-icon>logout</mat-icon> Für {{ claim.displayName }} freigeben
+                </button>
+              }
             </div>
           }
         } @else {

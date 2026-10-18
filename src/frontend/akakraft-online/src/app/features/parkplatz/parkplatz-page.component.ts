@@ -126,7 +126,10 @@ export class ParkplatzPageComponent implements OnInit, OnDestroy {
   }
 
   freigeben(claim: ParkClaim, account: ParkAccountStatus): void {
-    if (!confirm(`${account.label} freigeben? Bitte nur, wenn dein Fahrzeug den Campus verlassen hat.`)) return;
+    const frage = claim.userId === this.currentUserId()
+      ? `${account.label} freigeben? Bitte nur, wenn dein Fahrzeug den Campus verlassen hat.`
+      : `${account.label} für ${claim.displayName} (${claim.kennzeichen}) freigeben? Bitte nur, wenn das Fahrzeug den Campus verlassen hat.`;
+    if (!confirm(frage)) return;
     this.busyAccountId.set(account.id);
     this.api.freigeben(claim.id).subscribe({
       next: () => {
