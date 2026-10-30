@@ -22,22 +22,7 @@ spec:
     storageClass: local-path
     size: 5Gi
 
-  backup:
-    barmanObjectStore:
-      destinationPath: s3://pg-backups/akakraft
-      endpointURL: http://akakraft-minio:9000
-      s3Credentials:
-        accessKeyId:
-          name: cnpg-backup-secret
-          key: ACCESS_KEY_ID
-        secretAccessKey:
-          name: cnpg-backup-secret
-          key: ACCESS_KEY_SECRET
-      wal:
-        compression: gzip
-      data:
-        compression: gzip
-    retentionPolicy: "14d"
+  # Kein Backup für Staging. Geplant: regelmäßiger Refresh aus den Prod-Backups auf nas-03.
 
   resources:
     requests:
