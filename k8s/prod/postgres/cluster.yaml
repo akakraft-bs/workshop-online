@@ -5,6 +5,7 @@ metadata:
   namespace: akakraft-prod
 spec:
   instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.2
 
   postgresql:
     parameters:
@@ -22,22 +23,12 @@ spec:
     storageClass: local-path
     size: 10Gi
 
-  backup:
-    barmanObjectStore:
-      destinationPath: s3://pg-backups/akakraft
-      endpointURL: http://akakraft-minio:9000
-      s3Credentials:
-        accessKeyId:
-          name: cnpg-backup-secret
-          key: ACCESS_KEY_ID
-        secretAccessKey:
-          name: cnpg-backup-secret
-          key: ACCESS_KEY_SECRET
-      wal:
-        compression: gzip
-      data:
-        compression: gzip
-    retentionPolicy: "14d"
+  # Backups über das Barman-Cloud-Plugin auf nas-03 (siehe objectstore.yaml)
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: nas03-store
 
   resources:
     requests:

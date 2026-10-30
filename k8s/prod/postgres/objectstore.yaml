@@ -1,0 +1,23 @@
+# Backup-Ziel der Prod-DB: S3 (silo) auf nas-03, Dataset Data/backups/s3
+# Zugangsdaten: Secret barman-nas03 (Benutzer cnpg-akakraft-prod, nur Bucket akakraft-prod-db)
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: nas03-store
+  namespace: akakraft-prod
+spec:
+  retentionPolicy: "14d"
+  configuration:
+    destinationPath: s3://akakraft-prod-db/
+    endpointURL: http://10.131.101.16:9000
+    s3Credentials:
+      accessKeyId:
+        name: barman-nas03
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: barman-nas03
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
