@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: akakraft-ingress
-  namespace: akakraft
+  namespace: akakraft-stag
   annotations:
     # Traefik ist der Standard-Ingress-Controller in k3s.
     # "web" = HTTP-Entrypoint (Port 80) – TLS wird vom NPM davor übernommen.

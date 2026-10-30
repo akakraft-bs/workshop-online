@@ -278,10 +278,10 @@ Die App läuft auf einem k3s-Cluster hinter einem Ingress-Controller. Container-
 ### Secrets anlegen
 
 ```bash
-kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/stag/namespace.yaml
 
 kubectl create secret generic akakraft-secrets \
-  --namespace akakraft \
+  --namespace akakraft-stag \
   --from-literal=db-password='<passwort>' \
   --from-literal=jwt-key='<min-32-zeichen-schluessel>' \
   --from-literal=google-client-id='<client-id>' \
@@ -290,11 +290,11 @@ kubectl create secret generic akakraft-secrets \
   --from-literal=minio-secret-key='<minio-passwort>'
 
 kubectl create secret generic google-calendar-secret \
-  --namespace akakraft \
+  --namespace akakraft-stag \
   --from-file=service-account-json=k8s/secrets/akakraft-online-*.json
 
 kubectl create secret docker-registry ghcr-pull-secret \
-  --namespace akakraft \
+  --namespace akakraft-stag \
   --docker-server=ghcr.io \
   --docker-username=<github-username> \
   --docker-password=<github-pat>
@@ -303,18 +303,18 @@ kubectl create secret docker-registry ghcr-pull-secret \
 ### Manifeste deployen
 
 ```bash
-kubectl apply -f k8s/postgres/
-kubectl apply -f k8s/minio/
-kubectl apply -f k8s/backend/
-kubectl apply -f k8s/frontend/
-kubectl apply -f k8s/ingress.yaml
+kubectl apply -f k8s/stag/postgres/
+kubectl apply -f k8s/stag/minio/
+kubectl apply -f k8s/stag/backend/
+kubectl apply -f k8s/stag/frontend/
+kubectl apply -f k8s/stag/ingress.yaml
 ```
 
 ### Rollout-Update nach neuem Image
 
 ```bash
-kubectl rollout restart deployment/akakraft-backend  -n akakraft
-kubectl rollout restart deployment/akakraft-frontend -n akakraft
+kubectl rollout restart deployment/akakraft-backend  -n akakraft-stag
+kubectl rollout restart deployment/akakraft-frontend -n akakraft-stag
 ```
 
 ---
