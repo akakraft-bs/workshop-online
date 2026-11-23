@@ -195,6 +195,8 @@ private struct ParkCheckinSheet: View {
     @Environment(AppSession.self) private var session
     @Environment(\.dismiss) private var dismiss
     @State private var fahrzeuge = Remote<[Fahrzeug]>("fahrzeuge")
+    /// Fahrzeuge ohne Kennzeichen (Fahrrad) kommen fürs Parkkonto nicht in Frage.
+    private var parkbareFahrzeuge: [Fahrzeug] { (fahrzeuge.value ?? []).filter(\.hatKennzeichen) }
     @State private var fahrzeugId: String?
     @State private var manualKennzeichen = ""
     @State private var manualBezeichnung = ""
@@ -220,7 +222,7 @@ private struct ParkCheckinSheet: View {
                 Section {
                     Picker("Fahrzeug", selection: $fahrzeugId) {
                         Text("Anderes Fahrzeug").tag(String?.none)
-                        ForEach(fahrzeuge.value ?? []) { Text($0.label).tag(Optional($0.id.lowercased())) }
+                        ForEach(parkbareFahrzeuge) { Text($0.label).tag(Optional($0.id.lowercased())) }
                     }
                     if fahrzeugId == nil {
                         TextField("Kennzeichen", text: $manualKennzeichen)
@@ -260,8 +262,10 @@ private struct ParkCheckinSheet: View {
                 await fahrzeuge.load(session)
                 // Beim zweiten Konto parkt meist das Gastfahrzeug → Kennzeichen eingeben.
                 guard !isSecondAccount else { return }
-                fahrzeugId = berechtigung.vorgeschlagenesFahrzeugId?.lowercased()
-                    ?? fahrzeuge.value?.first(where: \.istStandard)?.id.lowercased()
+                let parkbar = Set(parkbareFahrzeuge.map { $0.id.lowercased() })
+                let vorschlag = berechtigung.vorgeschlagenesFahrzeugId?.lowercased()
+                fahrzeugId = (vorschlag.map(parkbar.contains) == true ? vorschlag : nil)
+                    ?? parkbareFahrzeuge.first(where: \.istStandard)?.id.lowercased()
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Abbrechen", role: .cancel) { dismiss() } }

@@ -1,5 +1,6 @@
 using AkaKraft.Application.DTOs;
 using AkaKraft.Domain.Entities;
+using AkaKraft.Domain.Enums;
 using AkaKraft.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +19,7 @@ internal static class FahrzeugEndpoints
                 .Where(f => f.UserId == userId)
                 .OrderByDescending(f => f.IstStandard)
                 .ThenBy(f => f.Marke).ThenBy(f => f.Modell)
-                .Select(f => new FahrzeugDto(f.Id, f.Marke, f.Modell, f.Kennzeichen, f.IstStandard))
+                .Select(f => new FahrzeugDto(f.Id, f.Marke, f.Modell, f.Kennzeichen, f.IstStandard, f.Art))
                 .ToListAsync();
 
             return Results.Ok(list);
@@ -29,7 +30,8 @@ internal static class FahrzeugEndpoints
         {
             if (!ctx.TryGetCurrentUserId(out var userId)) return Results.Unauthorized();
 
-            var validation = Validate(req);
+            var art = req.Art ?? FahrzeugArt.Pkw;
+            var validation = Validate(req, art);
             if (validation is not null) return Results.BadRequest(validation);
 
             var fahrzeug = new Fahrzeug
@@ -38,8 +40,9 @@ internal static class FahrzeugEndpoints
                 UserId = userId,
                 Marke = req.Marke.Trim(),
                 Modell = string.IsNullOrWhiteSpace(req.Modell) ? null : req.Modell.Trim(),
-                Kennzeichen = NormalizeKennzeichen(req.Kennzeichen),
+                Kennzeichen = NormalizeKennzeichen(req.Kennzeichen ?? string.Empty),
                 IstStandard = req.IstStandard,
+                Art = art,
             };
 
             if (fahrzeug.IstStandard)
@@ -49,7 +52,7 @@ internal static class FahrzeugEndpoints
             await db.SaveChangesAsync();
 
             return Results.Created($"/fahrzeuge/{fahrzeug.Id}",
-                new FahrzeugDto(fahrzeug.Id, fahrzeug.Marke, fahrzeug.Modell, fahrzeug.Kennzeichen, fahrzeug.IstStandard));
+                ToDto(fahrzeug));
         }).RequireAuthorization("AnyRole");
 
         // Fahrzeug bearbeiten
@@ -60,12 +63,14 @@ internal static class FahrzeugEndpoints
             var fahrzeug = await db.Fahrzeuge.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
             if (fahrzeug is null) return Results.NotFound();
 
-            var validation = Validate(req);
+            var art = req.Art ?? fahrzeug.Art;
+            var validation = Validate(req, art);
             if (validation is not null) return Results.BadRequest(validation);
 
             fahrzeug.Marke = req.Marke.Trim();
             fahrzeug.Modell = string.IsNullOrWhiteSpace(req.Modell) ? null : req.Modell.Trim();
-            fahrzeug.Kennzeichen = NormalizeKennzeichen(req.Kennzeichen);
+            fahrzeug.Kennzeichen = NormalizeKennzeichen(req.Kennzeichen ?? string.Empty);
+            fahrzeug.Art = art;
 
             if (req.IstStandard && !fahrzeug.IstStandard)
                 await ClearStandardAsync(db, userId);
@@ -73,7 +78,7 @@ internal static class FahrzeugEndpoints
 
             await db.SaveChangesAsync();
 
-            return Results.Ok(new FahrzeugDto(fahrzeug.Id, fahrzeug.Marke, fahrzeug.Modell, fahrzeug.Kennzeichen, fahrzeug.IstStandard));
+            return Results.Ok(ToDto(fahrzeug));
         }).RequireAuthorization("AnyRole");
 
         // Fahrzeug löschen
@@ -92,14 +97,21 @@ internal static class FahrzeugEndpoints
         return app;
     }
 
-    private static string? Validate(SaveFahrzeugRequest req)
+    private static string? Validate(SaveFahrzeugRequest req, FahrzeugArt art)
     {
+        if (!Enum.IsDefined(art)) return "Ungültige Fahrzeugart.";
         if (string.IsNullOrWhiteSpace(req.Marke)) return "Marke ist erforderlich.";
-        if (string.IsNullOrWhiteSpace(req.Kennzeichen)) return "Kennzeichen ist erforderlich.";
+        if (KennzeichenPflicht(art) && string.IsNullOrWhiteSpace(req.Kennzeichen)) return "Kennzeichen ist erforderlich.";
         if (req.Marke.Trim().Length > 80) return "Marke ist zu lang.";
-        if (NormalizeKennzeichen(req.Kennzeichen).Length > 16) return "Kennzeichen ist zu lang.";
+        if (NormalizeKennzeichen(req.Kennzeichen ?? string.Empty).Length > 16) return "Kennzeichen ist zu lang.";
         return null;
     }
+
+    /// <summary>Fahrräder brauchen kein Kennzeichen, alle anderen Arten schon.</summary>
+    internal static bool KennzeichenPflicht(FahrzeugArt art) => art != FahrzeugArt.Fahrrad;
+
+    private static FahrzeugDto ToDto(Fahrzeug f) =>
+        new(f.Id, f.Marke, f.Modell, f.Kennzeichen, f.IstStandard, f.Art);
 
     private static async Task ClearStandardAsync(ApplicationDbContext db, Guid userId)
     {

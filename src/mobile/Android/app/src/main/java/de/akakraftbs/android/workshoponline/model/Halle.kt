@@ -155,6 +155,25 @@ data class CalendarEventInput(
 
 // region Fahrzeuge
 
+@Serializable(with = FahrzeugArt.Serializer::class)
+enum class FahrzeugArt(val raw: String, val label: String) {
+    Pkw("Pkw", "PKW"),
+    Lkw("Lkw", "LKW"),
+    Motorrad("Motorrad", "Motorrad"),
+    Anhaenger("Anhaenger", "Anhänger"),
+    Fahrrad("Fahrrad", "Fahrrad"),
+    Unknown("Unknown", "Unbekannt");
+
+    /** Fahrräder brauchen kein Kennzeichen, alle anderen Arten schon. */
+    val kennzeichenPflicht: Boolean get() = this != Fahrrad
+
+    object Serializer : ResilientEnumSerializer<FahrzeugArt>("FahrzeugArt", entries.toTypedArray(), Unknown, FahrzeugArt::raw)
+
+    companion object {
+        val selectable = listOf(Pkw, Lkw, Motorrad, Anhaenger, Fahrrad)
+    }
+}
+
 @Serializable
 data class Fahrzeug(
     val id: String,
@@ -162,12 +181,16 @@ data class Fahrzeug(
     val modell: String? = null,
     val kennzeichen: String,
     val istStandard: Boolean = false,
+    val art: FahrzeugArt = FahrzeugArt.Pkw,
 ) {
-    val label: String get() = listOfNotNull(marke, modell.nonEmpty).joinToString(" ") + " · " + kennzeichen
+    val name: String get() = listOfNotNull(marke, modell.nonEmpty).joinToString(" ")
+    val hatKennzeichen: Boolean get() = kennzeichen.isNotBlank()
+    val label: String get() = if (hatKennzeichen) "$name · $kennzeichen" else name
 }
 
 @Serializable
 data class FahrzeugInput(
+    val art: FahrzeugArt,
     val marke: String,
     val modell: String?,
     val kennzeichen: String,

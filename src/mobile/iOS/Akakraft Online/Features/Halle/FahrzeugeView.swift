@@ -19,13 +19,23 @@ struct FahrzeugeView: View {
                         editing = fahrzeug
                     } label: {
                         HStack {
+                            (fahrzeug.art ?? .pkw).image
+                                .foregroundStyle(Color.secondary)
+                                .frame(width: 32)
+                                .accessibilityLabel((fahrzeug.art ?? .pkw).label)
                             VStack(alignment: .leading) {
-                                Text([fahrzeug.marke, fahrzeug.modell.nonEmpty].compactMap { $0 }.joined(separator: " "))
+                                Text(fahrzeug.name)
                                     .font(.headline)
                                     .foregroundStyle(Color.primary)
-                                Text(fahrzeug.kennzeichen)
-                                    .font(.subheadline.monospaced())
-                                    .foregroundStyle(Color.secondary)
+                                HStack(spacing: 6) {
+                                    Text((fahrzeug.art ?? .pkw).label)
+                                    if fahrzeug.hatKennzeichen {
+                                        Text("·")
+                                        Text(fahrzeug.kennzeichen).monospaced()
+                                    }
+                                }
+                                .font(.subheadline)
+                                .foregroundStyle(Color.secondary)
                             }
                             Spacer()
                             if fahrzeug.istStandard {
@@ -79,6 +89,7 @@ struct FahrzeugFormView: View {
         self.fahrzeug = fahrzeug
         self.onSaved = onSaved
         _input = State(initialValue: FahrzeugInput(
+            art: fahrzeug?.art.flatMap { $0 == .unknown ? nil : $0 } ?? .pkw,
             marke: fahrzeug?.marke ?? "", modell: fahrzeug?.modell,
             kennzeichen: fahrzeug?.kennzeichen ?? "", istStandard: fahrzeug?.istStandard ?? false
         ))
@@ -87,11 +98,22 @@ struct FahrzeugFormView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Picker("Art", selection: $input.art) {
+                    ForEach(FahrzeugArt.selectable) { art in
+                        Label { Text(art.label) } icon: { art.image }.tag(art)
+                    }
+                }
                 TextField("Marke", text: $input.marke)
                 TextField("Modell (optional)", text: optional($input.modell))
-                TextField("Kennzeichen", text: $input.kennzeichen)
-                    .textInputAutocapitalization(.characters)
-                    .autocorrectionDisabled()
+                Section {
+                    TextField(input.art.kennzeichenPflicht ? "Kennzeichen" : "Kennzeichen (optional)", text: $input.kennzeichen)
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                } footer: {
+                    if !input.art.kennzeichenPflicht {
+                        Text("Fahrräder werden beim Campus-Parken nicht angeboten.")
+                    }
+                }
                 Toggle("Standardfahrzeug", isOn: $input.istStandard)
             }
             .navigationTitle(fahrzeug == nil ? "Neues Fahrzeug" : "Fahrzeug bearbeiten")
@@ -118,12 +140,19 @@ struct FahrzeugFormView: View {
                             }
                         }
                     }
-                    .disabled(input.marke.trimmed.isEmpty || input.kennzeichen.trimmed.isEmpty || action.isRunning)
+                    .disabled(input.marke.trimmed.isEmpty || (input.art.kennzeichenPflicht && input.kennzeichen.trimmed.isEmpty) || action.isRunning)
                     .requiresOnline()
                 }
             }
             .actionAlert(action)
         }
         .presentationDetents([.medium, .large])
+    }
+}
+
+extension FahrzeugArt {
+    /// SF Symbol bzw. eigenes Template-Asset (Anhänger).
+    var image: Image {
+        if let assetImage { Image(assetImage) } else { Image(systemName: systemImage ?? "car") }
     }
 }

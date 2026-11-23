@@ -302,6 +302,8 @@ class ParkCheckinViewModel @Inject constructor(session: AppSession, saved: Saved
     val account: ParkAccountStatus = route.account.fromArg()
     val berechtigung: ParkBerechtigung = route.berechtigung.fromArg()
     val fahrzeuge = remote<List<Fahrzeug>>("fahrzeuge")
+    /** Fahrzeuge ohne Kennzeichen (Fahrrad) kommen fürs Parkkonto nicht in Frage. */
+    val parkbareFahrzeuge: List<Fahrzeug> get() = fahrzeuge.value.orEmpty().filter { it.hatKennzeichen }
 
     var fahrzeugId by mutableStateOf<String?>(null)
     var manualKennzeichen by mutableStateOf("")
@@ -319,8 +321,9 @@ class ParkCheckinViewModel @Inject constructor(session: AppSession, saved: Saved
             fahrzeuge.load(session)
             // Beim zweiten Konto parkt meist das Gastfahrzeug → Kennzeichen eingeben.
             if (zweitesKonto) return@launch
-            fahrzeugId = berechtigung.vorgeschlagenesFahrzeugId?.lowercase()
-                ?: fahrzeuge.value?.firstOrNull { it.istStandard }?.id?.lowercase()
+            val parkbar = parkbareFahrzeuge.map { it.id.lowercase() }.toSet()
+            fahrzeugId = berechtigung.vorgeschlagenesFahrzeugId?.lowercase()?.takeIf { it in parkbar }
+                ?: parkbareFahrzeuge.firstOrNull { it.istStandard }?.id?.lowercase()
         }
     }
 
@@ -356,8 +359,8 @@ private fun ParkCheckinScreen(viewModel: ParkCheckinViewModel = hiltViewModel())
         }
         DropdownField(
             label = "Fahrzeug",
-            options = viewModel.fahrzeuge.value.orEmpty(),
-            selected = viewModel.fahrzeuge.value?.firstOrNull { it.id.lowercase() == viewModel.fahrzeugId },
+            options = viewModel.parkbareFahrzeuge,
+            selected = viewModel.parkbareFahrzeuge.firstOrNull { it.id.lowercase() == viewModel.fahrzeugId },
             optionLabel = { it.label },
             onSelect = { viewModel.fahrzeugId = it?.id?.lowercase() },
             noneLabel = "Anderes Fahrzeug",

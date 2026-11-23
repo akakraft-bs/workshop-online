@@ -109,6 +109,7 @@ internal static class ParkplatzEndpoints
             {
                 var fahrzeug = await db.Fahrzeuge.FirstOrDefaultAsync(f => f.Id == fahrzeugId && f.UserId == userId);
                 if (fahrzeug is null) return Results.BadRequest("Fahrzeug nicht gefunden.");
+                if (!fahrzeug.HatKennzeichen) return Results.BadRequest("Dieses Fahrzeug hat kein Kennzeichen und kann nicht für ein Parkkonto verwendet werden.");
                 kennzeichen = fahrzeug.Kennzeichen;
                 bezeichnung = $"{fahrzeug.Marke} {fahrzeug.Modell}".Trim();
             }
