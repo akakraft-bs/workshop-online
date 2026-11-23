@@ -330,3 +330,10 @@ $border-color: var(--mat-sys-outline-variant, #e0e0e0);
 .time-labels + .day-column {
   border-left: none;
 }
+
+// Mobil nur das Icon zeigen, damit die Toolbar nicht umbricht.
+@media (max-width: 599.98px) {
+  .neue-ansicht-text { display: none; }
+  .neue-ansicht-btn { min-width: 0; padding: 0 10px; }
+  .neue-ansicht-btn mat-icon { margin: 0; }
+}

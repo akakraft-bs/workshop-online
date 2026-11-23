@@ -1,0 +1,343 @@
+<div class="hb" [class.hb--mobile]="isMobile()">
+
+  <header class="hb-head">
+    <h1 class="page-title">Hallenbelegung</h1>
+    <div class="hb-head-actions">
+      <button mat-button type="button" (click)="alteAnsicht()" matTooltip="Zur bisherigen Wochenansicht wechseln">
+        <mat-icon>history</mat-icon>
+        Alte Ansicht
+      </button>
+      @if (canWrite() && !isMobile()) {
+        <button mat-flat-button type="button" (click)="reservieren()">
+          <mat-icon>add</mat-icon>
+          Platz reservieren
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- ===================================================================
+       Wiederverwendbare Spuren einer Zeile (Desktop-Timeline + mobile Tagesansicht)
+       =================================================================== -->
+  <ng-template #spurenTpl let-zeile>
+    <div class="track" [class.track--wochenende]="zeile.wochenende">
+      <!-- Hintergrund: Nacht 03–06 und 22–03, Rasterlinien, Mitternacht -->
+      <div class="track-nacht" style="left: 0; width: 12.5%"></div>
+      <div class="track-nacht" style="left: 79.1667%; right: 0"></div>
+      @for (h of ACHSE; track $index) {
+        @if ($index > 0 && $index < ACHSE.length - 1) {
+          <div class="track-linie" [class.track-linie--mitternacht]="h === 0" [style.left.%]="achsenPosition($index)"></div>
+        }
+      }
+      @if (zeile.vergangen > 0 && zeile.vergangen < 100) {
+        <div class="track-vergangen" [style.width.%]="zeile.vergangen"></div>
+      } @else if (zeile.vergangen >= 100) {
+        <div class="track-vergangen" style="width: 100%"></div>
+      }
+
+      <div class="lanes">
+        @for (spur of zeile.spuren; track spur.platz.id) {
+          <div
+            class="lane"
+            [class.lane--klickbar]="writableCalendarIds().includes(spur.platz.id)"
+            [attr.aria-label]="spur.platz.name"
+            (click)="spurKlick(zeile, spur.platz, $event)">
+            @for (s of spur.segmente; track s.event.calendarId + s.event.id) {
+              <button
+                type="button"
+                class="bar"
+                [class.bar--weiter-links]="s.weiterLinks"
+                [class.bar--weiter-rechts]="s.weiterRechts"
+                [style.left.%]="s.links"
+                [style.width.%]="s.breite"
+                [style.background]="spur.platz.farbe"
+                [style.color]="spur.platz.textFarbe"
+                [matTooltip]="s.label"
+                [attr.aria-label]="s.label"
+                (click)="terminOeffnen(s.event, $event)">
+                <span class="bar-titel">{{ s.event.title }}</span>
+                @if (s.event.creatorName) { <span class="bar-person">{{ s.event.creatorName }}</span> }
+                <span class="bar-zeit">{{ s.zeit }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      @if (zeile.jetzt !== null) {
+        <div class="track-jetzt" [style.left.%]="zeile.jetzt" aria-hidden="true"></div>
+      }
+    </div>
+  </ng-template>
+
+  <ng-template #achseTpl>
+    <div class="achse" aria-hidden="true">
+      @for (h of ACHSE; track $index) {
+        <span class="achse-label" [class.achse-label--mitternacht]="h === 0" [style.left.%]="achsenPosition($index)">
+          {{ achsenLabel(h) }}
+        </span>
+      }
+    </div>
+  </ng-template>
+
+  @if (!isMobile()) {
+    <!-- =================================================================
+         DESKTOP
+         ================================================================= -->
+
+    <!-- 1. Als Nächstes frei -->
+    <section class="hb-section" aria-labelledby="hb-frei">
+      <h2 id="hb-frei" class="hb-h2">Als Nächstes frei</h2>
+      <div class="frei-grid">
+        @for (s of platzStatus(); track s.platz.id) {
+          <div class="frei-card">
+            <div class="frei-platz">
+              <span class="platz-dot" [style.background]="s.platz.farbe"></span>
+              {{ s.platz.name }}
+            </div>
+            <div class="frei-haupt">{{ s.haupt }}</div>
+            <div class="frei-unter">{{ s.unter }}</div>
+          </div>
+        }
+        <button type="button" class="frei-card frei-card--dunkel"
+                [disabled]="!naechstesFreiesWochenende()"
+                (click)="naechstesFreiesWochenende() && wochenendeAnzeigen(naechstesFreiesWochenende()!)">
+          <div class="frei-platz">
+            <mat-icon aria-hidden="true">weekend</mat-icon>
+            Nächstes freies Wochenende
+          </div>
+          <div class="frei-haupt">{{ naechstesFreiesWochenende()?.label ?? 'Keins in Sicht' }}</div>
+          <div class="frei-unter">
+            {{ naechstesFreiesWochenende() ? 'Alle Plätze Sa + So frei' : 'In den nächsten ' + wochenendAnzahl() + ' Wochen' }}
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. Timeline -->
+    <section class="hb-section" aria-labelledby="hb-timeline">
+      <div class="tl-toolbar">
+        <h2 id="hb-timeline" class="hb-h2">Belegung</h2>
+        <mat-button-toggle-group
+          hideSingleSelectionIndicator
+          [value]="modus()"
+          (change)="modusWechseln($event.value)"
+          aria-label="Zeitraum">
+          <mat-button-toggle value="tag">Tag</mat-button-toggle>
+          <mat-button-toggle value="woche">7 Tage</mat-button-toggle>
+          <mat-button-toggle value="wochenenden">Wochenenden</mat-button-toggle>
+        </mat-button-toggle-group>
+        <div class="tl-nav">
+          <button mat-icon-button type="button" (click)="zurueck()" aria-label="Zurück"><mat-icon>chevron_left</mat-icon></button>
+          <button mat-stroked-button type="button" (click)="heute()" [disabled]="istAktuell() && modus() !== 'wochenenden'">Heute</button>
+          <button mat-icon-button type="button" (click)="vor()" aria-label="Weiter"><mat-icon>chevron_right</mat-icon></button>
+        </div>
+        <span class="tl-range">{{ kopfzeile() }}</span>
+        @if (loading()) { <mat-spinner diameter="20" /> }
+      </div>
+
+      <div class="legende">
+        @for (p of plaetze(); track p.id) {
+          <span class="legende-item"><span class="platz-dot" [style.background]="p.farbe"></span>{{ p.name }}</span>
+        }
+        @if (canWrite()) {
+          <span class="legende-hint">Tipp: Auf eine freie Stelle klicken, um dort zu reservieren.</span>
+        }
+      </div>
+
+      <div class="tl-scroll">
+        <div class="tl" [class.tl--tag]="modus() === 'tag'">
+          <div class="tl-row tl-row--achse">
+            <div class="tl-label"></div>
+            <ng-container [ngTemplateOutlet]="achseTpl" />
+          </div>
+          @for (zeile of zeilen(); track zeile.tag.getTime()) {
+            <div class="tl-row" [class.tl-row--wochenende]="zeile.wochenende">
+              <button type="button" class="tl-label" (click)="modus() !== 'tag' && tagOeffnen(zeile.tag)"
+                      [attr.aria-label]="'Tagesansicht ' + zeile.wochentag + ' ' + zeile.datum"
+                      [disabled]="modus() === 'tag'">
+                <span class="tl-wochentag">{{ zeile.wochentag }}</span>
+                <span class="tl-datum">{{ zeile.datum }}</span>
+                @if (zeile.badge) {
+                  <span class="badge" [class.badge--laeuft]="zeile.badge === 'Läuft noch'">{{ zeile.badge }}</span>
+                }
+              </button>
+              <ng-container [ngTemplateOutlet]="spurenTpl" [ngTemplateOutletContext]="{ $implicit: zeile }" />
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Wochenenden im Überblick -->
+    <section class="hb-section" aria-labelledby="hb-we">
+      <h2 id="hb-we" class="hb-h2">Wochenenden im Überblick</h2>
+      <div class="we-grid">
+        @for (w of wochenenden(); track w.samstag.getTime()) {
+          <button type="button" class="we-kachel" [class.we-kachel--frei]="w.ganzFrei" (click)="wochenendeAnzeigen(w)"
+                  [attr.aria-label]="'Wochenende ' + w.label + (w.ganzFrei ? ', ganz frei' : '')">
+            <div class="we-kopf">
+              <span class="we-label">{{ w.label }}</span>
+              @if (w.ganzFrei) { <span class="badge badge--frei">Ganz frei</span> }
+            </div>
+            <div class="we-tabelle">
+              <span></span><span class="we-tag">Sa</span><span class="we-tag">So</span>
+              @for (p of w.plaetze; track p.platz.id) {
+                <span class="we-platz">{{ p.platz.name }}</span>
+                <span class="we-box" [class.we-box--belegt]="p.sa" [style.--platz]="p.platz.farbe"
+                      [attr.aria-label]="'Samstag ' + (p.sa ? 'belegt' : 'frei')"></span>
+                <span class="we-box" [class.we-box--belegt]="p.so" [style.--platz]="p.platz.farbe"
+                      [attr.aria-label]="'Sonntag ' + (p.so ? 'belegt' : 'frei')"></span>
+              }
+            </div>
+          </button>
+        }
+      </div>
+      <button mat-button type="button" class="we-mehr" (click)="mehrWochenenden()">
+        Weitere Wochenenden
+        <mat-icon iconPositionEnd>expand_more</mat-icon>
+      </button>
+    </section>
+
+  } @else if (mobilZeile(); as zeile) {
+    <!-- =================================================================
+         MOBIL – Tagesansicht
+         ================================================================= -->
+    <section class="hb-section">
+      <div class="m-tag-kopf">
+        <button mat-icon-button type="button" (click)="mobilTagSchliessen()" aria-label="Zurück zur Übersicht">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h2 class="hb-h2">{{ zeile.wochentag }} {{ zeile.datum }}</h2>
+        @if (zeile.badge) {
+          <span class="badge" [class.badge--laeuft]="zeile.badge === 'Läuft noch'">{{ zeile.badge }}</span>
+        }
+      </div>
+
+      <div class="tl-scroll">
+        <div class="tl tl--tag tl--mobil">
+          <div class="tl-row tl-row--achse"><ng-container [ngTemplateOutlet]="achseTpl" /></div>
+          <div class="tl-row"><ng-container [ngTemplateOutlet]="spurenTpl" [ngTemplateOutletContext]="{ $implicit: zeile }" /></div>
+        </div>
+      </div>
+
+      <div class="m-liste">
+        @for (gruppe of mobilTermine(); track gruppe.platz.id) {
+          <div class="m-gruppe">
+            <div class="m-gruppe-kopf">
+              <span class="platz-dot" [style.background]="gruppe.platz.farbe"></span>
+              {{ gruppe.platz.name }}
+            </div>
+            @for (s of gruppe.segmente; track s.event.calendarId + s.event.id) {
+              <button type="button" class="m-termin" (click)="terminOeffnen(s.event)">
+                <span class="m-termin-zeit">{{ s.zeit }}</span>
+                <span class="m-termin-text">{{ s.event.title }}@if (s.event.creatorName) { · {{ s.event.creatorName }} }</span>
+                <mat-icon aria-hidden="true">chevron_right</mat-icon>
+              </button>
+            } @empty {
+              <div class="m-frei">Den ganzen Tag frei</div>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+  } @else {
+    <!-- =================================================================
+         MOBIL – Übersicht
+         ================================================================= -->
+
+    <section class="hb-section" aria-labelledby="m-jetzt">
+      <h2 id="m-jetzt" class="hb-h2">Jetzt in der Halle</h2>
+      <div class="m-karte">
+        @for (s of platzStatus(); track s.platz.id) {
+          <div class="m-platz">
+            <span class="m-marker" [style.background]="s.platz.farbe"></span>
+            <div class="m-platz-text">
+              <span class="m-platz-name">{{ s.platz.name }}</span>
+              <span class="m-platz-unter">{{ s.pill.art === 'belegt' ? s.unter : s.haupt }}</span>
+            </div>
+            <span class="pill" [class.pill--belegt]="s.pill.art === 'belegt'">{{ s.pill.text }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="hb-section" aria-labelledby="m-woche">
+      <div class="m-woche-kopf">
+        <h2 id="m-woche" class="hb-h2">Nächste 7 Tage</h2>
+        <div class="tl-nav">
+          <button mat-icon-button type="button" (click)="zurueck()" aria-label="Vorherige 7 Tage"><mat-icon>chevron_left</mat-icon></button>
+          <button mat-icon-button type="button" (click)="vor()" aria-label="Nächste 7 Tage"><mat-icon>chevron_right</mat-icon></button>
+        </div>
+      </div>
+      <div class="m-range">
+        {{ wochenKopfzeile() }}
+        @if (!istAktuell()) { · <button type="button" class="link-btn" (click)="heute()">Heute</button> }
+        @if (loading()) { <mat-spinner diameter="14" /> }
+      </div>
+      <div class="m-karte">
+        @for (zeile of wochenZeilen(); track zeile.tag.getTime()) {
+          <button type="button" class="m-tag" [class.m-tag--wochenende]="zeile.wochenende" (click)="tagOeffnen(zeile.tag)"
+                  [attr.aria-label]="'Tagesansicht ' + zeile.wochentag + ' ' + zeile.datum">
+            <span class="m-tag-label">
+              <span class="tl-wochentag">{{ zeile.wochentag }}</span>
+              <span class="tl-datum">{{ zeile.datum }}</span>
+              @if (zeile.badge) {
+                <span class="badge badge--klein" [class.badge--laeuft]="zeile.badge === 'Läuft noch'">{{ zeile.badge }}</span>
+              }
+            </span>
+            <span class="mini">
+              @if (zeile.vergangen > 0) {
+                <span class="mini-vergangen" [style.width.%]="zeile.vergangen > 100 ? 100 : zeile.vergangen"></span>
+              }
+              <span class="mini-mitternacht"></span>
+              @for (spur of zeile.spuren; track spur.platz.id) {
+                <span class="mini-spur">
+                  @for (s of spur.segmente; track s.event.calendarId + s.event.id) {
+                    <span class="mini-bar" [style.left.%]="s.links" [style.width.%]="s.breite" [style.background]="spur.platz.farbe"></span>
+                  }
+                </span>
+              }
+              @if (zeile.jetzt !== null) {
+                <span class="mini-jetzt" [style.left.%]="zeile.jetzt"></span>
+              }
+            </span>
+            <mat-icon class="m-tag-chevron" aria-hidden="true">chevron_right</mat-icon>
+          </button>
+        }
+        <div class="mini-achse" aria-hidden="true">
+          <span style="left: 0">03</span>
+          <span style="left: 50%">15</span>
+          <span class="mini-achse-mitternacht" style="left: 87.5%">00</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="hb-section" aria-labelledby="m-we">
+      <h2 id="m-we" class="hb-h2">Freie Wochenenden</h2>
+      <div class="m-we-grid">
+        @for (w of freieWochenenden(); track w.samstag.getTime()) {
+          <button type="button" class="we-kachel we-kachel--frei" (click)="wochenendeAnzeigen(w)">
+            <span class="we-label">{{ w.label }}</span>
+            <span class="badge badge--frei">Ganz frei</span>
+          </button>
+        } @empty {
+          <div class="m-frei">Kein komplett freies Wochenende in den nächsten {{ wochenendAnzahl() }} Wochen.</div>
+        }
+      </div>
+    </section>
+
+    @if (canWrite()) {
+      <!-- App-weites Muster: mobil als feste Leiste unten (neben dem Feedback-Button) -->
+      <div class="page-search-and-actions m-actions">
+        <div class="page-actions">
+          <button mat-flat-button type="button" (click)="reservieren()">
+            <mat-icon>add</mat-icon>
+            Platz reservieren
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>

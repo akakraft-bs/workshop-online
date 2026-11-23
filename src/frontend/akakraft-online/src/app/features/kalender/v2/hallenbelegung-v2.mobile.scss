@@ -1,0 +1,278 @@
+// Hallenbelegung V2 – mobiles Layout (unter Tablet-Breite)
+
+// ---- Mobil -----------------------------------------------------------------
+
+.hb--mobile {
+  gap: 22px;
+}
+
+.m-karte {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: var(--hb-card);
+  border: 1px solid var(--hb-border);
+  overflow: hidden;
+}
+
+.m-platz {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  min-height: 60px;
+
+  & + & { border-top: 1px solid var(--hb-border); }
+}
+
+.m-marker {
+  width: 6px;
+  align-self: stretch;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.m-platz-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.m-platz-name { font-weight: 600; font-size: 0.9rem; }
+
+.m-platz-unter {
+  font-size: 0.78rem;
+  color: var(--hb-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pill {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--hb-frei-bg);
+  color: var(--hb-frei);
+
+  &--belegt { background: var(--hb-belegt-bg); color: var(--hb-belegt); }
+}
+
+.m-woche-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.m-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -10px;
+  font-size: 0.85rem;
+  color: var(--hb-muted);
+}
+
+.link-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--mat-sys-primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.m-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px 10px 14px;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--mat-sys-on-surface);
+  text-align: left;
+  cursor: pointer;
+
+  & + & { border-top: 1px solid var(--hb-border); }
+  &--wochenende { background: var(--hb-wochenende); }
+  &:focus-visible { outline: 2px solid var(--mat-sys-primary); outline-offset: -2px; }
+}
+
+.m-tag-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.m-tag-chevron { color: var(--hb-muted); flex-shrink: 0; }
+
+.mini {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 3px 0;
+  // Nachtbereich 03–06 und 22–03
+  background: linear-gradient(to right,
+    var(--hb-nacht) 0 12.5%, transparent 12.5% 79.1667%, var(--hb-nacht) 79.1667% 100%);
+  border-radius: 4px;
+}
+
+.mini-spur {
+  position: relative;
+  height: 7px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
+}
+
+.mini-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 2px;
+  border-radius: 2px;
+}
+
+.mini-vergangen {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 1;
+}
+
+.mini-mitternacht {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 87.5%;
+  border-left: 1.5px solid color-mix(in srgb, var(--mat-sys-on-surface) 40%, transparent);
+  z-index: 1;
+}
+
+.mini-jetzt {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--hb-jetzt);
+  z-index: 2;
+}
+
+// Achse unter der Mini-Liste, bündig mit den Mini-Spuren
+.mini-achse {
+  position: relative;
+  height: 20px;
+  margin: 0 40px 0 88px; // Label-Spalte + Chevron
+  font-size: 0.65rem;
+  color: var(--hb-muted);
+  border-top: 1px solid var(--hb-border);
+
+  span {
+    position: absolute;
+    top: 3px;
+    transform: translateX(-50%);
+  }
+
+  span:first-child { transform: none; }
+}
+
+.mini-achse-mitternacht { font-weight: 700; color: var(--mat-sys-on-surface); }
+
+.m-we-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  .we-kachel { gap: 6px; align-items: flex-start; }
+}
+
+.m-frei {
+  grid-column: 1 / -1;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  color: var(--hb-muted);
+}
+
+.m-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+// Mobile Tagesansicht
+.m-tag-kopf {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: -8px;
+}
+
+.m-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.m-gruppe {
+  border-radius: 16px;
+  background: var(--hb-card);
+  border: 1px solid var(--hb-border);
+  overflow: hidden;
+}
+
+.m-gruppe-kopf {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--hb-border);
+}
+
+.m-termin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 6px 10px 14px;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--mat-sys-on-surface);
+  text-align: left;
+  cursor: pointer;
+
+  & + & { border-top: 1px solid var(--hb-border); }
+
+  mat-icon { color: var(--hb-muted); flex-shrink: 0; }
+}
+
+.m-termin-zeit {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--hb-muted);
+  width: 82px;
+  flex-shrink: 0;
+}
+
+.m-termin-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.88rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
