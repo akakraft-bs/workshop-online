@@ -82,7 +82,9 @@ export class ParkplatzCheckinDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.fahrzeugService.list().subscribe({
-      next: list => {
+      next: alle => {
+        // Fahrzeuge ohne Kennzeichen (Fahrrad) kommen fürs Parkkonto nicht in Frage.
+        const list = alle.filter(f => !!f.kennzeichen);
         this.fahrzeuge.set(list);
         const vorschlag = this.data.berechtigung.vorgeschlagenesFahrzeugId;
         // Beim zweiten Konto parkt meist das Gastfahrzeug → Kennzeichen eingeben.

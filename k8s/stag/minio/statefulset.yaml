@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: akakraft-minio
-  namespace: akakraft
+  namespace: akakraft-stag
 spec:
   serviceName: akakraft-minio
   replicas: 1

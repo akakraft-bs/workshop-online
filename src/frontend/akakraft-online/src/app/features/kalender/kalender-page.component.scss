@@ -4,6 +4,16 @@ $hour-height: 26px;
 $header-bg: var(--mat-sys-surface);
 $border-color: var(--mat-sys-outline-variant, #e0e0e0);
 
+// Linke Zeit-Spalte bleibt beim horizontalen Scrollen (mobil) stehen.
+@mixin sticky-gutter {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: $header-bg;
+  border-right: 1px solid $border-color;
+  box-sizing: border-box;
+}
+
 :host {
   display: flex;
   flex-direction: column;
@@ -92,6 +102,15 @@ $border-color: var(--mat-sys-outline-variant, #e0e0e0);
   min-width: 0;
 }
 
+// Zeilen so breit wie ihr Inhalt machen – sonst endet die Zeile an der
+// Viewport-Breite und die sticky Zeit-Spalte scrollt mit dem Zeilenende weg.
+.allday-row,
+.allday-divider,
+.day-header-row,
+.time-grid {
+  min-width: max-content;
+}
+
 // ---- Ganztages-Zeile (innerhalb scroll-area, scrollt horizontal mit) -------
 
 .allday-row {
@@ -102,6 +121,7 @@ $border-color: var(--mat-sys-outline-variant, #e0e0e0);
   background: $header-bg;
 
   .time-gutter {
+    @include sticky-gutter;
     width: $time-gutter-width;
     flex-shrink: 0;
     font-size: 0.65rem;
@@ -159,6 +179,7 @@ $border-color: var(--mat-sys-outline-variant, #e0e0e0);
   flex-shrink: 0;
 
   .time-gutter {
+    @include sticky-gutter;
     width: $time-gutter-width;
     flex-shrink: 0;
   }
@@ -188,6 +209,7 @@ $border-color: var(--mat-sys-outline-variant, #e0e0e0);
 }
 
 .time-labels {
+  @include sticky-gutter;
   width: $time-gutter-width;
   flex-shrink: 0;
 
@@ -299,4 +321,19 @@ $border-color: var(--mat-sys-outline-variant, #e0e0e0);
   justify-content: center;
   background: rgba(255, 255, 255, 0.6);
   z-index: 10;
+}
+
+// Die sticky Zeit-Spalte bringt ihren eigenen rechten Rand mit –
+// sonst entstünde neben der ersten Tag-Spalte eine doppelte Linie.
+.time-gutter + .allday-cell,
+.time-gutter + .day-header,
+.time-labels + .day-column {
+  border-left: none;
+}
+
+// Mobil nur das Icon zeigen, damit die Toolbar nicht umbricht.
+@media (max-width: 599.98px) {
+  .neue-ansicht-text { display: none; }
+  .neue-ansicht-btn { min-width: 0; padding: 0 10px; }
+  .neue-ansicht-btn mat-icon { margin: 0; }
 }

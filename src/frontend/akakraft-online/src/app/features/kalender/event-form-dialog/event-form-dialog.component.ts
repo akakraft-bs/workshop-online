@@ -16,6 +16,10 @@ import { ConflictConfirmDialogComponent } from './conflict-confirm-dialog.compon
 export interface EventFormDialogData {
   event?: CalendarEvent;
   defaultStart?: Date;
+  /** Vorbelegtes Ende (z. B. Ende der angeklickten freien Lücke). Standard: Start + 1 h. */
+  defaultEnd?: Date;
+  /** Vorausgewählter Platz/Kalender (nur wenn beschreibbar). */
+  defaultCalendarId?: string;
   configs: CalendarConfig[];
   writableCalendarIds: string[];
   /** Existing events used to detect time conflicts (optional). */
@@ -112,7 +116,12 @@ export class EventFormDialogComponent implements OnInit {
       });
     } else {
       const start = this.data.defaultStart ?? roundToNextHour(new Date());
-      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      const end = this.data.defaultEnd && this.data.defaultEnd > start
+        ? this.data.defaultEnd
+        : new Date(start.getTime() + 60 * 60 * 1000);
+      if (this.data.defaultCalendarId && this.writableConfigs.some(c => c.googleCalendarId === this.data.defaultCalendarId)) {
+        this.form.patchValue({ calendarId: this.data.defaultCalendarId });
+      }
       this.form.patchValue({
         startDate: dateOnly(start),
         startTime: toTimeString(start),

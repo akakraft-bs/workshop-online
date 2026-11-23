@@ -80,6 +80,22 @@
   color: var(--mat-sys-primary);
 }
 
+.fz-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.fz-art {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+
+  &:not(.fz-art--solo)::after {
+    content: '·';
+    margin-left: 8px;
+  }
+}
+
 .fz-kennzeichen {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 14px;

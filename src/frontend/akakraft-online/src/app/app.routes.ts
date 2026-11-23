@@ -171,7 +171,7 @@ export const routes: Routes = [
       {
         path: 'kalender',
         loadComponent: () =>
-          import('./features/kalender/kalender-page.component').then(m => m.KalenderPageComponent),
+          import('./features/kalender/hallenbelegung-page.component').then(m => m.HallenbelegungPageComponent),
       },
       {
         path: 'veranstaltungen',
