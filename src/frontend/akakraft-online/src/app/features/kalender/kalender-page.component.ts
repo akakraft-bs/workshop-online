@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/auth/auth.service';
 import { CalendarService } from '../../core/calendar/calendar.service';
+import { HallenAnsichtService } from './hallen-ansicht.service';
 import { CalendarConfig, CalendarEvent, PositionedEvent } from '../../models/calendar.model';
 import {
   EventFormDialogComponent,
@@ -40,6 +41,7 @@ export class KalenderPageComponent implements OnInit {
   private readonly calendarService = inject(CalendarService);
   private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
+  private readonly ansicht = inject(HallenAnsichtService);
 
   readonly PX_PER_HOUR = PX_PER_HOUR;
   readonly HOURS = HOURS;
@@ -101,6 +103,11 @@ export class KalenderPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadConfigs();
+  }
+
+  /** Zurück zur neuen Hallenbelegung (V2); wird im Browser gemerkt. */
+  neueAnsicht(): void {
+    this.ansicht.setzen('neu');
   }
 
   private loadConfigs(): void {

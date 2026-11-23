@@ -17,6 +17,10 @@
     <span class="week-range">{{ weekRange() }}</span>
 
     <div class="actions">
+      <button mat-stroked-button (click)="neueAnsicht()" matTooltip="Zur neuen Hallenbelegung wechseln" class="neue-ansicht-btn">
+        <mat-icon>auto_awesome</mat-icon>
+        <span class="neue-ansicht-text">Neue Ansicht</span>
+      </button>
       @if (canWrite()) {
         <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn-desktop">
           <mat-icon>add</mat-icon>

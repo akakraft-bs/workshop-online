@@ -1,0 +1,439 @@
+// Hallenbelegung V2 – siehe docs/Hallebelegung V2.md
+
+:host {
+  --hb-frei: #248a3d;
+  --hb-frei-bg: #e3f4e7;
+  --hb-belegt: #d70015;
+  --hb-belegt-bg: #fde7e9;
+  --hb-jetzt: #ff3b30;
+  --hb-border: var(--mat-sys-outline-variant, #e0e0e0);
+  --hb-card: var(--mat-sys-surface-container-low, #f7f7f9);
+  --hb-muted: var(--mat-sys-on-surface-variant, #5f6368);
+  --hb-nacht: rgba(0, 0, 0, 0.045);
+  --hb-wochenende: rgba(41, 55, 72, 0.035);
+  --hb-label-breite: 120px;
+  --hb-lane-hoehe: 24px;
+
+  display: block;
+}
+
+.hb {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-bottom: 32px;
+}
+
+.hb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .page-title { margin: 0; }
+}
+
+.hb-head-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hb-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.hb-h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--mat-sys-on-surface);
+}
+
+.platz-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  white-space: nowrap;
+
+  &--laeuft { background: var(--hb-belegt-bg); color: var(--hb-belegt); }
+  &--frei { background: var(--hb-frei); color: #fff; }
+  &--klein { font-size: 0.62rem; padding: 0 6px; }
+}
+
+// ---- 1. Als Nächstes frei --------------------------------------------------
+
+.frei-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.frei-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--hb-card);
+  border: 1px solid var(--hb-border);
+  text-align: left;
+  font: inherit;
+  color: var(--mat-sys-on-surface);
+  min-width: 0;
+
+  &--dunkel {
+    background: var(--mat-sys-primary);
+    border-color: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+    cursor: pointer;
+
+    .frei-platz, .frei-unter { color: rgba(255, 255, 255, 0.78); }
+    &:disabled { cursor: default; }
+    &:not(:disabled):hover { filter: brightness(1.12); }
+    &:focus-visible { outline: 3px solid var(--mat-sys-primary-container); outline-offset: 2px; }
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  }
+}
+
+.frei-platz {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--hb-muted);
+}
+
+.frei-haupt {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.frei-unter {
+  font-size: 0.8rem;
+  color: var(--hb-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ---- 2. Timeline -----------------------------------------------------------
+
+.tl-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.tl-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tl-range {
+  font-weight: 500;
+}
+
+.legende {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  font-size: 0.8rem;
+  color: var(--hb-muted);
+}
+
+.legende-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legende-hint {
+  margin-left: auto;
+  font-style: italic;
+}
+
+.tl-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--hb-border);
+  border-radius: 12px;
+  background: var(--mat-sys-surface, #fff);
+}
+
+.tl {
+  min-width: 980px;
+
+  &--tag { --hb-lane-hoehe: 40px; }
+  &--mobil { min-width: 640px; }
+}
+
+.tl-row {
+  display: flex;
+  border-top: 1px solid var(--hb-border);
+
+  &:first-child { border-top: none; }
+
+  &--wochenende .tl-label { background: color-mix(in srgb, var(--mat-sys-primary) 5%, var(--mat-sys-surface, #fff)); }
+
+  &--achse {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--mat-sys-surface, #fff);
+    height: 26px;
+  }
+}
+
+// Linke Spalte bleibt beim horizontalen Scrollen stehen.
+.tl-label {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: var(--hb-label-breite);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 12px;
+  background: var(--mat-sys-surface, #fff);
+  border: none;
+  border-right: 1px solid var(--hb-border);
+  font: inherit;
+  color: var(--mat-sys-on-surface);
+  text-align: left;
+
+  &:is(button):not(:disabled) { cursor: pointer; }
+  &:is(button):not(:disabled):hover .tl-wochentag { text-decoration: underline; }
+  &:focus-visible { outline: 2px solid var(--mat-sys-primary); outline-offset: -2px; }
+}
+
+.tl-wochentag { font-weight: 600; font-size: 0.85rem; }
+.tl-datum { font-size: 0.75rem; color: var(--hb-muted); }
+
+.tl--mobil .tl-row--achse .achse,
+.tl--mobil .track { margin-left: 0; }
+
+// Zeitachse
+.achse {
+  position: relative;
+  flex: 1;
+  margin: 0 14px;
+}
+
+.achse-label {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.7rem;
+  color: var(--hb-muted);
+  font-variant-numeric: tabular-nums;
+
+  &--mitternacht {
+    font-weight: 700;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+// Spuren einer Zeile
+.track {
+  position: relative;
+  flex: 1;
+  margin: 0 14px;
+  padding: 6px 0;
+
+  &--wochenende { background: var(--hb-wochenende); }
+}
+
+.track-nacht {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--hb-nacht);
+  pointer-events: none;
+}
+
+.track-linie {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--hb-border);
+  pointer-events: none;
+
+  &--mitternacht {
+    border-left: 2px solid color-mix(in srgb, var(--mat-sys-on-surface) 35%, transparent);
+  }
+}
+
+.track-vergangen {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.55);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.track-jetzt {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--hb-jetzt);
+  z-index: 2;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--hb-jetzt);
+  }
+}
+
+.lanes {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lane {
+  position: relative;
+  height: var(--hb-lane-hoehe);
+
+  &--klickbar { cursor: copy; }
+}
+
+.bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 4px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 5px;
+  font: inherit;
+  font-size: 0.72rem;
+  line-height: 1.1;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+
+  &:hover { filter: brightness(0.92); }
+  &:focus-visible { outline: 2px solid var(--mat-sys-on-surface); outline-offset: 1px; z-index: 1; }
+
+  // Über 03:00 hinaus: Fortsetzung in der Nachbarzeile andeuten
+  &--weiter-links { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+  &--weiter-rechts { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+}
+
+.bar-titel { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.bar-person, .bar-zeit { opacity: 0.85; overflow: hidden; text-overflow: ellipsis; }
+
+.tl--tag .bar {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+  font-size: 0.75rem;
+
+  .bar-titel, .bar-person, .bar-zeit { max-width: 100%; }
+  .bar-person { display: none; }
+}
+
+// ---- 3. Wochenenden --------------------------------------------------------
+
+.we-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.we-kachel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--hb-border);
+  background: var(--hb-card);
+  font: inherit;
+  color: var(--mat-sys-on-surface);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover { border-color: var(--mat-sys-outline); }
+  &:focus-visible { outline: 2px solid var(--mat-sys-primary); outline-offset: 2px; }
+
+  &--frei {
+    background: var(--hb-frei-bg);
+    border-color: color-mix(in srgb, var(--hb-frei) 35%, transparent);
+  }
+}
+
+.we-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.we-label { font-weight: 600; }
+
+.we-tabelle {
+  display: grid;
+  grid-template-columns: 1fr 18px 18px;
+  gap: 5px 6px;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.we-tag { text-align: center; color: var(--hb-muted); font-size: 0.68rem; }
+.we-platz { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--hb-muted); }
+
+.we-box {
+  width: 18px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid var(--platz);
+  box-sizing: border-box;
+
+  &--belegt { background: var(--platz); }
+}
+
+.we-mehr { align-self: flex-start; }
