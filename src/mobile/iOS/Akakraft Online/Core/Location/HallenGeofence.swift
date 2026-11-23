@@ -13,7 +13,8 @@ import UserNotifications
 final class HallenGeofence: NSObject {
     nonisolated static let notificationCategory = "HALLE_CHECKIN"
     nonisolated static let checkInAction = "HALLE_CHECKIN_JA"
-    private static let monitorName = "de.akakraft-bs.halle"
+    /// CLMonitor erlaubt nur einfache Namen (keine Punkte/Bindestriche) – sonst stürzt die App ab.
+    static let monitorName = "AkakraftHalle"
     private static let conditionID = "halle"
     private static let promptID = "halle-checkin-frage"
     /// Am Rand des Umkreises springt das GPS gern hin und her – so oft wird höchstens gefragt.
@@ -116,7 +117,21 @@ final class HallenGeofence: NSObject {
         }
     }
 
+    /// Mehrere Auslöser (Start, Freigabe, Standort) dürfen den Monitor nicht parallel anlegen:
+    /// zwei CLMonitor mit gleichem Namen gleichzeitig sind nicht erlaubt.
+    private var applyChain: Task<Void, Never>?
+
     private func apply() async {
+        let previous = applyChain
+        let current = Task {
+            await previous?.value
+            await applyNow()
+        }
+        applyChain = current
+        await current.value
+    }
+
+    private func applyNow() async {
         guard isEnabled, let standort, authorization == .authorizedAlways || authorization == .authorizedWhenInUse else {
             await stop()
             return

@@ -10,8 +10,10 @@ public class FahrzeugConfiguration : IEntityTypeConfiguration<Fahrzeug>
     {
         builder.HasKey(f => f.Id);
 
+        builder.Property(f => f.Art).HasConversion<string>().HasMaxLength(16);
         builder.Property(f => f.Marke).IsRequired().HasMaxLength(80);
         builder.Property(f => f.Modell).HasMaxLength(80);
+        // Nicht-null, aber bei Fahrrädern leerer String.
         builder.Property(f => f.Kennzeichen).IsRequired().HasMaxLength(16);
 
         builder.HasIndex(f => f.UserId);

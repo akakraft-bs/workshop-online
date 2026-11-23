@@ -182,19 +182,64 @@ nonisolated struct CalendarEventInput: Codable, Sendable {
 
 // MARK: - Fahrzeuge
 
+nonisolated enum FahrzeugArt: String, ResilientEnum, CaseIterable, Identifiable {
+    case pkw = "Pkw"
+    case lkw = "Lkw"
+    case motorrad = "Motorrad"
+    case anhaenger = "Anhaenger"
+    case fahrrad = "Fahrrad"
+    case unknown = "Unknown"
+
+    static let selectable: [FahrzeugArt] = [.pkw, .lkw, .motorrad, .anhaenger, .fahrrad]
+    /// Fahrräder brauchen kein Kennzeichen, alle anderen Arten schon.
+    var kennzeichenPflicht: Bool { self != .fahrrad }
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .pkw: "PKW"
+        case .lkw: "LKW"
+        case .motorrad: "Motorrad"
+        case .anhaenger: "Anhänger"
+        case .fahrrad: "Fahrrad"
+        case .unknown: "Unbekannt"
+        }
+    }
+    /// SF Symbol, oder `nil` wenn ein eigenes Asset verwendet wird (siehe `assetImage`).
+    var systemImage: String? {
+        switch self {
+        case .pkw, .unknown: "car"
+        case .lkw: "truck.box"
+        case .motorrad: "motorcycle"
+        case .fahrrad: "bicycle"
+        case .anhaenger: nil
+        }
+    }
+    /// Eigenes Template-Asset aus Assets.xcassets.
+    var assetImage: String? {
+        self == .anhaenger ? "Trailer" : nil
+    }
+}
+
 nonisolated struct Fahrzeug: Codable, Identifiable, Hashable, Sendable {
     let id: String
     var marke: String
     var modell: String?
     var kennzeichen: String
     var istStandard: Bool
+    /// Optional, damit ältere Cache-Einträge ohne Feld weiter dekodieren.
+    var art: FahrzeugArt?
 
+    var name: String {
+        [marke, modell.nonEmpty].compactMap { $0 }.joined(separator: " ")
+    }
+    var hatKennzeichen: Bool { !kennzeichen.trimmed.isEmpty }
     var label: String {
-        [marke, modell.nonEmpty].compactMap { $0 }.joined(separator: " ") + " · " + kennzeichen
+        hatKennzeichen ? name + " · " + kennzeichen : name
     }
 }
 
 nonisolated struct FahrzeugInput: Codable, Sendable {
+    var art: FahrzeugArt
     var marke: String
     var modell: String?
     var kennzeichen: String

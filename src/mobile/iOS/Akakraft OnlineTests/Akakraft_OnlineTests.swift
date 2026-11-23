@@ -183,3 +183,14 @@ struct GreetingTests {
         #expect(!all.contains("Mahlzeit"))
     }
 }
+
+import CoreLocation
+
+struct GeofenceTests {
+    /// CLMonitor bricht mit „Monitor name is not valid“ ab, wenn der Name ungültig ist (z. B. mit Punkten).
+    @Test @MainActor func monitorNameIsAccepted() async {
+        // Ein ungültiger Name beendet den Prozess (NSInternalInconsistencyException) – Durchlaufen genügt.
+        let monitor = await CLMonitor(HallenGeofence.monitorName)
+        await monitor.remove("nicht-vorhanden")
+    }
+}

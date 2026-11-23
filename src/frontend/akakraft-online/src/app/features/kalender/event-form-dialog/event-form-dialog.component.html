@@ -81,7 +81,7 @@
           <mat-option [value]="''">– keins –</mat-option>
           @for (fz of fahrzeuge(); track fz.id) {
             <mat-option [value]="fz.id">
-              {{ fz.marke }}{{ fz.modell ? ' ' + fz.modell : '' }} · {{ fz.kennzeichen }}
+              {{ fz.marke }}{{ fz.modell ? ' ' + fz.modell : '' }}{{ fz.kennzeichen ? ' · ' + fz.kennzeichen : '' }}
             </mat-option>
           }
         </mat-select>

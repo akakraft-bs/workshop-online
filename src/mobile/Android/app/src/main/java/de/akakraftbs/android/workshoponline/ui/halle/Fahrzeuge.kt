@@ -8,6 +8,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.DirectionsCar
+import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.outlined.PedalBike
+import androidx.compose.material.icons.outlined.TwoWheeler
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -20,6 +23,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import de.akakraftbs.android.workshoponline.R
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -32,13 +38,16 @@ import de.akakraftbs.android.workshoponline.core.auth.AppSession
 import de.akakraftbs.android.workshoponline.core.cache.remote
 import de.akakraftbs.android.workshoponline.core.network.HttpMethod
 import de.akakraftbs.android.workshoponline.model.Fahrzeug
+import de.akakraftbs.android.workshoponline.model.FahrzeugArt
 import de.akakraftbs.android.workshoponline.model.FahrzeugInput
 import de.akakraftbs.android.workshoponline.model.Tone
 import de.akakraftbs.android.workshoponline.model.nonEmpty
 import de.akakraftbs.android.workshoponline.ui.components.ActionErrorDialog
 import de.akakraftbs.android.workshoponline.ui.components.AppScaffold
 import de.akakraftbs.android.workshoponline.ui.components.ConfirmDialog
+import de.akakraftbs.android.workshoponline.ui.components.DropdownField
 import de.akakraftbs.android.workshoponline.ui.components.FeatureViewModel
+import de.akakraftbs.android.workshoponline.ui.components.FormHint
 import de.akakraftbs.android.workshoponline.ui.components.FormScaffold
 import de.akakraftbs.android.workshoponline.ui.components.FormTextField
 import de.akakraftbs.android.workshoponline.ui.components.LocalIsOnline
@@ -104,9 +113,14 @@ private fun FahrzeugeScreen(viewModel: FahrzeugeViewModel = hiltViewModel()) {
             items(items, key = { it.id }) { fahrzeug ->
                 ListItem(
                     modifier = Modifier.clickable(enabled = isOnline) { nav.open(FahrzeugFormRoute(fahrzeug.toArg())) },
-                    leadingContent = { Icon(Icons.Outlined.DirectionsCar, contentDescription = null) },
-                    headlineContent = { Text(listOfNotNull(fahrzeug.marke, fahrzeug.modell.nonEmpty).joinToString(" ")) },
-                    supportingContent = { Text(fahrzeug.kennzeichen, fontFamily = FontFamily.Monospace) },
+                    leadingContent = { Icon(fahrzeug.art.icon, contentDescription = fahrzeug.art.label) },
+                    headlineContent = { Text(fahrzeug.name) },
+                    supportingContent = {
+                        Row {
+                            Text(if (fahrzeug.hatKennzeichen) "${fahrzeug.art.label} · " else fahrzeug.art.label)
+                            if (fahrzeug.hatKennzeichen) Text(fahrzeug.kennzeichen, fontFamily = FontFamily.Monospace)
+                        }
+                    },
                     trailingContent = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (fahrzeug.istStandard) StatusPill("Standard", Tone.Blue, Icons.Outlined.Star)
@@ -133,15 +147,16 @@ private fun FahrzeugeScreen(viewModel: FahrzeugeViewModel = hiltViewModel()) {
 @HiltViewModel
 class FahrzeugFormViewModel @Inject constructor(session: AppSession, saved: SavedStateHandle) : FeatureViewModel(session) {
     val fahrzeug: Fahrzeug? = saved.toRoute<FahrzeugFormRoute>().fahrzeug?.fromArg()
+    var art by mutableStateOf(fahrzeug?.art?.takeIf { it != FahrzeugArt.Unknown } ?: FahrzeugArt.Pkw)
     var marke by mutableStateOf(fahrzeug?.marke.orEmpty())
     var modell by mutableStateOf(fahrzeug?.modell.orEmpty())
     var kennzeichen by mutableStateOf(fahrzeug?.kennzeichen.orEmpty())
     var istStandard by mutableStateOf(fahrzeug?.istStandard ?: false)
 
-    val canSave: Boolean get() = marke.isNotBlank() && kennzeichen.isNotBlank()
+    val canSave: Boolean get() = marke.isNotBlank() && (!art.kennzeichenPflicht || kennzeichen.isNotBlank())
 
     fun save(onDone: () -> Unit) {
-        val input = FahrzeugInput(marke.trim(), modell.nonEmpty, kennzeichen.trim().uppercase(), istStandard)
+        val input = FahrzeugInput(art, marke.trim(), modell.nonEmpty, kennzeichen.trim().uppercase(), istStandard)
         act(onSuccess = { onDone() }) {
             if (fahrzeug != null) send(HttpMethod.PUT, "fahrzeuge/${fahrzeug.id}", input)
             else send(HttpMethod.POST, "fahrzeuge", input)
@@ -159,9 +174,30 @@ private fun FahrzeugFormScreen(viewModel: FahrzeugFormViewModel = hiltViewModel(
         onSave = { viewModel.save(nav::back) },
         action = viewModel.action,
     ) {
+        DropdownField(
+            label = "Art",
+            options = FahrzeugArt.selectable,
+            selected = viewModel.art,
+            optionLabel = { it.label },
+            onSelect = { it?.let { art -> viewModel.art = art } },
+        )
         FormTextField(viewModel.marke, { viewModel.marke = it }, "Marke")
         FormTextField(viewModel.modell, { viewModel.modell = it }, "Modell (optional)")
-        FormTextField(viewModel.kennzeichen, { viewModel.kennzeichen = it }, "Kennzeichen", capitalization = KeyboardCapitalization.Characters)
+        FormTextField(
+            viewModel.kennzeichen, { viewModel.kennzeichen = it },
+            if (viewModel.art.kennzeichenPflicht) "Kennzeichen" else "Kennzeichen (optional)",
+            capitalization = KeyboardCapitalization.Characters,
+        )
+        if (!viewModel.art.kennzeichenPflicht) FormHint("Fahrräder werden beim Campus-Parken nicht angeboten.")
         SwitchRow("Standardfahrzeug", viewModel.istStandard, { viewModel.istStandard = it })
     }
 }
+
+private val FahrzeugArt.icon: ImageVector
+    @Composable get() = when (this) {
+        FahrzeugArt.Lkw -> Icons.Outlined.LocalShipping
+        FahrzeugArt.Motorrad -> Icons.Outlined.TwoWheeler
+        FahrzeugArt.Fahrrad -> Icons.Outlined.PedalBike
+        FahrzeugArt.Anhaenger -> ImageVector.vectorResource(R.drawable.ic_trailer)
+        FahrzeugArt.Pkw, FahrzeugArt.Unknown -> Icons.Outlined.DirectionsCar
+    }
